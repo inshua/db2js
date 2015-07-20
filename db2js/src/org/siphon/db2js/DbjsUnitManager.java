@@ -42,15 +42,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.siphon.common.js.JSON;
-import org.siphon.common.js.JsDateUtil;
 import org.siphon.common.js.JsEngineUtil;
 import org.siphon.common.js.JsTypeUtil;
 import org.siphon.db2js.jshttp.JsEngineHandlerContext;
 import org.siphon.db2js.jshttp.ServerUnitManager;
 import org.siphon.db2js.jshttp.Task;
 import org.siphon.jssql.SqlExecutor;
-
-import sun.org.mozilla.javascript.internal.NativeObject;
 
 public class DbjsUnitManager extends ServerUnitManager {
 
@@ -94,7 +91,6 @@ public class DbjsUnitManager extends ServerUnitManager {
 		ctxt.setJson(new JSON(engine)); // jdk has a NativeJSON class inside but
 										// it's sealed
 		ctxt.setJsTypeUtil(new JsTypeUtil(engine));
-		ctxt.setJsDateUtil(new JsDateUtil(engine));
 
 		return ctxt;
 	}

@@ -60,7 +60,6 @@ import org.siphon.common.js.JsTypeUtil;
 import org.siphon.common.js.UnsupportedConversionException;
 
 import sun.misc.BASE64Decoder;
-import sun.org.mozilla.javascript.internal.ScriptableObject;
 
 /*
  * query(sql, [1,2,"John"])

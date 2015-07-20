@@ -23,9 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.siphon.db2js.jshttp.JsEngineHandlerContext;
 
-import sun.org.mozilla.javascript.internal.NativeArray;
-import sun.org.mozilla.javascript.internal.NativeObject;
-
 public abstract class Formatter {
 
 	public abstract String formatQueryResult(Object queryResult, String message, JsEngineHandlerContext engineContext)
