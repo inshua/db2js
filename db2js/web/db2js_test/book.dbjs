@@ -1,0 +1,11 @@
+dbjs.fetch = function(params){
+	var sql = 'select * from books where author_id = :author_id order by id';
+	return this.query(sql, params);
+}
+
+dbjs.modify = function(row, columns){
+	$V(row, {
+		title : V.email
+	});
+	return this.updateRow('books', row, columns);
+}

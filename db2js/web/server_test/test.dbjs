@@ -1,0 +1,14 @@
+dbjs.fetch = function(params){
+	return this.callDbjs('./another.dbjs', 'fetch', params);
+}
+
+dbjs.testUpdate = function(record){
+	record.id = record.id * 1;
+	this.doTransaction(function(){
+		this.updateRow('authors', record, ['id', 'last_name']);
+		this.callDbjs('./another.dbjs', 'testTransaction', record);
+	});
+}
+
+
+

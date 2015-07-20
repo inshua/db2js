@@ -1,0 +1,21 @@
+dbjs.fetch = function(params){
+	sql{.
+		select * from authors where 1 = 1
+		code{.
+			if(params.last_name){
+				sql{. and instr(last_name, :last_name) > 0 .}
+			}
+		.}
+	.}
+	
+	return this.query(this.orderBy(sql, params._sorts, {id:'asc'}), params, params._page);
+}
+
+dbjs.modify = function(row, columns){
+//	$V(row, {
+//		last_name : V.email
+//	});
+	
+	return this.updateRow('authors', row, columns);
+}
+

@@ -1,0 +1,36 @@
+<html>
+
+<head><title>classic db operation</title></head>
+<body>
+
+<form action="using_dbjs.jssp" method="get">
+	Last Name : <input name="last_name">
+	<input type="submit">
+</form>
+
+[% 
+	var r = this.callDbjs('authors.dbjs', 'fetch', {last_name : request.last_name, _sort : [{property : 'id', direction : 'asc'}]}, null, null);
+	logger.info(JSON.stringify(r));
+%]
+	
+<table border="1">
+<caption>authors</caption>
+<thead>
+[%	r.columns.forEach(function(col){ %]
+	<td>[%= col.name %]</td>	
+[%	}); %]
+</thead>
+
+[%	r.rows.forEach(function(row){ %]
+<tr>
+	[%	r.columns.forEach(function(col){ %]
+		<td>[%= row[col.name] %]</td>
+	[%	}); %]
+</tr>				
+	
+[%	}); %]
+
+</table>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+abcd
+efg"adfasd" [%= var1 %] [%~ var2 %]
+[%= "[%%]" %]
+[% var b = "[%%]"; // test [% %]
+
+[% var b /*[%abcd%]*/ = t; %]
+
+[% var b = '\r'; %]
+
+[% var o = {name : '张良'}; %]
+
+[%
+ 	response.contentType = 'abcd';
+%]

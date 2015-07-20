@@ -1,0 +1,15 @@
+dbjs.fetch = function(params){
+	sql{.
+		select * from authors
+		code{.
+			if(params.last_name){
+				sql{.
+					where instr(last_name, :last_name) > 0
+				.}
+			}
+		.}
+	.}
+	
+	return this.query(sql, params, params._page);
+}
+

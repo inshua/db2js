@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Db2js</title>
+
+<link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+<script src="../jslib/jquery-1.10.2.js"></script>
+<script src="../jslib/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+
+<script src="../jslib/db2js/dataset.js"></script>
+<script src="../jslib/db2js/render.js"></script>
+<script src="../jslib/db2js/renderers.js"></script>
+<script src="../jslib/db2js/pipelines.js"></script>
+<script src="../jslib/db2js/collector.js"></script>
+
+<style>
+	renderer{
+		display: none;
+	}
+</style>
+
+</head>
+<body>
+
+	<h1>渲染任意对象<small>选择器为 #person </small></h1>
+	
+	Name : <div id="divForPerson" data="#person,name" renderer="std"> 
+	</div>
+	MailBox(自动命中子对象的选择器) : <span data="#mailbox,length" renderer="bootstrap.badge"> </span>
+	
+	<h1>直接渲染<small>不使用选择器</small></h1>
+	
+	<div id="divForPerson2"> 
+		<p>姓名： <span data="name" renderer="std"></span></p>
+		<p>性别： <span data="gendor" renderer="dict({M:'男',F:'女'}) | std"></span></p>
+	</div>
+	
+	<h1>嵌入渲染器<small>使用 renderer 标签嵌入一个渲染器，如果还有其它渲染器，该渲染器将放在最后一个调用</small></h1>
+	
+	Name : <div id="divForPerson3" data="#person,name">
+		<renderer>element.innerHTML = '<b>' + value + '</b>(custom renderer)'</renderer> 
+	</div>
+	
+	<h1>渲染数据表<small>DataTable、 db2js.dataset 均可</small></h1>
+	
+	<div>
+		
+		<div data="#test,rows,0,last_name" renderer="bootstrap.label('default')"></div>
+	
+		<div data="#test,rows,1,last_name" renderer="bootstrap.label('primary')"></div>
+	
+		<div id="divPrompt"></div>
+	
+		<input type="text" data="#test,rows,0,input_date" renderer="format('yyyy-MM-dd ddd') | uppercase | std"></input>
+	
+		<div data="#test2,rows,0,last_name" renderer="bootstrap.label('success')"></div>
+
+	</div>
+
+
+</body>
+<script>
+
+	// 渲染任意对象
+	var person = {db2js:'person', name : 'Jack'};		// 该 db2js 属性系为与选择器配对
+	db2js.render(null, person);
+	
+	person = {name : 'Jack', mailbox : {db2js:'mailbox', length : 4}};				// 可嵌套于任意对象，只要能探索到 dbjs==选择器，即可渲染
+	db2js.render(null, person);
+	
+	// 定向渲染
+	db2js.render($('#divForPerson2')[0], { name : 'Tom', gendor : 'M'}, true);		// 指定目标元素，不使用选择器, 适合快速渲染
+
+	// 渲染表
+	var table = new db2js.DataTable('test', 'test.dbjs');
+	table.load({ _m : 'fetch'}, function(error) {
+			if(error){
+				divPrompt.innerText = error.message;
+				return;
+			}
+			divPrompt.innerText = 'success';
+			db2js.render(null, table);
+			
+			
+			// 渲染 dataset
+			table = db2js.dataset.test2 = new db2js.DataTable('test2', 'test.dbjs');
+			table.load({ _m : 'fetch'}, function(){
+				if(error){
+					divPrompt.innerText = error.message;
+					return;
+				}
+				divPrompt.innerText = 'success';
+				db2js.render();
+			});
+		});
+	
+	
+
+	
+</script>
+</html>
