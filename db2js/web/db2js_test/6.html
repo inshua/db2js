@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Db2js</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+<script src="../jslib/jquery-1.10.2.js"></script>
+<script src="../jslib/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+
+<script src="../jslib/db2js/dataset.js"></script>
+<script src="../jslib/db2js/render.js"></script>
+<script src="../jslib/db2js/renderers.js"></script>
+<script src="../jslib/db2js/pipelines.js"></script>
+<script src="../jslib/db2js/collector.js"></script>
+
+</head>
+<body>
+	<div class="container">
+		<h1>表格编辑</h1>
+		<div>
+			<form class="form-inline">
+			  <div class="form-group">
+			    <label>Last Name</label>
+			    <input type="text" class="form-control" placeholder="" data="#authors,search,params,last_name" collector="c|s">
+			  </div>
+			  <button type="button" class="btn btn-default" onclick="search($(this).parent('form'))">Search</button>
+			</form>
+		</div>
+		<div data="#authors,error" renderer="stderr"></div>
+		
+		<div data="#authors,rows" renderer="repeater">
+			<h1>Authors</h1>
+			<hr>
+			<h2 repeater="true"><small data="first_name" renderer="std"></small><span data="last_name" renderer="std"></span></h2>
+			
+			<nav>
+				<ul class="pagination" data="#authors" renderer="pagination">
+				</ul>
+			</nav>
+		</div>
+		
+
+		
+	</div>
+</body>
+<script>
+	
+	var table = new db2js.DataTable('authors', 'test.dbjs', {pageSize : 5});
+	
+	table.load({ _m : 'fetch'}, function(error){db2js.render(null, this);});
+</script>
+</html>
