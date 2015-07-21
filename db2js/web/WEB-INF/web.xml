@@ -19,23 +19,23 @@
   
   <servlet>
     <servlet-name>DbjsDispatch</servlet-name>
-    <servlet-class>org.siphon.dbjs.DispatchServlet</servlet-class>
+    <servlet-class>org.siphon.db2js.DispatchServlet</servlet-class>
     <init-param>
       <param-name>JSLIB</param-name>
       <param-value>WEB-INF/jslib/</param-value>
     </init-param>
     <init-param>
       <param-name>PRELOADJS</param-name>
-      <param-value>WEB-INF/jslib/dbjs.js</param-value>
+      <param-value>WEB-INF/jslib/db2js.js</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
     <servlet-name>DbjsDispatch</servlet-name>
-    <url-pattern>*.dbjs</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>DbjsDispatch</servlet-name>
     <url-pattern>*.db2js</url-pattern>
+  </servlet-mapping>
+   <servlet-mapping>
+    <servlet-name>DbjsDispatch</servlet-name>
+    <url-pattern>*.dbjs</url-pattern>
   </servlet-mapping>
   
   <servlet>

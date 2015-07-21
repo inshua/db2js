@@ -23,7 +23,7 @@
 
 imports("./jssp_lib/website.js");
 
-include('dbjs.js');
+include('db2js.js');
 
 var executor = new org.siphon.jssql.SqlExecutor(dataSource, engine);
 init(executor);

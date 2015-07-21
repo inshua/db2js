@@ -24,9 +24,9 @@ imports("./lang.js");
 
 imports("./jssp_lib/website.js");
 
-imports("./dbjs/common.js");
+imports("./db2js/common.js");
 
-imports("./dbjs/validation.js");
+imports("./db2js/validation.js");
 
 var executor = new org.siphon.jssql.SqlExecutor(dataSource, engine);
 init(executor);

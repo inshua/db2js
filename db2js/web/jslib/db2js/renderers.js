@@ -167,6 +167,37 @@ db2js.Renderers.input = function(inputType){
 }
 
 /**
+ * repeater 渲染器
+ * <div data="#authors,rows" renderer="repeater">
+		<h2 repeater="true"><span data="name" renderer="std"></span></h2>
+		<h2 repeater-none="true">no data found</h2>
+	</div>
+ */
+db2js.Renderers.repeater = function(element, rows){
+	var e = $(element);
+	var copies = e.find('[repeater-copy]');
+	copies.each(function(idx, c){c.remove()});
+
+	var repeater = e.find('[repeater]');
+	repeater.hide();
+	
+	if(rows.length == 0){
+		e.find('[repeater-none]').show();
+	} else {
+		e.find('[repeater-none]').hide();
+		var prev = repeater;
+		for(var i=0; i<rows.length; i++){
+			var r = repeater.clone();
+			r.attr('repeater-copy', true);
+			db2js.render(r[0], rows[i], true);
+			r.show();
+			r.insertAfter(prev);
+			prev = r;
+		}
+	}
+}
+
+/**
  * bootstrap 渲染器
  */
 db2js.Renderers.bootstrap = {}
