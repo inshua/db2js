@@ -168,9 +168,10 @@ db2js.Renderers.input = function(inputType){
 
 /**
  * repeater 渲染器
+ * usage:
  * <div data="#authors,rows" renderer="repeater">
 		<h2 repeater="true"><span data="name" renderer="std"></span></h2>
-		<h2 repeater-none="true">no data found</h2>
+		<h2 repeater-empty="true">no data found</h2>
 	</div>
  */
 db2js.Renderers.repeater = function(element, rows){
@@ -182,9 +183,9 @@ db2js.Renderers.repeater = function(element, rows){
 	repeater.hide();
 	
 	if(rows.length == 0){
-		e.find('[repeater-none]').show();
+		e.find('[repeater-empty]').show();
 	} else {
-		e.find('[repeater-none]').hide();
+		e.find('[repeater-empty]').hide();
 		var prev = repeater;
 		for(var i=0; i<rows.length; i++){
 			var r = repeater.clone();
