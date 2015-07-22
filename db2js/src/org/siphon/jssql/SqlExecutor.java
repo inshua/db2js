@@ -40,6 +40,8 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -59,8 +61,6 @@ import org.postgresql.util.PGobject;
 import org.siphon.common.js.JsDateUtil;
 import org.siphon.common.js.JsTypeUtil;
 import org.siphon.common.js.UnsupportedConversionException;
-
-import sun.misc.BASE64Decoder;
 
 /*
  * query(sql, [1,2,"John"])
@@ -1080,10 +1080,10 @@ public class SqlExecutor {
 			}
 			return r;
 		} else if (value instanceof String) {
-			BASE64Decoder decoder = new BASE64Decoder();
+			Decoder decoder = Base64.getDecoder();
 			try {
-				return decoder.decodeBuffer((String) value);
-			} catch (IOException e) {
+				return decoder.decode((String) value);
+			} catch (Exception e) {
 				throw new SqlExecutorException("cannot parse base64 binary data " + value, e);
 			}
 		} else {
