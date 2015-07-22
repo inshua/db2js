@@ -55,6 +55,7 @@ import jdk.nashorn.internal.runtime.ScriptObject;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.postgresql.util.PGobject;
 import org.siphon.common.js.JsDateUtil;
 import org.siphon.common.js.JsTypeUtil;
 import org.siphon.common.js.UnsupportedConversionException;
@@ -74,6 +75,8 @@ import sun.misc.BASE64Decoder;
  * 				{'DATE': '2013-02-29 22:22:22'},
  * 				{'TIME': '22:22:22'}
  * 				{'ARRAY': ['int4', 1, 2, 3]}	// 第一个元素必须是类型
+ * 				{'JSON' : JSON OBJECT}
+ * 				{'JSONB' : JSON OBJECT}
  * 			  ])
  *
  * 不指定类型时，数字有小数点默认取 DECIMAL 类型，没有小数点默认取INT类型。
@@ -83,7 +86,7 @@ import sun.misc.BASE64Decoder;
  * 如果字符串很长,数据库已经定义为 CLOB, 建议使用 {CLOB : '长文本'} 方式——实际上只有 MERGE INTO 需要这样,不然会出现 ORA-00600[KOKLISMEM1: R_LENGTH IS 0] 
  * 接收有输出游标的存储过程值，使用  $OUTP()，详见函数说明 
  * 
- * @author Administrator
+ * @author Inshua <inshua@gmail.com>
  *
  */
 public class SqlExecutor {
@@ -743,6 +746,11 @@ public class SqlExecutor {
 					ps.setArray(i + 1, createSqlArray(ps.getConnection(), (NativeArray) value));
 					// ps.setObject(i+1, createSqlArray(ps.getConnection(),
 					// (NativeArray) value));
+				} else if ("JSON".equals(attr) || "JSONB".equals(attr)){
+					PGobject obj = new PGobject();
+					obj.setType(attr.toLowerCase());
+					obj.setValue(this.JSON.tryStringify(value));
+					ps.setObject(i + 1, obj);
 				} else {
 					throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") not support");
 				}
@@ -999,6 +1007,17 @@ public class SqlExecutor {
 				result.callMember("push", v);
 			}
 			return result;
+		} else if(obj instanceof PGobject){
+			PGobject pgObj = (PGobject) obj;
+			if("jsonb".equals(pgObj.getType()) || "json".equals(pgObj.getType())){
+				try {
+					return JSON.parse((String)pgObj.getValue());
+				} catch (Exception e) {
+					throw new SqlExecutorException("cannot parse json " + obj + "  " + obj.getClass());
+				}
+			} else {
+				throw new SqlExecutorException("unknown object type " + obj + "  " + obj.getClass());
+			}
 		} else {
 			throw new SqlExecutorException("unknown object type " + obj + "  " + obj.getClass());
 		}

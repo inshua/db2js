@@ -30,6 +30,8 @@ function $STRING(o){ return {'STRING' : o + ''};}
 function $BOOLEAN(o){ return {'BOOLEAN' : o ? true : false};}
 function $OUTCURSOR(o){return {'OUTCURSOR' : o};}
 function $ARRAY(type, o){ return {'ARRAY' : [type].concat(o)};}
+function $JSONB(o){ return {'JSONB' : o}; }
+function $JSON(o){ return {'JSON' : o}; }
 /**
  * <pre>
  * 输出参数. 存储过程输出时用. 由于存储过程输出参数必须明确 JDBC 类型, 必须使用该函数封包. 

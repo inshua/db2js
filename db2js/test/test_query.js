@@ -47,4 +47,13 @@ dbjs.travelTest = function(){
 	});
 }
 
+dbjs.insertJson = function(){
+	var sql = "insert into test_json(id, tag, tag2) values(?, ?, ?)";
+	this.execute(sql, [2, {JSONB : {name : 'mary'}}, {JSON : {name : 'tom'}}]);
+}
 
+dbjs.queryJson = function(){
+	var sql = "select * from test_json";
+	var data = this.query(sql);
+	println(JSON.stringify(data));	
+}
