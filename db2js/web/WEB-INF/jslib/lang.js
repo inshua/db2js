@@ -32,9 +32,9 @@
  * @param fn function(item, index) { return boolean};
  * @returns {Number}
  */
-Array.prototype.find = function(fn){
+Array.prototype.find = function(fn, scope){
 	for(var i=0; i< this.length; i++){
-		if(fn(this[i], i)) return i;
+		if(fn.call(scope, this[i], i)) return i;
 	}
 	return -1;
 };
