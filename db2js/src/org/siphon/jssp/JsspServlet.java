@@ -57,6 +57,7 @@ public class JsspServlet extends JsServlet {
 
 		HashMap<String, Object> otherArgs = new HashMap<String, Object>();
 		otherArgs.put("globalLockObject", new Object());
+		otherArgs.put("application", JsServlet.application);
 		otherArgs.put("preloadJs", this.getPreloadJs());
 		otherArgs.put("jslib", this.getJsLibs());
 

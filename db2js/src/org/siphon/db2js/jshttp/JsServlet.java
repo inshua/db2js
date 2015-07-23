@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -48,6 +49,8 @@ import org.siphon.jssp.JsspSession;
 public abstract class JsServlet extends HttpServlet {
 
 	private static Logger logger = Logger.getLogger(JsServlet.class);
+	
+	protected static ConcurrentHashMap<String, Object> application = new ConcurrentHashMap<String, Object>();
 	
 	@Override
 	public void init() throws ServletException {

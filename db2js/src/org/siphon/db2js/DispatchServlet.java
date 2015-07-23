@@ -70,6 +70,7 @@ public class DispatchServlet extends JsServlet {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("jslib", this.getJsLibs());
 		args.put("preloadJs", this.getPreloadJs());
+		args.put("application", JsServlet.application);
 		dbjsRunner.setOtherArgs(args);
 	}
 	
