@@ -12,14 +12,14 @@ import org.siphon.common.js.JsEngineUtil;
 public class TestSqlExecutor {
 
 	private static Logger logger = Logger.getLogger(TestSqlExecutor.class);
-	
-	public static void main(String[] args) {
+
+	public static void main(String[] args) throws NoSuchMethodException, ScriptException {
 		PropertyConfigurator.configure("./log4j.properties");
-		
+
 		BasicDataSource bds = new BasicDataSource();
 		bds.setDriverClassName("org.postgresql.Driver");
 
-		bds.setUrl("jdbc:postgresql://localhost:5432/botao");
+		bds.setUrl("jdbc:postgresql://localhost:5432/booktown");
 
 		bds.setUsername("postgres");
 		bds.setPassword("pass4postgres");
@@ -34,33 +34,17 @@ public class TestSqlExecutor {
 		} catch (Exception e) {
 			logger.error("", e);
 		}
-		
+
 		Invocable inv = (Invocable) engine;
-//		try {
-//			inv.invokeMethod(engine.eval("dbjs"), "test1");
-//		} catch (NoSuchMethodException | ScriptException e) {
-//			logger.error("", e);
-//		}
-//		
-//		try {
-//			inv.invokeMethod(engine.eval("dbjs"), "travelTest");
-//		} catch (NoSuchMethodException | ScriptException e) {
-//			logger.error("", e);
-//		}
-		
-//		try {
-//			inv.invokeMethod(engine.eval("dbjs"), "insertJson");
-//		} catch (NoSuchMethodException | ScriptException e) {
-//			logger.error("", e);
-//		}
-		
-		try {
-			inv.invokeMethod(engine.eval("dbjs"), "queryJson");
-		} catch (NoSuchMethodException | ScriptException e) {
-			logger.error("", e);
-		}
+		inv.invokeMethod(engine.eval("dbjs"), "test1");
 
+		inv.invokeMethod(engine.eval("dbjs"), "travelTest");
+		
+		inv.invokeMethod(engine.eval("dbjs"), "paging");
 
+//		inv.invokeMethod(engine.eval("dbjs"), "insertJson");
+//
+//		inv.invokeMethod(engine.eval("dbjs"), "queryJson");
 
 	}
 }

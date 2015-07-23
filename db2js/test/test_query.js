@@ -23,7 +23,7 @@ dbjs.test1 = function() {
 
 dbjs.paging = function() {
 	// 自动推断类型
-	var sql = 'select * from tree order by id';
+	var sql = 'select * from authors order by id';
 	var r = this.query(sql, [], {start : 2, limit : 4});
 	println(JSON.stringify(r));	
 }

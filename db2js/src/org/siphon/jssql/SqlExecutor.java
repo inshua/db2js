@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import javax.sql.DataSource;
@@ -50,8 +51,10 @@ import javax.sql.DataSource;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.objects.NativeArray;
 import jdk.nashorn.internal.objects.NativeDate;
+import jdk.nashorn.internal.objects.NativeFunction;
 import jdk.nashorn.internal.objects.NativeObject;
 import jdk.nashorn.internal.runtime.ConsString;
+import jdk.nashorn.internal.runtime.ScriptFunction;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
 import org.apache.commons.dbcp.BasicDataSource;
@@ -157,11 +160,11 @@ public class SqlExecutor {
 	 * @param function isFunction
 	 * @throws Exception
 	 */
-	public void doTransaction(ScriptObjectMirror function) throws Exception {
+	public void doTransaction(NativeFunction function) throws Exception {
 		Connection conn = null;
 		try {
 			conn = beginTransaction();
-			function.callMember("call");
+			NativeFunction.call(function, "call", function);
 			conn.commit();
 		} catch (Exception e) {
 			try {
@@ -181,7 +184,7 @@ public class SqlExecutor {
 	 * @return
 	 * @throws SqlExecutorException
 	 */
-	public boolean call(String callProcStmt, ScriptObjectMirror args) throws SqlExecutorException {
+	public boolean call(String callProcStmt, NativeArray args) throws SqlExecutorException {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
@@ -203,7 +206,7 @@ public class SqlExecutor {
 	 * @return success or not
 	 * @throws SqlExecutorException 
 	 */
-	public boolean call(Connection connection, String callProcStmt, ScriptObjectMirror args) throws SqlExecutorException {
+	public boolean call(Connection connection, String callProcStmt, NativeArray args) throws SqlExecutorException {
 		if (connection == null) {
 			return this.call(callProcStmt, args);
 		}
@@ -217,7 +220,7 @@ public class SqlExecutor {
 			// callProcStmt + " with args: " + JSON.tryStringify(args));
 
 			proc = connection.prepareCall(String.format("{call %s}", callProcStmt));
-			NativeArray nargs = args.to(NativeArray.class);
+			NativeArray nargs = args;
 			setArgs(proc, nargs);
 			boolean result = proc.execute();
 			for (int i = 0; i < JsTypeUtil.getArrayLength(nargs); i++) {
@@ -258,7 +261,7 @@ public class SqlExecutor {
 		}
 	}
 
-	public int execute(String sql, ScriptObjectMirror args) throws SqlExecutorException {
+	public int execute(String sql, NativeArray args) throws SqlExecutorException {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
@@ -270,7 +273,7 @@ public class SqlExecutor {
 		}
 	}
 
-	public int execute(Connection connection, String sql, ScriptObjectMirror args) throws SqlExecutorException {
+	public int execute(Connection connection, String sql, NativeArray args) throws SqlExecutorException {
 		if (connection == null) {
 			return this.execute(sql, args);
 		}
@@ -284,7 +287,7 @@ public class SqlExecutor {
 			// JSON.tryStringify(args));
 
 			ps = connection.prepareStatement(sql);
-			setArgs(ps, args.to(NativeArray.class));
+			setArgs(ps, args);
 			return ps.executeUpdate();
 
 		} catch (SQLException | UnsupportedDataTypeException e) {
@@ -300,7 +303,7 @@ public class SqlExecutor {
 		}
 	}
 
-	public Object query(String sql, ScriptObjectMirror args, boolean returnSealed) throws SqlExecutorException {
+	public Object query(String sql, NativeArray args, boolean returnSealed) throws SqlExecutorException {
 
 		Connection conn = null;
 		try {
@@ -321,7 +324,7 @@ public class SqlExecutor {
 	 * @return
 	 * @throws SqlExecutorException 
 	 */
-	public Object query(Connection connection, String sql, ScriptObjectMirror args, boolean returnSealed) throws SqlExecutorException {
+	public Object query(Connection connection, String sql, NativeArray args, boolean returnSealed) throws SqlExecutorException {
 		if (connection == null) {
 			return this.query(sql, args, returnSealed);
 		}
@@ -336,7 +339,7 @@ public class SqlExecutor {
 			// JSON.tryStringify(args));
 
 			ps = connection.prepareStatement(sql);
-			setArgs(ps, args.to(NativeArray.class));
+			setArgs(ps, args);
 			rs = ps.executeQuery();
 
 			ScriptObjectMirror arr = rsToNativeArray(rs);
@@ -354,7 +357,7 @@ public class SqlExecutor {
 		}
 	}
 
-	public Object pageQuery(Connection connection, String sql, int start, int limit, ScriptObjectMirror args)
+	public Object pageQuery(Connection connection, String sql, int start, int limit, NativeArray args)
 			throws SqlExecutorException {
 		if (connection == null) {
 			return this.pageQuery(sql, start, limit, args);
@@ -371,7 +374,7 @@ public class SqlExecutor {
 		return jsTypeUtil.getSealed(result);
 	}
 
-	public Object pageQuery(String sql, int start, int limit, ScriptObjectMirror args) throws SqlExecutorException {
+	public Object pageQuery(String sql, int start, int limit, NativeArray args) throws SqlExecutorException {
 
 		Connection conn = null;
 		try {
@@ -396,7 +399,7 @@ public class SqlExecutor {
 		}
 	}
 
-	public Object queryScalar(String sql, ScriptObjectMirror args) throws SqlExecutorException {
+	public Object queryScalar(String sql, NativeArray args) throws SqlExecutorException {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
@@ -408,7 +411,7 @@ public class SqlExecutor {
 		}
 	}
 
-	public Object queryScalar(Connection connection, String sql, ScriptObjectMirror args) throws SqlExecutorException {
+	public Object queryScalar(Connection connection, String sql, NativeArray args) throws SqlExecutorException {
 		long start = System.currentTimeMillis();
 
 		PreparedStatement ps = null;
@@ -419,7 +422,7 @@ public class SqlExecutor {
 			// JSON.tryStringify(args));
 
 			ps = connection.prepareStatement(sql);
-			setArgs(ps, args.to(NativeArray.class));
+			setArgs(ps, args);
 			rs = ps.executeQuery();
 
 			if (rs.next()) {
@@ -452,7 +455,7 @@ public class SqlExecutor {
 	 * @param traveler isFunction
 	 * @throws SqlExecutorException
 	 */
-	public void travel(String sql, ScriptObjectMirror args, ScriptObjectMirror traveler) throws SqlExecutorException {
+	public void travel(String sql, NativeArray args, ScriptFunction traveler) throws SqlExecutorException {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
@@ -473,7 +476,7 @@ public class SqlExecutor {
 	 * @return
 	 * @throws SqlExecutorException 
 	 */
-	public void travel(Connection connection, String sql, ScriptObjectMirror args, ScriptObjectMirror traveler)
+	public void travel(Connection connection, String sql, NativeArray args, ScriptFunction traveler)
 			throws SqlExecutorException {
 		if (connection == null) {
 			this.travel(sql, args, traveler);
@@ -490,7 +493,7 @@ public class SqlExecutor {
 			// JSON.tryStringify(args));
 
 			ps = connection.prepareStatement(sql);
-			setArgs(ps, args.to(NativeArray.class));
+			setArgs(ps, args);
 			rs = ps.executeQuery();
 			ResultSetMetaData rsm = rs.getMetaData();
 			ScriptObjectMirror columns = columnListToNativeArray(rsm);
@@ -500,7 +503,7 @@ public class SqlExecutor {
 					String cname = rsm.getColumnName(i).toLowerCase();
 					item.put(cname, fieldValueToNativeObject(rsm.getColumnType(i), rs, cname));
 				}
-				Object result = traveler.callMember("call", traveler, item, columns);
+				Object result = NativeFunction.call(traveler, traveler, item.to(ScriptObject.class), columns); // traveler.callMember("call", traveler, item, columns);
 				if (JsTypeUtil.isTrue(result)) {
 					break;
 				}
