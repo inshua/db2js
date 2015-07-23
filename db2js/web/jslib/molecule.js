@@ -93,7 +93,7 @@ Molecule.scanDefines = function(){
 			m = Molecule.defines[r.module] = {};
 		}
 		Molecule.definesByFullname[r.fullname] = m[r.name] =
-				{name : r.name, depends : depends && depends.split(','), used : true, html : ele.outerHTML};
+				{name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML};
 		
 		if(!Molecule.TEST_DEFINE) $(ele).remove();
 	});
@@ -171,9 +171,9 @@ Molecule.scanMolecules = function(starter){
 		if(!def){
 			throw new Error(name + ' not found in ' + module + ', please check whether this molecule exists');
 		}
-		if(!def.used){
+		if(!def.appeared){
 			ensureDepends(def);
-			def.used = true;
+			def.appeared = true;
 		}
 		var p = ele.parentElement;
 		var pos = getIndexInParent(ele, p);
@@ -184,7 +184,13 @@ Molecule.scanMolecules = function(starter){
 		var copy = p.children[pos];
 		for(var i=0; i<ele.attributes.length; i++){
 			var attr = ele.attributes[i].name;
-			copy.setAttribute(attr, ele.getAttribute(attr));
+			var v = ele.getAttribute(attr);
+			if(attr == 'class' && v && v.charAt(0) == '+'){		// molecule="block" class="+ myclass"
+				v = copy.getAttribute(attr) + ' ' + v.substr(1);
+			} else if(attr == 'style' && v && v.charAt(0) == '+'){
+				v = copy.getAttribute(attr) + ' ' + v.substr(1);
+			}
+			copy.setAttribute(attr, v);
 		}
 		copy.removeAttribute('molecule');
 		copy.setAttribute('molecule-obj', fullname);
@@ -199,7 +205,9 @@ Molecule.scanMolecules = function(starter){
 		if(def.depends && def.depends.length){
 			def.depends.forEach(function(depend){
 				if(Molecule.defines[depend] == null){
-					Molecule.loadModule(depend);		// 不需要显示写递归，如果引用进的分子需要辗转引用其它包，在初始化元素该分子时即会发生
+					if(Molecule.loadModule(depend)){// 不需要显示写递归，如果引用进的分子需要辗转引用其它包，在初始化元素该分子时即会发生
+						throw new Error('depend module ' + module + ' load failed, ' + def.name + ' cannot create');
+					}
 				}
 			});
 		}
@@ -210,7 +218,7 @@ Molecule.scanMolecules = function(starter){
 //			def.depends.forEach(function(depend){
 //				var md = Molecule.defines[depend];
 //				if(md == null) throw new Error('molecule ' + depend + ' not defined whice depeneded at ' + def.name);
-//				if(!md.used){
+//				if(!md.appeared){
 //					ensureDepends(md);
 //					init(md);
 //				}
@@ -226,7 +234,7 @@ Molecule.scanMolecules = function(starter){
 //		item.appendTo(plat);
 //		resetScripts(plat);
 //		plat.remove();
-//		def.used = true;
+//		def.appeared = true;
 //	}
 	
 	function resetScripts(ele){		// 不如此不能让 script 再次运行

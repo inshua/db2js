@@ -12,6 +12,7 @@
 		<li>molecule 使用 molecule-def="分子名" module="包名"　depends="依赖包,依赖包,..." 定义，任何 html 元素都可以变为 molecule</li>
 		<li>molecule 定义中结尾总是调用 Molecule.create(Function, document.currentScript) 函数，完成 js 和元素间的绑定，使其变为有生命的分子</li>
 		<li>能动函数总是用 if(typeof Function == 'undefined') 判断是否已经定义过了</li>
+		<li>能动函数的 &lt;script&gt;需要加上 id="molecule",如果不考虑兼容 ie，也可以不加</li>
 		<li>molecule 实例只要使用 molecule="包名.分子名" 即可创建</li>
 		<li>molecule 实例创建不需要再执行任何脚本，创建新 html元素时，append 后即生效</li>
 		<li>可以通过 Molecule.of(html element) 获取实例的 js 对象</li>
@@ -25,6 +26,7 @@
 		<li>molecule 能动函数可以通过 this.container 访问html元素</li>
 		<li>实例的 html 元素可以通过设置 data-param1="" data-param2="" data-option="json" 提供初始化参数，实现参数化</li>
 		<li>实例显然也可以重载 css 样式表，因为实例自身的 css 样式表总是能覆盖模板的样式表，但是这种覆盖也会影响其它实例，自己想想办法(见下例)</li>
+		<li>实例的 class 和 style 属性，可以使用头字符 +，表示引用 molecule 模板的 css 或 style</li> 
 		<li>实例可以嵌套入其它 molecule，形成更大元素，这种元素可以加上 molecule-def 导出为新的大分子，也就是说分子可以聚合为更大的分子</li>
 		<li>不要在实例函数中定义公用通用函数，这些函数不实例化是不会调用的，应将它们定义于额外的文件中</li>
 	</ol>
@@ -33,9 +35,14 @@
 	<p>
 	<a href="../molecules/blocks.html">原始页面</a>
 	</p>
-	经过执行 molecules/extract.jssp 后，该原始页面抽取为 模块名.json，存放于 molecules/ 目录。
+	经过执行<a href="../molecules/extract.jssp">molecules/extract.jssp</a> 后，该原始页面抽取为 模块名.json，存放于 molecules/ 目录。
 	<p>
 	<a href="1.html">进入</a>
+	</p>
+	
+	<h1>使用+继承css</h1>
+	<p>
+	<a href="2.html">进入</a>
 	</p>
 </body>
 </html>

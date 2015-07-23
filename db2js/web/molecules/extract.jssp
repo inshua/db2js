@@ -16,9 +16,10 @@
 			out.print("<h2>parse " + file.name + "</h2>");
 			var document = org.jsoup.Jsoup.parse(file, "utf-8");
 			var defs = document.select("[molecule-def]");
+			out.print("<p>" + defs.size() + " molecule defs found</p>");
 			if(defs.size() > 0){
-				for(var i=0; i<defs.size(); i++){
-					var element = defs.get(i);
+				for(var j=0; j<defs.size(); j++){
+					var element = defs.get(j);
 					var name = element.attr("molecule-def");
 					var module = element.attr("molecule-module");
 					if(name.lastIndexOf('.') != -1){
