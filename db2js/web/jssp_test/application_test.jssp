@@ -6,7 +6,7 @@
 </head>
 <body>
 
-hello [%= session.getId() %], your name is  [%= application.name %]
+hello [%= session.getId() %], your info is  [%~ application.info %]
 
 <form action="application_test.dbjs?_m=test" method="post">
 	<input type="text" name="name" value="[%= application.name %]">

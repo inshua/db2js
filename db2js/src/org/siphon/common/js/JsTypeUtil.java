@@ -37,15 +37,20 @@ public class JsTypeUtil {
 	private NashornScriptEngine engine;
 	private CompiledScript arrayConstructor;
 	private CompiledScript objectConstructor;
-	private Field faSobj;
+	private static Field faSobj;
+	
+	static{
+		try {
+			faSobj = ScriptObjectMirror.class.getDeclaredField("sobj");
+			faSobj.setAccessible(true);
+		} catch (Exception ex){}
+	}
 
 	public JsTypeUtil(ScriptEngine jsEngine) {
 		this.engine = (NashornScriptEngine) jsEngine;
 		try {
 			this.arrayConstructor = this.engine.compile("new Array()");
 			this.objectConstructor = this.engine.compile("new Object()");
-			this.faSobj = ScriptObjectMirror.class.getDeclaredField("sobj");
-			this.faSobj.setAccessible(true);
 		} catch (Exception e) {
 			// logger.error("", e);
 		}
@@ -62,7 +67,7 @@ public class JsTypeUtil {
 		return arrayMirror;
 	}
 
-	public Object getSealed(ScriptObjectMirror scriptObjectMirror) {
+	public static Object getSealed(ScriptObjectMirror scriptObjectMirror) {
 		try {
 			return faSobj.get(scriptObjectMirror);
 		} catch (Exception e) {

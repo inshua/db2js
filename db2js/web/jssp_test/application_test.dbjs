@@ -1,5 +1,5 @@
 dbjs.test = function(params){
 	logger.info('passed name = ' +  params.name);
-	application.name = params.name;
+	application.info = {name : params.name};
 	response.sendRedirect('application_test.jssp');
 };

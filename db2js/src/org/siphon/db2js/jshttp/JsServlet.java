@@ -44,13 +44,14 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.siphon.common.io.WatchDir;
+import org.siphon.jssp.JsspGlobal;
 import org.siphon.jssp.JsspSession;
 
 public abstract class JsServlet extends HttpServlet {
 
 	private static Logger logger = Logger.getLogger(JsServlet.class);
 	
-	protected static ConcurrentHashMap<String, Object> application = new ConcurrentHashMap<String, Object>();
+	protected static Map<String, Object> application = new JsspGlobal();
 	
 	@Override
 	public void init() throws ServletException {

@@ -41,6 +41,9 @@ import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.SetUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.siphon.common.js.JsTypeUtil;
+
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 public class JsspSession implements HttpSession, Map<String, Object>{
 	
@@ -73,7 +76,12 @@ public class JsspSession implements HttpSession, Map<String, Object>{
 	}
 
 	public Object get(Object key) {
-		return session.getAttribute((String) key);
+		Object obj = session.getAttribute((String) key);
+		if(obj instanceof ScriptObjectMirror){
+			return JsTypeUtil.getSealed((ScriptObjectMirror) obj);
+		}else {
+			return obj;
+		}
 	}
 
 	public Object put(String key, Object value) {

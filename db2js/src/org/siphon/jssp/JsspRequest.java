@@ -27,6 +27,7 @@ import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.siphon.common.js.JsTypeUtil;
 import org.siphon.db2js.jshttp.JsEngineHandlerContext;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -67,21 +68,30 @@ public class JsspRequest extends HttpServletRequestWrapper implements Map<String
 
 	@Override
 	public Object get(Object key) {
-		String[] v = (String[]) map.get(key);
-		if (v == null || v.length == 0) {
-			return null;
-		} else if (v.length == 1) {
-			return v[0];
+		Object value = map.get(key);
+		if(value instanceof String[]){ 
+			String[] v = (String[]) value;
+			if (v == null || v.length == 0) {
+				return null;
+			} else if (v.length == 1) {
+				return v[0];
+			} else {
+				ScriptObjectMirror arr = null;
+				try {
+					arr = jsEngineHandlerContext.getJsTypeUtil().newArray();
+				} catch (ScriptException e) {
+				}
+				for (String s : v) {
+					arr.callMember("push", s);
+				}
+				return arr.to(NativeArray.class);
+			}
 		} else {
-			ScriptObjectMirror arr = null;
-			try {
-				arr = jsEngineHandlerContext.getJsTypeUtil().newArray();
-			} catch (ScriptException e) {
+			if(value instanceof ScriptObjectMirror){
+				return JsTypeUtil.getSealed((ScriptObjectMirror) value);
+			} else {
+				return value;
 			}
-			for (String s : v) {
-				arr.callMember("push", s);
-			}
-			return arr.to(NativeArray.class);
 		}
 	}
 
