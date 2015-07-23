@@ -21,7 +21,7 @@
 		<li>可以重载 dispose 函数 this.dispose= function(){} 进行收尾工作</li>
 		<li>molecule 实例的 html 元素，可以设置自己的 innerHTML，这段 html 会追加到 molecule 模板 html 末尾</li>
 		<li>molecule 实例自定义的 html attribute，在实例化后仍然保留, 通过以上两项可以进行一定意义上的重载</li>
-		<li>在 molecule 定义中夹杂 css 脚本，可以使脚本、html元素、能动函数混为一体</li>
+		<li>在 molecule 定义中夹杂 css 脚本，可以使css样式、html元素、能动函数混为一体</li>
 		<li>molecule 能动函数可以通过 this.container 访问html元素</li>
 		<li>实例的 html 元素可以通过设置 data-param1="" data-param2="" data-option="json" 提供初始化参数，实现参数化</li>
 		<li>实例显然也可以重载 css 样式表，因为实例自身的 css 样式表总是能覆盖模板的样式表，但是这种覆盖也会影响其它实例，自己想想办法(见下例)</li>
