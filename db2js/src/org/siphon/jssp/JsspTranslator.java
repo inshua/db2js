@@ -66,8 +66,10 @@ public class JsspTranslator {
 						i += tillTerm(i + 1, code);
 						result.append(code);
 					}
+					afterCode = true;
+				} else {
+					line.append(c);
 				}
-				afterCode = true;
 				break;
 
 			case '\r':

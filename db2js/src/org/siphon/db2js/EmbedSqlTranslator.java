@@ -64,7 +64,7 @@ public class EmbedSqlTranslator {
 		try {
 //			Lexer lexer = new Lexer(code);
 //			for(Token token = lexer.nextToken(); token.tokenType != Token.TOKEN_EOF; token = lexer.nextToken()){
-//				System.out.println(token.tokenType + " : " + code.substring(token.start, token.start + token.length));
+//				System.out.println(String.format("%s (%s-%s): %s", token.tokenType, token.start, token.length, token.getText()));
 //			}
 			
 			Parser parser = new Parser(new Lexer(code));
@@ -678,6 +678,10 @@ public class EmbedSqlTranslator {
 							tkLineComment.length = offset - tkLineComment.start;
 							return tkLineComment;
 						}
+					}
+					if(offset == code.length()){	// no more content
+						tkLineComment.length = offset - tkLineComment.start;
+						return tkLineComment;
 					}
 				} else if(code.startsWith("/*", offset)){
 					Token tkComment = new Token(Token.TOKEN_COMMENT, offset, code);
