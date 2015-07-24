@@ -452,10 +452,9 @@ DBJS.prototype.updateRow = function(table, row, columns, pkColumn){
 				args.push(row[col]);
 			}
 		}
-		if(i < columns.length -1){
-			sql.append(',');
-		}							
+		sql.append(',');
 	}
+	sql.setLength(sql.length() -1);
 	
 	sql.append(' WHERE ' + table + '.' + pkColumn + '= ?');
 	args.push(row[pkColumn]);

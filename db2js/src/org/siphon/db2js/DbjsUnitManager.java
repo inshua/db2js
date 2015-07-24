@@ -69,7 +69,7 @@ public class DbjsUnitManager extends ServerUnitManager {
 		engine.put("logger", logger);
 		engine.put("dataSource", dataSource);
 		engine.put("application", otherArgs.get("application"));
-		engine.put("jscurrtask", new Task()); // 由 js 根据业务需要创建，创建后还是由 java 关闭
+		// 由 js 根据业务需要创建，创建后由 java 关闭
 		if (StringUtils.isEmpty((String) otherArgs.get("preloadJs")) == false) {
 			logger.info("evaluate preload js: " + otherArgs.get("preloadJs"));
 			JsEngineUtil.eval(engine, (String) otherArgs.get("preloadJs"), true, false);

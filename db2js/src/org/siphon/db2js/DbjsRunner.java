@@ -101,6 +101,7 @@ public class DbjsRunner {
 			engineContext = dbjsManager.getEngineContext(jsfile, jsfile, dataSource, otherArgs);
 		} catch (Exception e3) {
 			logger.error("", e3);
+			engineContext.free();
 			throw new ServletException(e3);
 		}
 
@@ -114,8 +115,10 @@ public class DbjsRunner {
 			PrintWriter out = response.getWriter();
 			out.print("params must be json");
 			out.flush();
+			
+			engineContext.free();
 			return;
-		}
+		} 
 
 		formatter.writeHttpHeader(response, engineContext);
 		PrintWriter out = null;

@@ -25,7 +25,9 @@ import org.siphon.common.js.JsTypeUtil;
 import org.siphon.db2js.jshttp.JsEngineHandlerContext;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.internal.objects.NativeError;
 import jdk.nashorn.internal.objects.NativeJSON;
+import jdk.nashorn.internal.objects.NativeTypeError;
 import jdk.nashorn.internal.runtime.Context;
 import jdk.nashorn.internal.runtime.ScriptObject;
 
@@ -49,7 +51,13 @@ public class Db2jsFormatter extends Formatter {
 		if (exception instanceof ScriptObjectMirror){
 			return formatException(engineContext.getJsTypeUtil().getSealed((ScriptObjectMirror) exception), engineContext);
 		} else if( exception instanceof ScriptObject) {
-			
+			//NativeError, NativeTypeError, NativeEvalError, ... 
+			if(((ScriptObject) exception).getOwnKeys(false).length == 0){
+				Object instMessage = ((ScriptObject) exception).get("message");		// instMessage
+				if(instMessage != null){
+					exception = instMessage;
+				}
+			}		
 		} else if(exception instanceof Throwable){
 			exception = ((Throwable) exception).getMessage();
 		} else {
