@@ -1,0 +1,66 @@
+
+[%
+	 /*
+	  * 创建 molecule 定义  
+	  */
+ 
+	var path = request.getRealPath("molecules");
+
+	logger.info('path = ' + path);
+
+	var files = new java.io.File(path).listFiles();
+	var defines = {};
+	for(var i=0; i< files.length; i++){
+		var file = files[i];
+		if(file.name.endsWith(".html") || file.name.endsWith(".htm")){
+			out.print("<h2>parse " + file.name + "</h2>");
+			var document = org.jsoup.Jsoup.parse(file, "utf-8");
+			var defs = document.select("[molecule-def]");
+			out.print("<p>" + defs.size() + " molecule defs found</p>");
+			if(defs.size() > 0){
+				for(var j=0; j<defs.size(); j++){
+					var element = defs.get(j);
+					var name = element.attr("molecule-def");
+					var module = element.attr("molecule-module");
+					if(name.lastIndexOf('.') != -1){
+						if(module){
+							printError(module + ' module already defined in ' + name + ', define one time is enough');
+						} else {
+							var p = name.lastIndexOf('.');
+							module = name.substring(0, p);
+							name = name.substr(p + 1);
+						}
+					}
+					if(!module) module = 'noname';
+					var depends = element.attr("molecule-depends") || '';
+					
+					out.print("<h3>find " + name + "</h3>");
+					element.attr('molecule-def', '');
+					element.attr('molecule-module', '');
+					element.attr('molecule-depends', '');
+					
+					var html = element.outerHtml();
+					if(defines[module] == null) defines[module] = {};
+					if(defines[module][name] != null){
+						printError(module + '.' + name + ' defined more than one time');
+					}
+					defines[module][name] = {name : name, module : module, depends : depends && depends.split(','), 
+					                         tagName : element.tagName(), html : html};
+				}
+			} else {
+				out.print("<h3>(empty)</h3>");
+			}
+		}
+	}
+	
+	for(var module in defines){ if(defines.hasOwnProperty(module)){
+		var path = request.getRealPath("molecules/" + module +  ".json");
+		logger.debug('write molecule module : ' +  path);
+		org.apache.commons.io.FileUtils.write(new java.io.File(path), JSON.stringify(defines[module]), "utf-8");
+	}}
+	
+	
+	function printError(error){
+		out.print('<p class="error">' + error + '</p>');
+	}
+%]
