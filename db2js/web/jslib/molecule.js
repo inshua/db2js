@@ -27,6 +27,8 @@ function Molecule(currentScript){
 			delete Molecule.instances[me.id];
 		}
 	});
+	this.moleculeType = container.attr('molecule-obj') || container.attr('molecule-def');
+	
 	container.on('focus', function(ele){
 		me.focus && me.onfocus();
 	});
@@ -59,13 +61,23 @@ Molecule.create = function(fun, currScript){
 	fun.apply(p, args);
 	var obj = p;
 	Molecule.instances[id] = obj;
-	obj.container.attr('molecule-id', id);
+	var existed = obj.container.attr('molecule-id');
+	if(existed){
+		obj.container.attr('molecule-id',  existed + ',' + id);
+	} else {
+		obj.container.attr('molecule-id',  id);
+	}
 	
 	return obj;
 }
 
 Molecule.of = function(element){
-	return Molecule.instances[$(element).attr('molecule-id')];
+	var ids = $(element).attr('molecule-id');
+	if(!ids) return null;
+	if(ids.indexOf(',') != -1){
+		return ids.split(',').map(function(id){return Molecule.instances[id]});;
+	} 
+	return Molecule.instances[ids];
 }
 
 /**
@@ -99,6 +111,7 @@ Molecule.scanDefines = function(){
 	});
 }
 
+Molecule.loadedModules = {};
 Molecule.loadModule = function(module){
 	var result = false;
 	$.ajax({
@@ -115,6 +128,7 @@ Molecule.loadModule = function(module){
 					
 					Molecule.definesByFullname[module + '.' + k] = m[k] = resp[k];
 				}};
+				Molecule.loadedModules[module] = true;
 				result = true;
 			}
 		}
@@ -160,7 +174,7 @@ Molecule.scanMolecules = function(starter){
 			} else {
 				module = 'noname';
 			}
-			if(Molecule.defines[module] == null){
+			if(Molecule.loadedModules[module] == null){
 				if(!Molecule.loadModule(module)){
 					throw new Error(module + ' load failed, ' + name + ' cannot create');
 				}
@@ -181,24 +195,31 @@ Molecule.scanMolecules = function(starter){
 		var inner = ele.innerHTML;		// 保留原来的子节点
 		
 		ele.outerHTML = def.html;
-		var copy = p.children[pos];
+		var instance = p.children[pos];
+		var inherited = (instance.hasAttribute('molecule') && instance.getAttribute('molecule') != fullname); // 继承自另一 molecule
 		for(var i=0; i<ele.attributes.length; i++){
 			var attr = ele.attributes[i].name;
+			if(attr.indexOf('molecule') == 0) continue;
+			
 			var v = ele.getAttribute(attr);
 			if(attr == 'class' && v && v.charAt(0) == '+'){		// molecule="block" class="+ myclass"
-				v = copy.getAttribute(attr) + ' ' + v.substr(1);
+				v = instance.getAttribute(attr) + ' ' + v.substr(1);
 			} else if(attr == 'style' && v && v.charAt(0) == '+'){
-				v = copy.getAttribute(attr) + ' ' + v.substr(1);
+				v = instance.getAttribute(attr) + ' ' + v.substr(1);
 			}
-			copy.setAttribute(attr, v);
+			instance.setAttribute(attr, v);
 		}
-		copy.removeAttribute('molecule');
-		copy.setAttribute('molecule-obj', fullname);
+		instance.setAttribute('molecule-obj', fullname);
+		if(inherited){
+			instance = createMolecule(instance);
+		} else {
+			instance.removeAttribute('molecule');
+		}
 		
-		copy.insertAdjacentHTML('beforeEnd', inner);
+		instance.insertAdjacentHTML('beforeEnd', inner);
 		
-		resetScripts(copy);
-		return copy;
+		resetScripts(instance);
+		return instance;
 	}
 	
 	function ensureDepends(def){
