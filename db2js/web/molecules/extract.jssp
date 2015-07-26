@@ -20,29 +20,23 @@
 			if(defs.size() > 0){
 				for(var j=0; j<defs.size(); j++){
 					var element = defs.get(j);
-					var name = element.attr("molecule-def");
-					var module = element.attr("molecule-module");
-					if(name.lastIndexOf('.') != -1){
-						if(module){
-							printError(module + ' module already defined in ' + name + ', define one time is enough');
-						} else {
-							var p = name.lastIndexOf('.');
-							module = name.substring(0, p);
-							name = name.substr(p + 1);
-						}
+					var fullname = element.attr("molecule-def");
+					var module = 'noname', name = fullname;
+					if(fullname.lastIndexOf('.') != -1){
+						var p = name.lastIndexOf('.');
+						module = name.substring(0, p);
+						name = name.substr(p + 1);
 					}
-					if(!module) module = 'noname';
 					var depends = element.attr("molecule-depends") || '';
 					
-					out.print("<h3>find " + name + "</h3>");
-					element.attr('molecule-def', '');
-					element.attr('molecule-module', '');
-					element.attr('molecule-depends', '');
+					out.print("<h3>find " + fullname + "</h3>");
+					element.removeAttr('molecule-def');
+					element.removeAttr('molecule-depends');
 					
 					var html = element.outerHtml();
 					if(defines[module] == null) defines[module] = {};
 					if(defines[module][name] != null){
-						printError(module + '.' + name + ' defined more than one time');
+						printError(fullname + ' defined more than one time');
 					}
 					defines[module][name] = {name : name, module : module, depends : depends && depends.split(','), 
 					                         tagName : element.tagName(), html : html};

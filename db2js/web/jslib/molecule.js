@@ -17,8 +17,8 @@
  * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *******************************************************************************/
-function Molecule(currentScript){
-	var container = this.container = $(currentScript).parent('[molecule-obj],[molecule-def]');
+function Molecule(container){
+	this.container = container;
 	if(container.length == 0) debugger;
 	var me = this;
 	container.on('DOMNodeRemoved', function(evt){
@@ -39,21 +39,34 @@ function Molecule(currentScript){
 	this.release = function(){
 		container.remove();
 	}
-	if(this.container.attr('molecule-obj')){
-		$(currentScript).remove();		// remove define script
-	}
 }
 
 Molecule._nextId = 1;
 Molecule.nextId = function(){return Molecule._nextId ++; }
 Molecule.instances = {};
 
-Molecule.create = function(fun, currScript){
-	currScript = currScript || document.getElementById('molecule');		// for ie
+Molecule.create = function(fun, currentScript){
+	currentScript = currentScript 
+				|| document.getElementById('molecule');		// for ie
+	if(currentScript == null){
+		throw new Error('cannot retreive current script');
+	}
+	var container = $(currentScript).parent('[molecule-obj]');
+	if(!container.length){
+		container = $(currentScript).parent('[molecule-def]');
+		if(!Molecule.TEST_DEFINE){
+			return;
+		}
+	} else {
+		if(container.attr('molecule-def')) return;	// 不对molecule声明创建实例
+	}
+	if(!container.length){
+		throw new Error('container must has molecule-obj attribute');
+	}
 	var id = Molecule.nextId();
-	var p = new Molecule(currScript);
+	var p = new Molecule(container);
 	p.id = id;
-	
+		
 	//fun.prototype = p;
 	var args = [];
 	for(var i=2; i<arguments.length; i++) args.push(arguments[i]);
@@ -66,6 +79,10 @@ Molecule.create = function(fun, currScript){
 		obj.container.attr('molecule-id',  existed + ',' + id);
 	} else {
 		obj.container.attr('molecule-id',  id);
+	}
+	
+	if(container.attr('molecule-obj')){
+		$(currentScript).remove();		// remove define script
 	}
 	
 	return obj;
@@ -93,18 +110,17 @@ Molecule.definesByFullname = {};		// defines by fullname
 Molecule.scanDefines = function(){
 	$('[molecule-def]').each(function(idx, ele){
 		var e = $(ele);
-		var name = e.attr('molecule-def');
-		var module = e.attr('molecule-module');
+		var fullname = e.attr('molecule-def');
 		var depends = e.attr('molecule-depends');
 		ele.removeAttribute('molecule-def');
 		
-		var r = Molecule.getModuleName(name, module);
+		var r = Molecule.getModuleName(fullname);
 
 		var m = Molecule.defines[r.module];
 		if(m == null){
 			m = Molecule.defines[r.module] = {};
 		}
-		Molecule.definesByFullname[r.fullname] = m[r.name] =
+		Molecule.definesByFullname[fullname] = m[r.name] =
 				{name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML};
 		
 		if(!Molecule.TEST_DEFINE) $(ele).remove();
@@ -136,18 +152,14 @@ Molecule.loadModule = function(module){
 	return result;
 }
 
-Molecule.getModuleName = function(name, module){
+Molecule.getModuleName = function(fullname){
+	var module = 'noname';
 	if(name.lastIndexOf('.') != -1){
-		if(module){
-			throw new Error(module + ' module already defined in ' + name + ', define once is enough');
-		} else {
-			var p = name.lastIndexOf('.');
-			module = name.substring(0, p);
-			name = name.substr(p + 1);
-		}
+		var p = name.lastIndexOf('.');
+		module = name.substring(0, p);
+		name = name.substr(p + 1);
 	}
-	if(!module) module = 'noname';
-	return {module : module, name : name, fullname : module + '.' + name};
+	return {module : module, name : name};
 }
 
 Molecule.scanMolecules = function(starter){
@@ -163,23 +175,17 @@ Molecule.scanMolecules = function(starter){
 	}
 	
 	function createMolecule(ele){
-		var name = ele.getAttribute('molecule');
+		var fullname = ele.getAttribute('molecule');
 		var def = Molecule.definesByFullname[name];
-		var fullname = name;
+		var moduleDesc = Molecule.getModuleName(fullname);
+		var name = moduleDesc.name;
+		var module = moduleDesc.module;
 		if(def == null){
-			var p = name.lastIndexOf('.');
-			if(p != -1){
-				module = name.substring(0, p);
-				name = name.substr(p + 1);
-			} else {
-				module = 'noname';
-			}
 			if(Molecule.loadedModules[module] == null){
 				if(!Molecule.loadModule(module)){
 					throw new Error(module + ' load failed, ' + name + ' cannot create');
 				}
 			}
-			
 			def = Molecule.defines[module][name];
 		} 
 		if(!def){
