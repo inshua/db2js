@@ -71,23 +71,20 @@ function $SQL(sql){
  * 对于 *.dbjs 脚本，只要扩充 dbjs 或 hanlder 对象，给它插入新的方法即可。 <p>
  * 对于 *.dbjs 脚本，增删改查几个方法规格如下：
  * <pre class="code">
- * dbjs.fetch = function(params, body, pageDef){
+ * dbjs.fetch = function(params){
  * 		...
- *		return {success : true, data : this.query(sql, params.q, pageDef), message : "Loaded data"};
+ *		return this.query(sql, params, params._page);
  * };
  * dbjs.create = function(params, rcd){
  *		rcd.id = this.nextId('SEQ_ENTITY');
  *		this.insertRow('表名', rcd);
- *		return {type : 'exec', data : rcd, message : "Created " + rcd.id};		
  *	};
  *
  * dbjs.modify = function(params, rcd){
  *		this.updateRow('表名', rcd);
- *		return {type : 'exec', data : rcd, message : "Updated  " + rcd.id};
  * };
  * dbjs.destroy = function(params, rcd){	
  * 		this.deleteRow('表名', rcd);
- * 		return {type : 'exec', data : rcd, message : "Destroy " + rcd.id};
  * };	
  * </pre>
  * @class DBJS
@@ -236,7 +233,7 @@ DBJS.prototype.orderBy = DBJS.prototype.appendSort = function(sql, sorts, defaul
 				arr.push(k + ' ' + sorts[k]);
 			}
 		}
-		sql += ' ORDER BY ' + arr.join();
+		if(arr.length) sql += ' ORDER BY ' + arr.join();
 	}
 	return sql;
 };
