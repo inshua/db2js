@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -47,6 +48,7 @@ public class JsDateUtil {
 	public JsDateUtil(ScriptEngine jsEngine){
 		this.engine = (NashornScriptEngine) jsEngine;
 		try {
+			// 不知什么原因，(ScriptObjectMirror) engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE).get("Date") 不行，返回的是 new Date().toString() 的结果
 			this.newDate = this.engine.compile("new Date()");
 		} catch (ScriptException e) {
 		}
@@ -60,12 +62,15 @@ public class JsDateUtil {
 	}
 	
 	public long getTime(ScriptObjectMirror nativeDate){
-		NativeDate date = nativeDate.to(NativeDate.class);
-		return (long) NativeDate.getTime(date);
+		return (long)NativeDate.getTime(((ScriptObjectMirror)nativeDate).to(NativeDate.class));		
+	}
+	
+	public long getTime(NativeDate nativeDate){
+		return (long)NativeDate.getTime(nativeDate);		
 	}
 	
 	public boolean isNativeDate(Object o){
-		return o instanceof ScriptObjectMirror && ((ScriptObjectMirror)o).isInstanceOf(NativeDate.class);
+		return o instanceof NativeDate || (o instanceof ScriptObjectMirror && ((ScriptObjectMirror)o).to(Object.class) instanceof NativeDate);
 	}
 	
 	

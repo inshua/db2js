@@ -21,7 +21,9 @@ package org.siphon.common.js;
 
 import java.lang.reflect.Field;
 
+import javax.script.Bindings;
 import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
@@ -35,22 +37,15 @@ import jdk.nashorn.internal.runtime.Undefined;
 public class JsTypeUtil {
 
 	private NashornScriptEngine engine;
-	private CompiledScript arrayConstructor;
-	private CompiledScript objectConstructor;
-	private static Field faSobj;
+	private ScriptObjectMirror arrayConstructor;
+	private ScriptObjectMirror objectConstructor;
 	
-	static{
-		try {
-			faSobj = ScriptObjectMirror.class.getDeclaredField("sobj");
-			faSobj.setAccessible(true);
-		} catch (Exception ex){}
-	}
-
 	public JsTypeUtil(ScriptEngine jsEngine) {
 		this.engine = (NashornScriptEngine) jsEngine;
 		try {
-			this.arrayConstructor = this.engine.compile("new Array()");
-			this.objectConstructor = this.engine.compile("new Object()");
+		    Bindings b = engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE);
+			this.arrayConstructor = (ScriptObjectMirror) b.get("Array");
+			this.objectConstructor = (ScriptObjectMirror) b.get("Object");
 		} catch (Exception e) {
 			// logger.error("", e);
 		}
@@ -58,7 +53,7 @@ public class JsTypeUtil {
 	}
 
 	public ScriptObjectMirror newArray(Object... objects) throws ScriptException {
-		ScriptObjectMirror arrayMirror = (ScriptObjectMirror) this.arrayConstructor.eval();
+		ScriptObjectMirror arrayMirror = (ScriptObjectMirror) this.arrayConstructor.call(null);
 		NativeArray array = arrayMirror.to(NativeArray.class);
 		for (int i = 0; i < objects.length; i++) {
 			//NativeArray.push(array, objects[i]);
@@ -69,14 +64,14 @@ public class JsTypeUtil {
 
 	public static Object getSealed(ScriptObjectMirror scriptObjectMirror) {
 		try {
-			return faSobj.get(scriptObjectMirror);
+			return scriptObjectMirror.to(Object.class);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
 	public ScriptObjectMirror newObject() throws ScriptException {
-		return (ScriptObjectMirror) this.objectConstructor.eval();
+		return (ScriptObjectMirror) this.objectConstructor.call(null);
 	}
 
 	public static boolean isNull(Object object) {

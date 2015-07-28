@@ -53,6 +53,7 @@ import jdk.nashorn.internal.objects.NativeArray;
 import jdk.nashorn.internal.objects.NativeDate;
 import jdk.nashorn.internal.objects.NativeFunction;
 import jdk.nashorn.internal.objects.NativeObject;
+import jdk.nashorn.internal.objects.NativeString;
 import jdk.nashorn.internal.runtime.ConsString;
 import jdk.nashorn.internal.runtime.ScriptFunction;
 import jdk.nashorn.internal.runtime.ScriptObject;
@@ -668,6 +669,35 @@ public class SqlExecutor {
 			
 			if (JsTypeUtil.isNull(arg)) {
 				ps.setObject(i + 1, null);
+			} else if (arg instanceof String) {
+				ps.setString(i + 1, (String) arg);
+			} else if(arg instanceof ConsString){
+				ps.setString(i + 1, arg.toString());
+			} else if( arg instanceof NativeString){
+				ps.setString(i + 1, arg.toString());
+			} else if (arg instanceof Double) { // js number always be
+												// Double，but if its came from
+												// JSON.parse， since JSON is jdk
+												// given global object, it will
+												// make Integer and ...
+				double d = ((Double) arg).doubleValue();
+				if (d == (int) d) {
+					ps.setInt(i + 1, (int) d);
+				} else if (d == (long) d) {
+					ps.setLong(i + 1, (long) d);
+				} else {
+					ps.setBigDecimal(i + 1, new BigDecimal(d));
+				}
+			} else if (arg instanceof Integer) {
+				ps.setInt(i + 1, (Integer) arg);
+			} else if (arg instanceof Long) {
+				ps.setLong(i + 1, (Long) arg);
+			} else if (arg instanceof Float) {
+				ps.setFloat(i + 1, (Float) arg);
+			} else if (jsDateUtil.isNativeDate(arg)) {
+				ps.setTimestamp(i + 1, parseDate(arg));
+			} else if (arg instanceof Boolean) {
+				ps.setBoolean(i + 1, JsTypeUtil.isTrue(arg));
 			} else if (arg instanceof ScriptObjectMirror || arg instanceof ScriptObject) {
 				String attr = null;
 				Object value = null;
@@ -678,7 +708,11 @@ public class SqlExecutor {
 					value = atm.get(attr);
 				} else {
 					ScriptObject obj = (ScriptObject) arg;
-					attr = (String) obj.getOwnKeys(false)[0];
+					String[] arr = obj.getOwnKeys(false);
+					if(arr.length == 0){
+						throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") at " + i +  " is an empty js object");
+					}
+					attr = arr[0];
 					value = obj.get(attr);
 				}
 
@@ -757,35 +791,8 @@ public class SqlExecutor {
 				} else {
 					throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") not support");
 				}
-			} else if (arg instanceof String) {
-				ps.setString(i + 1, (String) arg);
-			} else if(arg instanceof ConsString){
-				ps.setString(i + 1, arg.toString());
-			} else if (arg instanceof Double) { // js number always be
-												// Double，but if its came from
-												// JSON.parse， since JSON is jdk
-												// given global object, it will
-												// make Integer and ...
-				double d = ((Double) arg).doubleValue();
-				if (d == (int) d) {
-					ps.setInt(i + 1, (int) d);
-				} else if (d == (long) d) {
-					ps.setLong(i + 1, (long) d);
-				} else {
-					ps.setBigDecimal(i + 1, new BigDecimal(d));
-				}
-			} else if (arg instanceof Integer) {
-				ps.setInt(i + 1, (Integer) arg);
-			} else if (arg instanceof Long) {
-				ps.setLong(i + 1, (Long) arg);
-			} else if (arg instanceof Float) {
-				ps.setFloat(i + 1, (Float) arg);
-			} else if (jsDateUtil.isNativeDate(arg)) {
-				ps.setTimestamp(i + 1, parseDate(arg));
-			} else if (arg instanceof Boolean) {
-				ps.setBoolean(i + 1, JsTypeUtil.isTrue(arg));
 			} else {
-				throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") not support");
+				throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") at " + i +  " not support");
 			}
 		}
 
@@ -1108,7 +1115,9 @@ public class SqlExecutor {
 			} catch (ParseException e) {
 				throw new SqlExecutorException("unmatched datetime format " + value, e);
 			}
-		} else if (value instanceof ScriptObjectMirror && ((ScriptObjectMirror) value).isInstanceOf(NativeDate.class)) {
+		} else if (value instanceof NativeDate){
+			return nativeDateToTimeStamp((NativeDate) value);
+		} else if (value instanceof ScriptObjectMirror && ((ScriptObjectMirror)value).to(Object.class) instanceof NativeDate) {
 			return nativeDateToTimeStamp((ScriptObjectMirror) value);
 		} else {
 			throw new SqlExecutorException("unknown date format " + value + " " + value.getClass());
@@ -1129,9 +1138,11 @@ public class SqlExecutor {
 			} catch (ParseException e) {
 				throw new SqlExecutorException("unmatched datetime format " + value, e);
 			}
+		} else if(value instanceof NativeDate){
+			return nativeDateToTimeStamp((NativeDate)value);
 		} else if (value instanceof ScriptObjectMirror) {
 			ScriptObjectMirror m = (ScriptObjectMirror) value;
-			if (m.isInstanceOf(NativeDate.class)) {
+			if (m.to(Object.class) instanceof NativeDate) {
 				return nativeDateToTimeStamp(m);
 			} else {
 				throw new SqlExecutorException("unknown date format " + value + " " + m.getClassName());
@@ -1141,6 +1152,15 @@ public class SqlExecutor {
 		}
 	}
 
+	private java.sql.Timestamp nativeDateToTimeStamp(NativeDate value) {
+		try {
+			long time = this.jsDateUtil.getTime(value);
+			return new java.sql.Timestamp(time);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 	private java.sql.Timestamp nativeDateToTimeStamp(ScriptObjectMirror value) {
 		try {
 			long time = this.jsDateUtil.getTime(value);
@@ -1149,6 +1169,7 @@ public class SqlExecutor {
 			return null;
 		}
 	}
+
 
 	public boolean isOracle() {
 		return oracle;
