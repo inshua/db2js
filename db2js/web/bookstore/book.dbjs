@@ -1,0 +1,7 @@
+dbjs.fetch = function(params){
+	sql{.
+		select * from book 
+	.}
+	sql = this.orderBy(sql, params._sorts, {title : 'asc'});
+	return this.query(sql, params, params._page);
+}
