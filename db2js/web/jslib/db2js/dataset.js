@@ -164,7 +164,7 @@ db2js.DataTable.prototype.setState = function(newState){
 }
 
 /**
- * 按JSON创建新行，不加入 rows，如需要加入 rows 可调用 table.addRow(newRow)
+ * 按JSON创建新行，不加入 rows，如需要加入 rows 可调用 table.addRow(rowData)
  * 如不提供 rowData，则仅按列规格创建一个对象
  * @param rowData 
  */
@@ -185,6 +185,7 @@ db2js.DataTable.prototype.addRow = function(rowData, raiseEvent){
 	row._state = "new";
 	this.rows.push(row);
 	if(raiseEvent) this.fireEvent('rowchange', row, 'new');
+	return row;
 }
 
 /**
@@ -496,11 +497,15 @@ db2js.DataTable.prototype.submit = function(option){
 				me.setState('none');
 				me.fireEvent('submit');
 			} else {
-				var err = new Error(result.error.message);
-				for(var k in result.error){
-					err[k] = result.error[k];
+				if(typeof result.error == 'string'){
+					onError(new Error(result.error));
+				} else {
+					var err = new Error(result.error.message);
+					for(var k in result.error){
+						err[k] = result.error[k];
+					}
+					onError(err);
 				}
-				onError(err);
 			}
 		} else {
 			onError(new Error(text));

@@ -77,7 +77,10 @@ db2js.Renderers.std = db2js.KNOWN_RENDERERS['std'] = function(element, value, ta
  */
 db2js.Renderers.options = function(dispCol, valueCol, allowEmpty){
 	return function(element, rows, table){
-		var sel = element.firstElementChild;		// SELECT
+		var sel = $(element).find('select')[0];		// SELECT
+		
+		while(sel.options.length) sel.options.remove(0);
+		
 		for(var i=0; i<rows.length; i++){
 			if(allowEmpty){
 				var option = document.createElement('option');
@@ -85,7 +88,7 @@ db2js.Renderers.options = function(dispCol, valueCol, allowEmpty){
 				option.value = '';
 				sel.options.add(option);
 			}
-				
+			
 			for(var i = 0; i < rows.length; i++){
 				var option = document.createElement('option');
 				var dispCell = rows[i][dispCol];
@@ -115,11 +118,16 @@ db2js.Renderers.table = db2js.KNOWN_RENDERERS['table'] = function(hTable,  value
 	var headRow = hTable.tHead.rows[0];
 	for(var i=0; i<headRow.cells.length; i++){
 		var cell = headRow.cells[i];
-		columnRenders.push({
-				data : cell.getAttribute('data-t'), 
-				renderer : cell.getAttribute('renderer'),
-				"renderer-t" : cell.getAttribute('renderer-t'),
-				"collector-t" : cell.getAttribute('collector-t')});
+		var attrs = {};
+		for(var j=0; j<cell.attributes.length; j++){
+			var attr = cell.attributes[j].name;
+			var v = $(cell).attr(attr);
+			switch(attr){
+			case 'data-t' : attrs['data'] = v; break;
+			default : attrs[attr] = v;
+			} 
+		}
+		columnRenders.push(attrs);
 	}
 	
 	if(hTable.tBodies.length == 0){
@@ -134,10 +142,13 @@ db2js.Renderers.table = db2js.KNOWN_RENDERERS['table'] = function(hTable,  value
 		var tr = tBody.insertRow();
 		columnRenders.forEach(function(column){
 			var cell = document.createElement('td');
-			cell.setAttribute('data', hTable.getAttribute('data') + ',' + column.data.replace(/,\s*N\s*,/, ',' + i + ','));
-			cell.setAttribute('renderer', column.renderer);
-			if(column['renderer-t']) cell.setAttribute('renderer-t', column['renderer-t']);
-			if(column['collector-t']) cell.setAttribute('collector-t', column['collector-t']);
+			for(var attr in column){if(column.hasOwnProperty(attr)){
+				if(attr == 'data'){
+					$(cell).attr('data', hTable.getAttribute('data') + ',' + column.data.replace(/,\s*N\s*,/, ',' + i + ','));
+				} else {
+					$(cell).attr(attr, column[attr]);
+				}
+			}}
 			tr.appendChild(cell);
 		});
 	}

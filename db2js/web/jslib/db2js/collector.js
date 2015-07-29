@@ -117,7 +117,7 @@ db2js.Collectors.s = db2js.KNOWN_COLLECTORS['s'] = function(element, newValue, t
  * @param newValue
  * @returns 数字
  */
-db2js.Collectors.n = db2js.KNOWN_COLLECTORS['n'] = function(element, newValue, table, _1, rows, index, row, columnName){
+db2js.Collectors.Pipelines.n = db2js.KNOWN_COLLECT_PIPELINES['n'] = function(element, newValue, table, _1, rows, index, row, columnName){
 	if(newValue instanceof String) newValue = newValue.trim();
 	if(isNaN(newValue)){
 		return null;
@@ -132,7 +132,7 @@ db2js.Collectors.n = db2js.KNOWN_COLLECTORS['n'] = function(element, newValue, t
  * @param newValue
  * @returns
  */
-db2js.Collectors.d = db2js.KNOWN_COLLECTORS['d'] = function(element, newValue, table, _1, rows, index, row, columnName){
+db2js.Collectors.Pipelines.d = db2js.KNOWN_COLLECT_PIPELINES['d'] = function(element, newValue, table, _1, rows, index, row, columnName){
 	if(newValue instanceof String) newValue = newValue.trim();
 	if(!newValue){
 		return null;

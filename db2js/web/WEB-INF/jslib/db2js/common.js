@@ -944,7 +944,7 @@ DBJS.prototype.callDbjs = function(src, method, params){
 		}
 		var arr = Java.to(params instanceof Array ? params : [params], ObjectArray);
 		var res = engineContext.getEngineAsInvocable().invokeMethod(another, method, arr);
-		if(res != null && res instanceof ScriptObjectMirror) res = engineContext.getJsTypeUtil().getSealed(res);
+		if(res != null && res instanceof ScriptObjectMirror) res = org.siphon.common.js.JsTypeUtil.getSealed(res);
 		dbjsRunner.completeTask(engineContext.getScriptEngine(), null);
 		return res;
 	} catch(e){

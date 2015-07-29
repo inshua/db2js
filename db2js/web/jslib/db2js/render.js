@@ -32,6 +32,13 @@ db2js.Renderers.EmbedRenderers = {};
 db2js.Renderers.EmbedRenderers.nextId = 1;
 db2js.Renderers.EmbedRenderers.codeMap = {};
 
+(function addcss(){
+	var css = document.createElement("style");
+	css.type = "text/css";
+	css.innerHTML = "render {display : none;}";
+	document.head.appendChild(css);
+})();
+
 /**
  * 发起渲染函数
  */

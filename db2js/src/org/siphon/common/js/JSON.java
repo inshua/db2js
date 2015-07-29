@@ -46,6 +46,9 @@ public class JSON {
 	}
 
 	public String stringify(Object obj) throws UnsupportedConversionException {
+		if(obj instanceof ScriptObjectMirror){
+			return this.stringify(((ScriptObjectMirror) obj).to(Object.class));
+		}
 		try{
 			return (String) json.callMember("stringify", obj);
 		}catch(Exception e){
@@ -54,6 +57,9 @@ public class JSON {
 	}
 	
 	public String tryStringify(Object obj) {
+		if(obj instanceof ScriptObjectMirror){
+			return this.tryStringify(((ScriptObjectMirror) obj).to(Object.class));
+		}
 		try{
 			return (String) json.callMember("stringify", obj);
 		}catch(Exception e){
@@ -64,7 +70,7 @@ public class JSON {
 
 	public Object parse(String jsonStr) throws Exception {
 		try {
-			return this.json.callMember("parse", jsonStr);
+			return this.json.callMember("parse", jsonStr, parseDate);
 		} catch (Exception e) {
 			throw new Exception(json + " cannot parsed", e);
 		} finally {
