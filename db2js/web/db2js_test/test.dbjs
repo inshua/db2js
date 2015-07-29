@@ -1,9 +1,9 @@
 dbjs.fetch = function(params){
 	sql{.
-		select * from authors where 1 = 1
+		select * from author where 1 = 1
 		code{.
-			if(params.last_name){
-				sql{. and instr(last_name, :last_name) > 0 .}
+			if(params.name){
+				sql{. and strpos(name, :name) > 0 .}
 			}
 		.}
 	.}
@@ -13,9 +13,9 @@ dbjs.fetch = function(params){
 
 dbjs.modify = function(row, columns){
 	$V(row, {
-		last_name : V.email
+		email : V.email
 	});
 	
-	return this.updateRow('authors', row, columns);
+	return this.updateRow('author', row, columns);
 }
 

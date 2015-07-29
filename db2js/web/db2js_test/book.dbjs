@@ -1,11 +1,30 @@
 dbjs.fetch = function(params){
-	var sql = 'select * from books where author_id = :author_id order by id';
-	return this.query(sql, params);
+	sql{.
+		select b.*, a.name author_name from book b, author a where b.author = a.id
+		code{. 
+			if(params.title){ 
+				sql{. and strpos(b.title, :title) > 0  .}
+			}
+			if(params.author){ 
+				sql{. and author = :author  .}
+			}
+		.}
+	.}
+	sql = this.orderBy(sql, params._sorts, {'b.title' : 'asc'});
+	return this.query(sql, params, params._page);
 }
 
-dbjs.modify = function(row, columns){
-	$V(row, {
-		title : V.email
-	});
-	return this.updateRow('books', row, columns);
+dbjs.create = function(rcd){
+	logger.info('add book ' + JSON.stringify(rcd));
+	this.insertRow('book', rcd, ['title', 'author', 'publish_date', 'kind', 'isbn', 'remarks'])
+}
+
+dbjs.modify = function(rcd){
+	logger.info('edit book ' + JSON.stringify(rcd));
+	this.updateRow('book', rcd, ['id', 'title', 'author', 'publish_date', 'kind', 'isbn', 'remarks'])
+}
+
+dbjs.destroy = function(rcd){
+	logger.info('delete book ' + JSON.stringify(rcd));
+	this.deleteRow('book', rcd)
 }

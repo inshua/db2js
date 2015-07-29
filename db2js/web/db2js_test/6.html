@@ -23,20 +23,20 @@
 			<form class="form-inline">
 			  <div class="form-group">
 			    <label>Last Name</label>
-			    <input type="text" class="form-control" placeholder="" data="#authors,search,params,last_name" collector="c|s">
+			    <input type="text" class="form-control" placeholder="" data="#author,search,params,last_name" collector="c|s">
 			  </div>
 			  <button type="button" class="btn btn-default" onclick="search($(this).parent('form'))">Search</button>
 			</form>
 		</div>
-		<div data="#authors,error" renderer="stderr"></div>
+		<div data="#author,error" renderer="stderr"></div>
 		
-		<div data="#authors,rows" renderer="repeater">
-			<h1>Authors</h1>
+		<div data="#author,rows" renderer="repeater">
+			<h1>author</h1>
 			<hr>
-			<h2 repeater="true"><small data="first_name" renderer="std"></small><span data="last_name" renderer="std"></span></h2>
+			<h2 repeater="true"><span data=name renderer="std"></span><small data="email" renderer="std"></small></h2>
 			
 			<nav>
-				<ul class="pagination" data="#authors" renderer="pagination">
+				<ul class="pagination" data="#author" renderer="pagination">
 				</ul>
 			</nav>
 		</div>
@@ -47,7 +47,7 @@
 </body>
 <script>
 	
-	var table = new db2js.DataTable('authors', 'test.dbjs', {pageSize : 5});
+	var table = new db2js.DataTable('author', 'test.dbjs', {pageSize : 5});
 	
 	table.load({ _m : 'fetch'}, function(error){db2js.render(null, this);});
 </script>
