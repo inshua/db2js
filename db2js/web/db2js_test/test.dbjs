@@ -12,9 +12,9 @@ dbjs.fetch = function(params){
 }
 
 dbjs.modify = function(row, columns){
-//	$V(row, {
-//		last_name : V.email
-//	});
+	$V(row, {
+		last_name : V.email
+	});
 	
 	return this.updateRow('authors', row, columns);
 }
