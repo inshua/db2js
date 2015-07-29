@@ -68,7 +68,7 @@ var $V = V;
 V.notNull = {
 	name : 'notNull',
 	check : function(v, fld){ 
-		if(v == null || v == '') return fld + '不允许为空'; 
+		if(v == null || v == '') return '此处不允许为空'; 
 	}
 };
 
@@ -82,7 +82,7 @@ V.email = {
 	check : function(v, fld){
 		if(v==null||v=='') return;
 		if(! this.reg.test(v)){
-			return fld + '应为合法的电子邮箱地址'; 
+			return '此处应为合法的电子邮箱地址'; 
 		}
 	}
 };
@@ -97,7 +97,7 @@ V.reg = function(reg, desc){
 		check : function(v, fld){
 			if(v==null||v=='') return;
 			if(! reg.test(v)){
-				return fld + desc; 
+				return desc; 
 			}
 		}
 	};
@@ -163,7 +163,7 @@ V.unique = function(table, tableField, primaryDesc, ignoreCase){
 					dbjs.query(sql, [v, primaryDesc[pk]]);
 					
 			if(r.rows.length){
-				return fld + '为' + v + '已经的记录存在';
+				return '取值为' + v + '已经的记录存在';
 			}
 		}
 	};
@@ -180,7 +180,7 @@ V.longest = function(size){
 		check : function(v, fld){
 			if(v==null||v=='') return;
 			if(v.length > size){
-				return fld + '长度不能超过 ' + size;
+				return '此处长度不能超过 ' + size;
 			}
 		}
 	};
@@ -197,7 +197,7 @@ V.shortest = function(size){
 		check : function(v, fld){
 			if(v==null||v=='') return;
 			if(v.length < size){
-				return fld + '长度不能短于 ' + size;
+				return '此处长度不能短于 ' + size;
 			}
 		}
 	};
@@ -213,7 +213,7 @@ V.most = function(maxValue){
 		name : 'numrange',
 		check : function(v, fld){
 			if(v==null||v=='') return;			
-			var msg = fld + '不能超过' + maxValue;
+			var msg = '值不能超过' + maxValue;
 			
 			if(maxValue != null){
 				if(isNaN(maxValue) && maxValue.substr){
@@ -235,7 +235,7 @@ V.atLeast = function(minValue){
 		name : 'numrange',
 		check : function(v, fld){
 			if(v==null||v=='') return;
-			var msg = fld + '应大于' + minValue;
+			var msg = '应输入大于' + minValue +'的数据';
 			
 			if(minValue != null){
 				if(isNaN(minValue) && minValue.substr){
@@ -260,7 +260,7 @@ V.between = function(minValue, maxValue){
 		check : function(v, fld, rcd){
 			if(v==null||v=='') return;
 			
-			var msg = fld + '应位于' + minValue + ' 和 ' + maxValue + ' 之间';
+			var msg = '值应位于' + minValue + ' 和 ' + maxValue + ' 之间';
 			
 			if(minValue != null){
 				if(isNaN(minValue) && minValue.substr){
@@ -288,7 +288,7 @@ V.inside = function(dict, msg){
 	return {
 		name : 'numrange',
 		check : function(v, fld){
-			msg = msg || fld + '取值不在给定范围';
+			msg = msg || '取值不是合法选项';
 			if(dict.indexOf(v) == -1){
 				return msg;
 			}
@@ -328,7 +328,7 @@ V.uniqueInNode = function(table, tableField, primaryDesc){
 					dbjs.query(sql + ' and ' + pk + ' <> ?', [v, primaryDesc[pk], rcd.node]);
 					
 			if(r.rows.length){
-				return fld + '为' + v + '已经的记录存在';
+				return '发现重复记录';
 			}
 		}
 	};
