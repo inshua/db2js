@@ -60,7 +60,7 @@ db2js.Renderers.std = db2js.KNOWN_RENDERERS['std'] = function(element, value, ta
 			e.checked = v;	
 	}
 
-	function tagRender(e, v){	
+	function tagRender(e, v){
 		if(v == null){
 			e.innerHTML = "&nbsp;";
 		} else {		
@@ -68,6 +68,45 @@ db2js.Renderers.std = db2js.KNOWN_RENDERERS['std'] = function(element, value, ta
 		}	
 	}
 }
+
+/**
+ * 适用于 innerHTML 中含有 {{... }} 表达式的渲染器
+ * 用法：
+ * 	<p data="#table,rows,0" renderer="expr">
+ * 		<h1>{{title.toUpperCase()}}<small>{{author}}</small></h1>
+ * 		<p>{{content}}</p>
+ * 	</p>
+ */
+db2js.Renderers.expr = db2js.KNOWN_RENDERERS['expr'] = function(e, data){
+	if(e.innerHTML.indexOf('{{') != -1){		// 带有表达式 {{}},以参数 row 为出发路径
+		e.setAttribute('render-expr', e.innerHTML)
+	}
+	if(e.hasAttribute('render-expr')){
+		var s = e.getAttribute('render-expr');
+		var res = '';
+		var start = 0;
+		for(var offset = s.indexOf('{{', start); offset != -1; offset = s.indexOf('{{', start)){
+			res += s.substring(start, offset);
+			
+			var end = s.indexOf('}}', offset + 2);
+			if(end != -1){
+				var expr = s.substring(offset + 2, end);
+				with(data){
+					res += eval(expr);
+				}
+				start = end + 2;
+			} else {
+				s += s.substring(offset);
+				break;
+			}
+		}
+		if(start < s.length -1) res += s.substr(start);
+		e.innerHTML = res;
+	} else {
+		//nothing todo
+	}
+}
+
 
 /**
  * 用法：

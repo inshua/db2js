@@ -148,9 +148,11 @@ db2js.extractData = function(baseData, dataPath, output, direct){
 		if(!found) return false;
 		i = 1;		// by-pass the selector;
 	} else {
-		if(!direct) return false;		// 只有direct方式可以不使用选择器
+		if(!direct) return false;		// 只有direct方式可以不使用命中器
 	}
-	output.push(start)
+	output.push(start);
+	
+	if(arr.length == 1 && arr[0] == 'this') return true;	// 像这种<p data="this"></p>只为命中本身
 	
 	var obj = start;
 	for(; i<arr.length; i++){
