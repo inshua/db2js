@@ -92,7 +92,14 @@ db2js.Renderers.expr = db2js.KNOWN_RENDERERS['expr'] = function(e, data){
 			if(end != -1){
 				var expr = s.substring(offset + 2, end);
 				with(data){
-					res += eval(expr);
+					try{
+						res += eval(expr);
+					}catch(e){
+						res += e.message;
+						console.log('eval error, expr : ' + expr);
+						console.log(e);
+						console.log(data);
+					}
 				}
 				start = end + 2;
 			} else {
