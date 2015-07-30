@@ -157,7 +157,7 @@ Molecule.getModuleName = function(fullname){
 	if(fullname.lastIndexOf('.') != -1){
 		var p = fullname.lastIndexOf('.');
 		module = fullname.substring(0, p);
-		var name = fullname.substr(p + 1);
+		name = fullname.substr(p + 1);
 	}
 	return {module : module, name : name};
 }
