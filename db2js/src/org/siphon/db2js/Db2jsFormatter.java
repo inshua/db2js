@@ -19,10 +19,13 @@
  *******************************************************************************/
 package org.siphon.db2js;
 
+import java.sql.SQLException;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.siphon.common.js.JsTypeUtil;
 import org.siphon.db2js.jshttp.JsEngineHandlerContext;
+import org.siphon.jssql.SqlExecutorException;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.objects.NativeError;
@@ -49,7 +52,7 @@ public class Db2jsFormatter extends Formatter {
 	@Override
 	public String formatException(Object exception, JsEngineHandlerContext engineContext) throws Exception {
 		if (exception instanceof ScriptObjectMirror){
-			return formatException(engineContext.getJsTypeUtil().getSealed((ScriptObjectMirror) exception), engineContext);
+			return formatException(engineContext.getJsTypeUtil().getSealed((ScriptObjectMirror) exception), engineContext);		
 		} else if( exception instanceof ScriptObject) {
 			//NativeError, NativeTypeError, NativeEvalError, ... 
 			if(((ScriptObject) exception).getOwnKeys(false).length == 0){
@@ -58,7 +61,17 @@ public class Db2jsFormatter extends Formatter {
 					exception = instMessage;
 				}
 			}		
+		}else if (exception instanceof SqlExecutorException){
+			SqlExecutorException sqlExecutorException = (SqlExecutorException) exception;
+			if(sqlExecutorException.getCause() instanceof SQLException){
+				exception = sqlExecutorException.getCause().getMessage();
+			} else {
+				exception = sqlExecutorException.getMessage();
+			}
 		} else if(exception instanceof Throwable){
+			if(((Throwable) exception).getCause() instanceof SqlExecutorException){
+				return formatException(((Throwable) exception).getCause(), engineContext);
+			}
 			exception = ((Throwable) exception).getMessage();
 		} else {
 			exception = exception.toString();
