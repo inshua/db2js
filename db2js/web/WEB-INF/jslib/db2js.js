@@ -22,6 +22,8 @@
 
 imports("./lang.js");
 
+imports("./Date.js");
+
 imports("./jssp_lib/website.js");
 
 imports("./db2js/common.js");

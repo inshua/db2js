@@ -41,7 +41,8 @@ limitations under the License.
  * @returns localization data
  */
 d.i18n = function (l) {
-  return (typeof l == 'string')
+	return 'en-US';	// no navigator since run at server
+	return (typeof l == 'string')
        ? (l in Date.i18n ? Date.i18n[l] : Date.i18n(l.substr(0, l.lastIndexOf('-'))))
        : (l || Date.i18n(navigator.language || navigator.browserLanguage || ''));
 };
