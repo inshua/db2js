@@ -68,7 +68,7 @@ dbjs.fetch = function(params){
 </body>
 <script>
 
-	var books = new db2js.DataTable('book', 'book.dbjs', {pageSize : 5 /* 默认 10 */});
+	var books = new db2js.DataTable('book', 'book.dbjs');
 	
 	books.load({ _m : 'fetch'});
 	
