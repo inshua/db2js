@@ -265,4 +265,6 @@ PDF入门
 继续深入...
 -------
 
-使用 eclipse 打开
+运行项目，打开 index.html，可以更完整的浏览 db2js, jssp, molecule 三种技术。
+
+ 
