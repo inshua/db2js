@@ -153,11 +153,11 @@ Molecule.loadModule = function(module){
 }
 
 Molecule.getModuleName = function(fullname){
-	var module = 'noname';
-	if(name.lastIndexOf('.') != -1){
-		var p = name.lastIndexOf('.');
-		module = name.substring(0, p);
-		name = name.substr(p + 1);
+	var module = 'noname', name=fullname;
+	if(fullname.lastIndexOf('.') != -1){
+		var p = fullname.lastIndexOf('.');
+		module = fullname.substring(0, p);
+		var name = fullname.substr(p + 1);
 	}
 	return {module : module, name : name};
 }
