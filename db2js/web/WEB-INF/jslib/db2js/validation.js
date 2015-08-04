@@ -333,3 +333,161 @@ V.uniqueInNode = function(table, tableField, primaryDesc){
 		}
 	};
 };
+
+/**
+ * <pre>
+ * 服务器端类型转换器，如转换失败则抛错，这组工具会修改 record 的值，同时具备转换和校验的功能。
+ * 
+ * 使用方法:
+ * <pre class="code">
+ * $V(rcd,{ 
+ * 			name  : [T.string, V.notNull, V.shortest(5), V.unique('table')],
+ * 			qq	  : T.number(20),
+ * 			email : [V.notNull, V.email],
+ * 			telphones : [T.array],
+ * 			tag : [T.object, T.json],		// 先将 object 从字符串转为 js 对象，再加上 $JSON() 引用 
+ * 	  })
+ * </pre>
+ * </pre>
+ * 
+ * @class T
+ */
+function T(){}
+
+/**
+ * 将数据转换为整数
+ * @memberof T
+ */
+T.int = function(v, fld, rcd){
+	var n = v * 1;
+	if(isNaN(n)) return '此处需要填入整数';
+	if(n != Math.floor(n)) return '数字' + n +'不是整数'
+	rcd[fld] = n;
+}
+
+/**
+ * 将数据转为字符串，如为 '' 转为 null
+ * @param v
+ * @param fld
+ * @param rcd
+ * @memberof T
+ */
+T.string = function(v, fld, rcd){
+	if(v == null){
+		rcd[fld] = null;
+	} else {
+		rcd[fld] = v + '';
+	}
+}
+
+/**
+ * 将原本是数组的数据套上 $ARRAY() 标记，如为字符串，将试图 JSON.parse 为数组
+ * @param v
+ * @param fld
+ * @param rcd
+ * @returns {String}
+ * @memberof T
+ */
+T.array = function(v, fld, rcd){
+	if(v != null){
+		if(typeof v == 'string'){
+			try{
+				v = JSON.parse(v, parseDate);
+			}catch(e){
+				return '\"' + v + '\"不是合法的JSON字符串';				
+			}
+		} 
+		if(v instanceof Array){
+			rcd[fld] = $ARRAY(v);
+		} else {
+			return '此处需要填入数组'
+		}
+	}
+}
+
+/**
+ * 将JSON字符串转为对象，如果原本是对象则不转换。
+ * @param v
+ * @param fld
+ * @param rcd
+ * @memberof T
+ */
+T.object = function(v, fld, rcd){
+	if(v != null){
+		if(typeof v == 'string'){
+			try{
+				v = JSON.parse(v, parseDate);
+			}catch(e){
+				return '\"' + v + '\"不是合法的JSON字符串';				
+			}
+		}
+	}
+	rcd[fld] = v;
+}
+
+/**
+ * 将JS对象套上 $JSON() 壳，如为字符串，将试图使用 JSON.parse 转为 JS 对象
+ * @param v
+ * @param fld
+ * @param rcd
+ * @memberof T
+ */
+T.json = function(v, fld, rcd){
+	if(v != null){
+		if(typeof v == 'string'){
+			try{
+				v = JSON.parse(v, parseDate);
+			}catch(e){
+				return '\"' + v + '\"不是合法的JSON字符串';				
+			}
+		} 
+		rcd[fld] = $JSON(v);
+	}
+}
+
+/**
+ * 将JS对象套上 $JSONB() 壳，如为字符串，将试图使用 JSON.parse 转为 JS 对象
+ * @param v
+ * @param fld
+ * @param rcd
+ * @memberof T
+ */
+T.jsonb = function(v, fld, rcd){
+	if(v != null){
+		if(typeof v == 'string'){
+			try{
+				v = JSON.parse(v, parseDate);
+			}catch(e){
+				return '\"' + v + '\"不是合法的JSON字符串';				
+			}
+		} 
+		rcd[fld] = $JSONB(v);
+	}
+}
+
+/**
+ * 检查数据为 Date 格式。如果为字符串，将先后按 JSON.parse 和 Date.parse 转换，全部失败则失败。
+ * @param v
+ * @param fld
+ * @param rcd
+ * @memberof T
+ */
+T.date = function(v, fld, rcd){
+	if(v != null){
+		if(typeof v == 'string'){
+			try{
+				v = JSON.parse(v, parseDate);
+			}catch(e){
+				try{
+					v = Date.parse(v);
+				}catch(e){
+					return '\"' + v + '\"不是合法的日期格式字符串';	
+				}
+			}			
+		} 
+		if(!v instanceof Date){
+			return '此处需要输入日期';
+		}
+		rcd[fld] = v;
+	}
+}
