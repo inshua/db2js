@@ -356,63 +356,57 @@ function T(){}
 
 /**
  * 将数据转换为整数
- * @memberof T
  */
-T.int = function(v, fld, rcd){
-	var n = v * 1;
-	if(isNaN(n)) return '此处需要填入整数';
-	if(n != Math.floor(n)) return '数字' + n +'不是整数'
-	rcd[fld] = n;
+T.int = {
+      name : 'int',
+      check : function(v, fld, rcd){
+			var n = v * 1;
+			if(isNaN(n)) return '此处需要填入整数';
+			if(n != Math.floor(n)) return '数字' + n +'不是整数'
+			rcd[fld] = n;
+      }
 }
 
 /**
  * 将数据转为字符串，如为 '' 转为 null
- * @param v
- * @param fld
- * @param rcd
- * @memberof T
  */
-T.string = function(v, fld, rcd){
+T.string = {name : 'string', check : function(v, fld, rcd){
 	if(v == null){
 		rcd[fld] = null;
 	} else {
 		rcd[fld] = v + '';
 	}
-}
+}}
 
 /**
  * 将原本是数组的数据套上 $ARRAY() 标记，如为字符串，将试图 JSON.parse 为数组
- * @param v
- * @param fld
- * @param rcd
- * @returns {String}
- * @memberof T
  */
-T.array = function(v, fld, rcd){
-	if(v != null){
-		if(typeof v == 'string'){
-			try{
-				v = JSON.parse(v, parseDate);
-			}catch(e){
-				return '\"' + v + '\"不是合法的JSON字符串';				
+T.array = function(elementType){
+	return {
+		name : 'array', 
+		check : function(v, fld, rcd){
+			if(v != null){
+				if(typeof v == 'string'){
+					try{
+						v = JSON.parse(v, parseDate);
+					}catch(e){
+						return '\"' + v + '\"不是合法的JSON字符串';				
+					}
+				} 
+				if(v instanceof Array){
+					rcd[fld] = $ARRAY(elementType, v);
+				} else {
+					return '此处需要填入数组'
+				}
 			}
-		} 
-		if(v instanceof Array){
-			rcd[fld] = $ARRAY(v);
-		} else {
-			return '此处需要填入数组'
 		}
 	}
 }
 
 /**
  * 将JSON字符串转为对象，如果原本是对象则不转换。
- * @param v
- * @param fld
- * @param rcd
- * @memberof T
  */
-T.object = function(v, fld, rcd){
+T.object = { name : 'object', check : function(v, fld, rcd){
 	if(v != null){
 		if(typeof v == 'string'){
 			try{
@@ -423,16 +417,12 @@ T.object = function(v, fld, rcd){
 		}
 	}
 	rcd[fld] = v;
-}
+}}
 
 /**
  * 将JS对象套上 $JSON() 壳，如为字符串，将试图使用 JSON.parse 转为 JS 对象
- * @param v
- * @param fld
- * @param rcd
- * @memberof T
  */
-T.json = function(v, fld, rcd){
+T.json = {name : 'json', check : function(v, fld, rcd){
 	if(v != null){
 		if(typeof v == 'string'){
 			try{
@@ -443,16 +433,12 @@ T.json = function(v, fld, rcd){
 		} 
 		rcd[fld] = $JSON(v);
 	}
-}
+}}
 
 /**
  * 将JS对象套上 $JSONB() 壳，如为字符串，将试图使用 JSON.parse 转为 JS 对象
- * @param v
- * @param fld
- * @param rcd
- * @memberof T
  */
-T.jsonb = function(v, fld, rcd){
+T.jsonb = {name : 'json', check : function(v, fld, rcd){
 	if(v != null){
 		if(typeof v == 'string'){
 			try{
@@ -463,16 +449,12 @@ T.jsonb = function(v, fld, rcd){
 		} 
 		rcd[fld] = $JSONB(v);
 	}
-}
+}}
 
 /**
  * 检查数据为 Date 格式。如果为字符串，将先后按 JSON.parse 和 Date.parse 转换，全部失败则失败。
- * @param v
- * @param fld
- * @param rcd
- * @memberof T
  */
-T.date = function(v, fld, rcd){
+T.date = {name : 'date', check : function(v, fld, rcd){
 	if(v != null){
 		if(typeof v == 'string'){
 			try{
@@ -490,4 +472,4 @@ T.date = function(v, fld, rcd){
 		}
 		rcd[fld] = v;
 	}
-}
+}}
