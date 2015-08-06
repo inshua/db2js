@@ -42,7 +42,7 @@
 		                         tagName : element.tagName(), html : html};
 					var n = element.nextElementSibling();
 					if(n && n.tagName() == 'script' && (n.attr('molecule-for') == fullname || n.attr('molecule-for') == name)){
-						def.script = n.innerHTML;
+						def.script = n.html();
 					}
 					defines[module][name] = def;
 				}
