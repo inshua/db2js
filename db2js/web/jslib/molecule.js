@@ -51,9 +51,16 @@ Molecule.create = function(fun, currentScript){
 	if(currentScript == null){
 		throw new Error('cannot retreive current script');
 	}
-	var container = $(currentScript).parent('[molecule-obj]');
+	var forSilbling = currentScript.hasAttribute('molecule-for');
+	var container = null;
+	if(forSilbling){
+		container = $(currentScript.previousElementSibling);
+	} else {
+		container = $(currentScript).closest('[molecule-obj]');
+	}
+	
 	if(!container.length){
-		container = $(currentScript).parent('[molecule-def]');
+		container = $(currentScript).closest('[molecule-def]');
 		if(!Molecule.TEST_DEFINE){
 			return;
 		}
@@ -120,8 +127,17 @@ Molecule.scanDefines = function(){
 		if(m == null){
 			m = Molecule.defines[r.module] = {};
 		}
-		Molecule.definesByFullname[fullname] = m[r.name] =
-				{name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML};
+		console.log('define molecule ' + fullname);
+		
+		var def = {name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML};
+		
+		var script = $(ele.nextElementSibling);
+		if(script.length && (script.attr('molecule-for') == fullname || script.attr('molecule-for') == r.name)){
+			def.script = script[0].innerHTML;
+			script.remove();
+		}
+		
+		Molecule.definesByFullname[fullname] = m[r.name] = def;
 		
 		if(!Molecule.TEST_DEFINE) $(ele).remove();
 	});
@@ -200,7 +216,9 @@ Molecule.scanMolecules = function(starter){
 		
 		var inner = ele.innerHTML;		// 保留原来的子节点
 		
-		ele.outerHTML = def.html;
+		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);
+		
+		ele.outerHTML = replaceInnerHtml ? def.html.replace('<!-- {INNER_HTML} -->', inner) : def.html;
 		var instance = p.children[pos];
 		var inherited = (instance.hasAttribute('molecule') && instance.getAttribute('molecule') != fullname); // 继承自另一 molecule
 		for(var i=0; i<ele.attributes.length; i++){
@@ -222,7 +240,17 @@ Molecule.scanMolecules = function(starter){
 			instance.removeAttribute('molecule');
 		}
 		
-		instance.insertAdjacentHTML('beforeEnd', inner);
+		if(!replaceInnerHtml){
+			instance.insertAdjacentHTML('beforeEnd', inner);
+		}
+		
+		if(def.script){
+			var script = document.createElement('script');
+			script.setAttribute('molecule-for', fullname);
+			script.id = 'molecule';
+			script.innerHTML = def.script;
+			instance.parentElement.insertBefore(script, instance.nextSilbling);
+		}
 		
 		resetScripts(instance);
 		return instance;

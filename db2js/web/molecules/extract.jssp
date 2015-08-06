@@ -38,8 +38,13 @@
 					if(defines[module][name] != null){
 						printError(fullname + ' defined more than one time');
 					}
-					defines[module][name] = {name : name, module : module, depends : depends && depends.split(','), 
-					                         tagName : element.tagName(), html : html};
+					var def = {name : name, module : module, depends : depends && depends.split(','), 
+		                         tagName : element.tagName(), html : html};
+					var n = element.nextElementSibling();
+					if(n && n.tagName() == 'script' && (n.attr('molecule-for') == fullname || n.attr('molecule-for') == name)){
+						def.script = n.innerHTML;
+					}
+					defines[module][name] = def;
 				}
 			} else {
 				out.print("<h3>(empty)</h3>");
