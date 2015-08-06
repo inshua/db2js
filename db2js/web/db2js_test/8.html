@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Db2js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+    <script src="../jslib/jquery-1.10.2.js"></script>
+    <script src="../jslib/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+
+    <script src="../jslib/db2js/dataset.js"></script>
+    <script src="../jslib/db2js/render.js"></script>
+    <script src="../jslib/db2js/renderers.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
+    <script src="../jslib/db2js/collector.js"></script>
+
+    <script src="../jslib/molecule.js"></script>
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>表格编辑</h1>
+        <div>
+            <form class="form-inline text-right">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="form-control" placeholder="" data="#author,search,params,name" collector="c|s">
+                </div>
+                <button type="button" class="btn btn-default" onclick="search($(this).parent('form'))">Search</button>
+            </form>
+        </div>
+        <div data="#author,error" renderer="stderr"></div>
+
+        <table molecule="List" table="author">
+            <thead>
+                <tr>
+                    <th molecule="SortHeader" col="id" text="ID"></th>
+                    <th molecule="SortHeader" col="name" text="Name"></th>
+                    <th molecule="SortHeader" col="email" text="Email"></th>
+                    <th data-t="rows,N,id" renderer="editLink"></th>
+                </tr>
+            </thead>
+        </table>
+
+        <div molecule="Dialog">
+            <form table="author">
+                <div molecule="FormItem" col="name" text="Name">
+                    <input type="text" molecule="Input">
+                </div>
+                <div molecule="FormItem" col="email" text="Email">
+                    <input type="email" molecule="Input">
+                </div>
+            </form>
+        </div>
+
+    </div>
+</body>
+<script>
+    db2js.Renderers.editLink = function (element, v, table) {
+        var e = $(element);
+        e.html('');
+        var a = $(document.createElement('a')).appendTo(e);
+        a.html('EDIT');
+        a.attr('href', '###');
+        a.data('id', v);
+        a.on('click', function () {
+            editRow(table.find('id', $(this).data('id')));
+        });
+    }
+
+    function editRow(row) {
+        table.curr = row;
+        db2js.render($('#myModal')[0], table);
+        $('[molecule-obj=Dialog]').modal('show');
+    }
+
+    $(document).ready(function(){
+    	var dialog = Molecule.of($('[molecule-obj=Dialog]'));
+    	dialog.on('close', function () {
+            table.reject();
+            table.clearError();
+            db2js.render();
+        }); 
+    	dialog.on('submit', function(){
+    		db2js.collect();
+
+            table.submit({
+                callback: function (error) {
+                    db2js.render();
+                    if (!error) {
+                    	$('[molecule-obj=Dialog]').modal('hide');
+                        this.reload();
+                    }
+                }
+            });
+    	});
+    })
+
+    var table = new db2js.DataTable('author', 'test.dbjs', { pageSize: 5 });
+    table.on('load', function (error) {
+        db2js.render(null, this);
+    });
+
+    function search(form) {
+        db2js.collect(form[0]);
+        table.load();
+    }
+
+    table.load({ _m: 'fetch' });
+</script>
+</html>

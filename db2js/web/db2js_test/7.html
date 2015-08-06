@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Db2js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+    <script src="../jslib/jquery-1.10.2.js"></script>
+    <script src="../jslib/bootstrap-3.3.4/js/bootstrap.min.js"></script>
+
+    <script src="../jslib/db2js/dataset.js"></script>
+    <script src="../jslib/db2js/render.js"></script>
+    <script src="../jslib/db2js/renderers.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
+    <script src="../jslib/db2js/collector.js"></script>
+
+    <script src="../jslib/molecule.js"></script>
+
+
+</head>
+<body>
+    <!-- 可排序的列头，<th table=xxx col=xxx text=xxx [renderer=xxx,默认为 std]></th> -->
+    <table>
+        <tr>
+            <th molecule-def="SortHeader" renderer="std">
+                <a></a>
+                <script id="molecule">
+                    if (typeof SortHeader == 'undefined') {
+                        var SortHeader = function () {
+                            var table = this.container.attr('table') || this.container.closest('table').attr('table');
+                            var col = this.container.attr('col');
+                            var text = this.container.attr('text');
+                            this.container.attr('data-t', 'rows,N,' + col);
+
+                            var a = this.container.find('a');
+                            a.attr('data', '#' + table);
+                            a.attr('renderer', "sortLink('" + col + "','" + text + "')");
+                        }
+                        db2js.Renderers.sortLink = function (colName, text) {
+                            return function (element, table) {
+                                var e = $(element);
+                                e.attr('href', '###');
+                                element.onclick = function () {
+                                    var sort = {};
+                                    var old = table.search._sorts && table.search._sorts[colName];
+                                    if (old == 'asc') {
+                                        sort[colName] = 'desc';
+                                    } else {
+                                        sort[colName] = 'asc';
+                                    }
+                                    table.search._sorts = sort;
+                                    table.load();
+                                };
+                                var icon = null;
+                                var sorts = table.search._sorts || {};
+                                switch (sorts[colName]) {
+                                    case 'asc': icon = 'glyphicon glyphicon-arrow-up'; break;
+                                    case 'desc': icon = 'glyphicon glyphicon-arrow-down'; break;
+                                }
+                                e.html(text + (icon ? '<span class="' + icon + '">' : ''));
+                            }
+                        }
+                    }
+                    Molecule.create(SortHeader, document.currentScript);
+                </script>
+            </th>
+        </tr>
+    </table>
+
+    <!-- 列表，<table table=xxx [paging="true"]></table> -->
+    <table molecule-def="List" class="table table-striped" renderer="table" paging="true">
+        <!-- {INNER_HTML} -->
+        <tfoot>
+            <tr>
+                <td width="100%" colspan="1000">
+                    <nav class="text-center">
+                        <ul class="pagination" data="#author" renderer="pagination" />
+                    </nav>
+                </td>
+            </tr>
+        </tfoot>
+        <script id="molecule">
+            if (typeof List == 'undefined') {
+                var List = function () {
+                    var table = this.container.attr('table');
+                    this.container.attr('data', '#' + table);
+                    var paging = this.container.attr('paging');
+                    if (paging == 'false') {
+                        this.container.find('.pagination').closest('tfoot').remove();
+                    }
+                }
+            }
+            Molecule.create(List, document.currentScript);
+        </script>
+    </table>
+
+    <!-- 表单项，<form col="" text=""></form>， 必须放在 form 里，且 form 已指定 table=xxx -->
+    <div molecule-def="FormItem" class="form-group" renderer="flderr">
+        <label></label>
+        <!-- {INNER_HTML} -->
+        <script id="molecule">
+            if (typeof FormItem == 'undefined') {
+                var FormItem = function () {
+                    var table = this.container.attr('table') || this.container.closest('form').attr('table');
+                    var col = this.container.attr('col');
+                    var text = this.container.attr('text');
+
+                    this.container.attr('data', '#' + table + ',curr,_error,' + col);
+                    this.container.find('label').html(text);
+                }
+            }
+            Molecule.create(FormItem, document.currentScript);
+        </script>
+    </div>
+
+    <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
+    <input molecule-def="Input" type="text" class="form-control" renderer="std" collector="c|s">
+    <script molecule-for="Input" id="molecule">
+        if (typeof Input == 'undefined') {
+            var Input = function () {
+                var table = this.container.closest('form').attr('table');
+                var col = this.container.closest('.form-group').attr('col');
+
+                this.container.attr('data', '#' + table + ',curr,' + col);
+            }
+        }
+        Molecule.create(Input, document.currentScript);
+    </script>
+
+
+    <!-- 对话框 -->
+    <div molecule-def="Dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" title="Title">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>                
+                <div class="modal-body">
+                    <!-- {INNER_HTML} -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+        <script id="molecule">
+            if (typeof Dialog == 'undefined') {
+                var Dialog = function () {
+                    var title = this.container.attr('title');
+                    this.container.find('.modal-title').html(title);
+                    
+                    EventDispatcher.call(this);
+                    this.regEvent(['close', 'submit']);
+                    
+                    var me = this;
+                    this.container.find('.btn-primary').on('click', function(){
+                    	me.fireEvent('submit');
+                    });
+                    
+                    this.container.on('hide.bs.modal', function () {
+                    	me.fireEvent('close');
+                    });
+                }
+            }
+            Molecule.create(Dialog, document.currentScript);
+        </script>
+    </div>
+
+    <div class="container">
+        <h1>表格编辑</h1>
+        <div>
+            <form class="form-inline text-right">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="form-control" placeholder="" data="#author,search,params,name" collector="c|s">
+                </div>
+                <button type="button" class="btn btn-default" onclick="search($(this).parent('form'))">Search</button>
+            </form>
+        </div>
+        <div data="#author,error" renderer="stderr"></div>
+
+        <table molecule="List" table="author">
+            <thead>
+                <tr>
+                    <th molecule="SortHeader" col="id" text="ID"></th>
+                    <th molecule="SortHeader" col="name" text="Name"></th>
+                    <th molecule="SortHeader" col="email" text="Email"></th>
+                    <th data-t="rows,N,id" renderer="editLink"></th>
+                </tr>
+            </thead>
+        </table>
+
+        <div molecule="Dialog">
+            <form table="author">
+                <div molecule="FormItem" col="name" text="Name">
+                    <input type="text" molecule="Input">
+                </div>
+                <div molecule="FormItem" col="email" text="Email">
+                    <input type="email" molecule="Input">
+                </div>
+            </form>
+        </div>
+
+    </div>
+</body>
+<script>
+    db2js.Renderers.editLink = function (element, v, table) {
+        var e = $(element);
+        e.html('');
+        var a = $(document.createElement('a')).appendTo(e);
+        a.html('EDIT');
+        a.attr('href', '###');
+        a.data('id', v);
+        a.on('click', function () {
+            editRow(table.find('id', $(this).data('id')));
+        });
+    }
+
+
+    function editRow(row) {
+        table.curr = row;
+        db2js.render();
+        $('[molecule-obj=Dialog]').modal('show');
+    }
+
+    $(document).ready(function(){
+    	var dialog = Molecule.of($('[molecule-obj=Dialog]'));
+    	dialog.on('close', function () {
+            table.reject();
+            table.clearError();
+            db2js.render();
+        }); 
+    	dialog.on('submit', save);
+    })
+
+    var table = new db2js.DataTable('author', 'test.dbjs', { pageSize: 5 });
+    table.on('load', function (error) {
+        db2js.render(null, this);
+    });
+
+    function save() {
+        db2js.collect();
+
+        table.submit({
+            callback: function (error) {
+                db2js.render();
+                if (!error) {
+                	$('[molecule-obj=Dialog]').modal('hide');
+                    this.reload();
+                }
+            }
+        });
+    }
+
+    function search(form) {
+        db2js.collect(form[0]);
+        table.load();
+    }
+
+
+    table.load({ _m: 'fetch' });
+</script>
+</html>
