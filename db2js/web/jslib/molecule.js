@@ -54,7 +54,8 @@ Molecule.create = function(fun, currentScript){
 	var forSilbling = currentScript.hasAttribute('molecule-for');
 	var container = null;
 	if(forSilbling){
-		container = $(currentScript.previousElementSibling);
+		var c = $('[molecule-script-container=' + currentScript.getAttribute('molecule-script-target') +']');
+		container = c.length ? c : $(currentScript.previousElementSilbling);
 	} else {
 		container = $(currentScript).closest('[molecule-obj]');
 	}
@@ -178,11 +179,19 @@ Molecule.getModuleName = function(fullname){
 	return {module : module, name : name};
 }
 
-Molecule.scanMolecules = function(starter){
+Molecule.init = function(starter){
+	Molecule.scanMolecules(starter, true);	
+}
+
+Molecule.scanMolecules = function(starter, manual){
+	if(starter && starter.jquery){
+		starter = starter[0];
+	}
 	var stk = [starter || document.body];
 	while(stk.length){
 		var ele = stk.pop();
 		if(ele.hasAttribute('molecule')){
+			// if(ele.getAttribute('molecule-init') == 'manual' && !manual) continue;		// 跳过声明为手工创建的元素
 			var ele = createMolecule(ele);
 		}
 		for(var i=ele.children.length-1; i>=0; i--){
@@ -247,9 +256,18 @@ Molecule.scanMolecules = function(starter){
 		if(def.script){
 			var script = document.createElement('script');
 			script.setAttribute('molecule-for', fullname);
+			var t = 'temp';
+			instance.setAttribute('molecule-script-container', t);
+			script.setAttribute('molecule-script-target', t);
 			script.id = 'molecule';
 			script.innerHTML = def.script;
-			instance.parentElement.insertBefore(script, instance.nextSilbling);
+			// if($(script).attr('molecule-for') == 'SearchButton') debugger;
+			if(instance.nextElementSilbling){
+				instance.parentElement.insertBefore(script, instance.nextElementSilbling);
+			} else {
+				instance.parentElement.appendChild(script);
+			}
+			instance.removeAttribute('molecule-script-container');
 		}
 		
 		resetScripts(instance);
@@ -274,30 +292,6 @@ Molecule.scanMolecules = function(starter){
 		}
 	}
 	
-//	function ensureDepends(def){
-//		if(def.depends && def.depends.length){
-//			def.depends.forEach(function(depend){
-//				var md = Molecule.defines[depend];
-//				if(md == null) throw new Error('molecule ' + depend + ' not defined whice depeneded at ' + def.name);
-//				if(!md.appeared){
-//					ensureDepends(md);
-//					init(md);
-//				}
-//			});
-//		}
-//	}
-//	
-//	function init(def){		// 让代码执行一次，相应的函数可得到创建，是否有必要，似乎不一定
-//		var plat = $(document.createElemnt('div'));
-//		plat.appendTo(document.body).hide();
-//		var item = $(document.createElemnt(def.tagName));
-//		item.outerHTML = def.html;
-//		item.appendTo(plat);
-//		resetScripts(plat);
-//		plat.remove();
-//		def.appeared = true;
-//	}
-	
 	function resetScripts(ele){		// 不如此不能让 script 再次运行
 		$(ele).find('script').each(function(idx, script){
 			var p = script.parentElement;
@@ -307,7 +301,7 @@ Molecule.scanMolecules = function(starter){
 				var attr = script.attributes[i].name;
 				copy.setAttribute(attr, script.getAttribute(attr));
 			}
-			var sibling = script.nextSibling;
+			var sibling = script.nextElementSilbling;
 			$(script).remove();
 			
 			if(sibling) {
