@@ -26,42 +26,42 @@
             <th molecule-def="SortHeader" renderer="std">
                 <a></a>
                 <script id="molecule">
-                    if (typeof SortHeader == 'undefined') {
-                        var SortHeader = function () {
-                            var table = this.container.attr('table') || this.container.closest('table').attr('table');
-                            var col = this.container.attr('col');
-                            var text = this.container.attr('text');
-                            this.container.attr('data-t', 'rows,N,' + col);
+                    // MOLECULE_DEF
+                    var SortHeader = function () {
+                        var table = this.container.attr('table') || this.container.closest('table').attr('table');
+                        var col = this.container.attr('col');
+                        var text = this.container.attr('text');
+                        this.container.attr('data-t', 'rows,N,' + col);
 
-                            var a = this.container.find('a');
-                            a.attr('data', '#' + table);
-                            a.attr('renderer', "sortLink('" + col + "','" + text + "')");
-                        }
-                        db2js.Renderers.sortLink = function (colName, text) {
-                            return function (element, table) {
-                                var e = $(element);
-                                e.attr('href', '###');
-                                element.onclick = function () {
-                                    var sort = {};
-                                    var old = table.search._sorts && table.search._sorts[colName];
-                                    if (old == 'asc') {
-                                        sort[colName] = 'desc';
-                                    } else {
-                                        sort[colName] = 'asc';
-                                    }
-                                    table.search._sorts = sort;
-                                    table.load();
-                                };
-                                var icon = null;
-                                var sorts = table.search._sorts || {};
-                                switch (sorts[colName]) {
-                                    case 'asc': icon = 'glyphicon glyphicon-arrow-up'; break;
-                                    case 'desc': icon = 'glyphicon glyphicon-arrow-down'; break;
+                        var a = this.container.find('a');
+                        a.attr('data', '#' + table);
+                        a.attr('renderer', "sortLink('" + col + "','" + text + "')");
+                    }
+                    db2js.Renderers.sortLink = function (colName, text) {
+                        return function (element, table) {
+                            var e = $(element);
+                            e.attr('href', '###');
+                            element.onclick = function () {
+                                var sort = {};
+                                var old = table.search._sorts && table.search._sorts[colName];
+                                if (old == 'asc') {
+                                    sort[colName] = 'desc';
+                                } else {
+                                    sort[colName] = 'asc';
                                 }
-                                e.html(text + (icon ? '<span class="' + icon + '">' : ''));
+                                table.search._sorts = sort;
+                                table.load();
+                            };
+                            var icon = null;
+                            var sorts = table.search._sorts || {};
+                            switch (sorts[colName]) {
+                                case 'asc': icon = 'glyphicon glyphicon-arrow-up'; break;
+                                case 'desc': icon = 'glyphicon glyphicon-arrow-down'; break;
                             }
+                            e.html(text + (icon ? '<span class="' + icon + '">' : ''));
                         }
                     }
+                    // MOLECULE_DEF_END
                     Molecule.create(SortHeader, document.currentScript);
                 </script>
             </th>
@@ -81,16 +81,16 @@
             </tr>
         </tfoot>
         <script id="molecule">
-            if (typeof List == 'undefined') {
-                var List = function () {
-                    var table = this.container.attr('table');
-                    this.container.attr('data', '#' + table);
-                    var paging = this.container.attr('paging');
-                    if (paging == 'false') {
-                        this.container.find('.pagination').closest('tfoot').remove();
-                    }
+            // MOLECULE_DEF
+            function List() {
+                var table = this.container.attr('table');
+                this.container.attr('data', '#' + table);
+                var paging = this.container.attr('paging');
+                if (paging == 'false') {
+                    this.container.find('.pagination').closest('tfoot').remove();
                 }
             }
+            // MOLECULE_DEF_END
             Molecule.create(List, document.currentScript);
         </script>
     </table>
@@ -100,16 +100,16 @@
         <label></label>
         <!-- {INNER_HTML} -->
         <script id="molecule">
-            if (typeof FormItem == 'undefined') {
-                var FormItem = function () {
-                    var table = this.container.attr('table') || this.container.closest('form').attr('table');
-                    var col = this.container.attr('col');
-                    var text = this.container.attr('text');
+            // MOLECULE_DEF
+            function FormItem() {
+                var table = this.container.attr('table') || this.container.closest('form').attr('table');
+                var col = this.container.attr('col');
+                var text = this.container.attr('text');
 
-                    this.container.attr('data', '#' + table + ',curr,_error,' + col);
-                    this.container.find('label').html(text);
-                }
+                this.container.attr('data', '#' + table + ',curr,_error,' + col);
+                this.container.find('label').html(text);
             }
+            // MOLECULE_DEF_END
             Molecule.create(FormItem, document.currentScript);
         </script>
     </div>
@@ -117,14 +117,14 @@
     <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
     <input molecule-def="Input" type="text" class="form-control" renderer="std" collector="c|s">
     <script molecule-for="Input" id="molecule">
-        if (typeof Input == 'undefined') {
-            var Input = function () {
-                var table = this.container.closest('form').attr('table');
-                var col = this.container.closest('.form-group').attr('col');
+        // MOLECULE_DEF
+        function Input() {
+            var table = this.container.closest('form').attr('table');
+            var col = this.container.closest('.form-group').attr('col');
 
-                this.container.attr('data', '#' + table + ',curr,' + col);
-            }
+            this.container.attr('data', '#' + table + ',curr,' + col);
         }
+        // MOLECULE_DEF_END
         Molecule.create(Input, document.currentScript);
     </script>
 
@@ -136,7 +136,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="myModalLabel"></h4>
-                </div>                
+                </div>
                 <div class="modal-body">
                     <!-- {INNER_HTML} -->
                 </div>
@@ -147,24 +147,24 @@
             </div>
         </div>
         <script id="molecule">
-            if (typeof Dialog == 'undefined') {
-                var Dialog = function () {
-                    var title = this.container.attr('title');
-                    this.container.find('.modal-title').html(title);
-                    
-                    EventDispatcher.call(this);
-                    this.regEvent(['close', 'submit']);
-                    
-                    var me = this;
-                    this.container.find('.btn-primary').on('click', function(){
-                    	me.fireEvent('submit');
-                    });
-                    
-                    this.container.on('hide.bs.modal', function () {
-                    	me.fireEvent('close');
-                    });
-                }
+            // MOLECULE_DEF
+            function Dialog() {
+                var title = this.container.attr('title');
+                this.container.find('.modal-title').html(title);
+
+                EventDispatcher.call(this);
+                this.regEvent(['close', 'submit']);
+
+                var me = this;
+                this.container.find('.btn-primary').on('click', function () {
+                    me.fireEvent('submit');
+                });
+
+                this.container.on('hide.bs.modal', function () {
+                    me.fireEvent('close');
+                });
             }
+            // MOLECULE_DEF_END
             Molecule.create(Dialog, document.currentScript);
         </script>
     </div>
@@ -193,7 +193,7 @@
             </thead>
         </table>
 
-        <div molecule="Dialog">
+        <div molecule="Dialog" title="Author">
             <form table="author">
                 <div molecule="FormItem" col="name" text="Name">
                     <input type="text" molecule="Input">
@@ -226,14 +226,14 @@
         $('[molecule-obj=Dialog]').modal('show');
     }
 
-    $(document).ready(function(){
-    	var dialog = Molecule.of($('[molecule-obj=Dialog]'));
-    	dialog.on('close', function () {
+    $(document).ready(function () {
+        var dialog = Molecule.of($('[molecule-obj=Dialog]'));
+        dialog.on('close', function () {
             table.reject();
             table.clearError();
             db2js.render();
-        }); 
-    	dialog.on('submit', save);
+        });
+        dialog.on('submit', save);
     })
 
     var table = new db2js.DataTable('author', 'test.dbjs', { pageSize: 5 });
@@ -248,7 +248,7 @@
             callback: function (error) {
                 db2js.render();
                 if (!error) {
-                	$('[molecule-obj=Dialog]').modal('hide');
+                    $('[molecule-obj=Dialog]').modal('hide');
                     this.reload();
                 }
             }

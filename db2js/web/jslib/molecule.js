@@ -192,7 +192,7 @@ Molecule.scanMolecules = function(starter){
 	
 	function createMolecule(ele){
 		var fullname = ele.getAttribute('molecule');
-		var def = Molecule.definesByFullname[name];
+		var def = Molecule.definesByFullname[fullname];
 		var moduleDesc = Molecule.getModuleName(fullname);
 		var name = moduleDesc.name;
 		var module = moduleDesc.module;
@@ -216,7 +216,7 @@ Molecule.scanMolecules = function(starter){
 		
 		var inner = ele.innerHTML;		// 保留原来的子节点
 		
-		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);
+		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
 		
 		ele.outerHTML = replaceInnerHtml ? def.html.replace('<!-- {INNER_HTML} -->', inner) : def.html;
 		var instance = p.children[pos];
@@ -253,6 +253,12 @@ Molecule.scanMolecules = function(starter){
 		}
 		
 		resetScripts(instance);
+		
+		if(!def.defined){
+			def.html = removeDefineScript(def.html);
+			def.defined = true;
+		}
+		
 		return instance;
 	}
 	
@@ -310,6 +316,30 @@ Molecule.scanMolecules = function(starter){
 				p.appendChild(copy);
 			}
 		});
+	}
+	
+	function removeDefineScript(html){		// 移除以 // MOLECULE_DEF ... // MOLECULE_DEF_END 括号包围的部分
+		if(html.indexOf('MOLECULE_DEF') == -1) return html;
+		
+		//return html.replace(/\/\/(\s*)MOLECULE_DEF(\s*)[\r\n|\r|\n](.|\s)*[\r\n|\r|\n]\s*\/\/\s*MOLECULE_DEF_END/g, '');
+		
+		//var reg = /\/\/\s*MOLECULE_DEF(.|\s)*\/\/\s*MOLECULE_DEF_END/m;
+		//return html.replace(reg, '');		// js 不支持这么复杂的表达式，会死不会报错
+		
+		var reg1 = /\/\/\s*MOLECULE_DEF/, reg2 = /\/\/\s*MOLECULE_DEF_END/;
+		var arr = html.split(/\r\n|\n|\r/g), arr2 = [];
+		for(var i=0; i<arr.length; i++){
+			if(reg1.test(arr[i])){
+				for(i= i+1;i<arr.length; i++){
+					if(reg2.test(arr[i])){
+						i++;
+						break;
+					}
+				}
+			}
+			arr2.push(arr[i]);
+		}
+		return arr2.join('\r\n');
 	}
 	
 	function getIndexInParent(ele, parent){
