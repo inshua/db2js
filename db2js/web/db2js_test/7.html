@@ -28,7 +28,7 @@
                 <script id="molecule">
                     // MOLECULE_DEF
                     var SortHeader = function () {
-                        var table = this.container.attr('table') || this.container.closest('table').attr('table');
+                        var table = this.container.closest('[table]').attr('table');
                         var col = this.container.attr('col');
                         var text = this.container.attr('text');
                         this.container.attr('data-t', 'rows,N,' + col);
@@ -83,7 +83,7 @@
         <script id="molecule">
             // MOLECULE_DEF
             function List() {
-                var table = this.container.attr('table');
+                var table = this.container.closest('[table]').attr('table');
                 this.container.attr('data', '#' + table);
                 var paging = this.container.attr('paging');
                 if (paging == 'false') {
@@ -102,7 +102,7 @@
         <script id="molecule">
             // MOLECULE_DEF
             function FormItem() {
-                var table = this.container.attr('table') || this.container.closest('form').attr('table');
+                var table = this.container.closest('[table]').attr('table');
                 var col = this.container.attr('col');
                 var text = this.container.attr('text');
 
@@ -113,13 +113,31 @@
             Molecule.create(FormItem, document.currentScript);
         </script>
     </div>
+    
+    <!-- 搜索表单项，<form col="" text=""></form>， 必须放在 form 里，且 form 已指定 table=xxx -->
+    <div molecule-def="SearchFormItem" class="form-group">
+        <label></label>
+        <!-- {INNER_HTML} -->
+        <script id="molecule">
+            // MOLECULE_DEF
+            function SearchFormItem() {
+                var table = this.container.closest('[table]').attr('table');
+                var col = this.container.attr('col');
+                var text = this.container.attr('text');
+
+                this.container.find('label').html(text);
+            }
+            // MOLECULE_DEF_END
+            Molecule.create(SearchFormItem, document.currentScript);
+        </script>
+    </div>
 
     <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
     <input molecule-def="Input" type="text" class="form-control" renderer="std" collector="c|s">
     <script molecule-for="Input" id="molecule">
         // MOLECULE_DEF
         function Input() {
-            var table = this.container.closest('form').attr('table');
+            var table = this.container.closest('[table]').attr('table');
             var col = this.container.closest('.form-group').attr('col');
 
             this.container.attr('data', '#' + table + ',curr,' + col);
@@ -127,9 +145,24 @@
         // MOLECULE_DEF_END
         Molecule.create(Input, document.currentScript);
     </script>
+    
+    <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
+    <input molecule-def="SearchInput" type="text" class="form-control" renderer="std" collector="c|s">
+    <script molecule-for="SearchInput" id="molecule">
+        // MOLECULE_DEF
+        function SearchInput() {
+            var table = this.container.closest('[table]').attr('table');
+            var col = this.container.closest('.form-group').attr('col');
+
+            this.container.attr('data', '#' + table + ',search,params,' + col);
+        }
+        // MOLECULE_DEF_END
+        Molecule.create(SearchInput, document.currentScript);
+    </script>
+    
 
 
-    <!-- 对话框 -->
+    <!-- 对话框  <div title="title"> -->
     <div molecule-def="Dialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" title="Title">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -168,21 +201,126 @@
             Molecule.create(Dialog, document.currentScript);
         </script>
     </div>
+    
+    <!-- 搜索按钮, 放在 form 里 -->
+    <button molecule-def="SearchButton" type="button" class="btn btn-default"></button>
+    <script molecule-for="SearchButton" type="text/javascript">
+	    // MOLECULE_DEF
+	    function SearchButton() {
+	        var table = this.container.closest('[table]').attr('table');
+	        var btn = this.container;
+	        btn.on('click', function(){
+	        	db2js.collect(btn.parent('form')[0]);
+	            db2js.dataset[table].load();
+	        });	        
+	    }
+	    // MOLECULE_DEF_END
+	    Molecule.create(SearchButton, document.currentScript);
+    </script>
+    
+    <!-- 增加按钮, 放在 form 里 -->
+    <button molecule-def="AddButton" type="button" class="btn btn-default"></button>
+    <script molecule-for="AddButton" type="text/javascript">
+	    // MOLECULE_DEF
+	    function AddButton() {
+	        var table = this.container.closest('[table]').attr('table');
+	        var btn = this.container;
+	        btn.on('click', function(){
+	        	var tl = $(this).closest('[molecule-obj=TableList]');
+	        	var row = db2js.dataset[table].addRow();
+ 	        	Molecule.of(tl).editRow(row);
+	        });	        
+	    }
+	    // MOLECULE_DEF_END
+	    Molecule.create(AddButton, document.currentScript);
+    </script>
+    
+    <!-- TableList, <table table="" edit-dialog="dialog id"> -->
+     <div molecule-def="TableList" class="container">
+        <script id="molecule">
+            // MOLECULE_DEF
+            db2js.Renderers.editLink = function (element, v, table) {
+         	        var e = $(element);
+         	        e.html('');
+         	        var a = $(document.createElement('a')).appendTo(e);
+         	        a.html('EDIT');
+         	        a.attr('href', '###');
+         	        a.data('id', v);
+         	        a.on('click', function () {
+         	        	var row = table.find('id', $(this).data('id'));
+         	        	var tl = $(this).closest('[molecule-obj=TableList]');
+         	        	Molecule.of(tl).editRow(row);
+         	        });
+         	    };
+         	    
+            function TableList() {
+               	var dialogId = this.container.attr('edit-dialog');
+               	var tname = this.container.closest('[table]').attr('table');
+               	var table = db2js.dataset[tname];
+            	$(document).ready(function () {
+            		if(dialogId == null) return;		// 没有提供编辑数据的对话框
+            		var dialogEle = $('#' + dialogId);
+           	        var dialog = Molecule.of(dialogEle);
+           	        dialog.on('close', function () {
+           	            table.reject();
+           	            table.clearError();
+           	            db2js.render();
+           	        });
+           	        dialog.on('submit', function () {
+           	            db2js.collect();
 
-    <div class="container">
+           	            table.submit({
+           	                callback: function (error) {
+           	                    db2js.render();
+           	                    if (!error) {
+           	                    	dialogEle.modal('hide');
+           	                        this.reload();
+           	                    }
+           	                }
+           	            });
+           	        });
+           	    })
+           	    
+           	    this.editRow = function(row){
+       		        row._table.curr = row;
+       		        db2js.render();
+       		        $('#' + dialogId).modal('show');
+            	}
+            }
+            // MOLECULE_DEF_END
+            Molecule.create(TableList, document.currentScript);
+        </script>
+    </div>
+    
+    <!-- TableError -->
+	<div molecule-def="TableError" renderer="stderr">
+		<script id="molecule">
+            // MOLECULE_DEF
+            function TableError() {
+            	var tname = this.container.closest('[table]').attr('table');
+            	this.container.attr('data', '#' + tname + ',error');
+            }
+            // MOLECULE_DEF_END
+            Molecule.create(TableError, document.currentScript);
+        </script>
+	</div>
+    
+    
+
+    <div molecule="TableList" table="author" edit-dialog="dialog1">
         <h1>表格编辑</h1>
         <div>
             <form class="form-inline text-right">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" placeholder="" data="#author,search,params,name" collector="c|s">
+                <div molecule="SearchFormItem" col="name" text="Name">
+                    <input type="text" molecule="SearchInput">
                 </div>
-                <button type="button" class="btn btn-default" onclick="search($(this).parent('form'))">Search</button>
+                <button molecule="SearchButton">Search</button>
+                <button molecule="AddButton">Add</button>                
             </form>
         </div>
-        <div data="#author,error" renderer="stderr"></div>
+        <div molecule="TableError"></div>
 
-        <table molecule="List" table="author">
+        <table molecule="List">
             <thead>
                 <tr>
                     <th molecule="SortHeader" col="id" text="ID"></th>
@@ -192,74 +330,26 @@
                 </tr>
             </thead>
         </table>
-
-        <div molecule="Dialog" title="Author">
-            <form table="author">
-                <div molecule="FormItem" col="name" text="Name">
-                    <input type="text" molecule="Input">
-                </div>
-                <div molecule="FormItem" col="email" text="Email">
-                    <input type="email" molecule="Input">
-                </div>
-            </form>
-        </div>
-
     </div>
+
+    <div molecule="Dialog" title="Author" id="dialog1" table="author">
+        <form>
+            <div molecule="FormItem" col="name" text="Name">
+                <input type="text" molecule="Input">
+            </div>
+            <div molecule="FormItem" col="email" text="Email">
+                <input type="email" molecule="Input">
+            </div>
+        </form>
+    </div>
+
 </body>
 <script>
-    db2js.Renderers.editLink = function (element, v, table) {
-        var e = $(element);
-        e.html('');
-        var a = $(document.createElement('a')).appendTo(e);
-        a.html('EDIT');
-        a.attr('href', '###');
-        a.data('id', v);
-        a.on('click', function () {
-            editRow(table.find('id', $(this).data('id')));
-        });
-    }
-
-
-    function editRow(row) {
-        table.curr = row;
-        db2js.render();
-        $('[molecule-obj=Dialog]').modal('show');
-    }
-
-    $(document).ready(function () {
-        var dialog = Molecule.of($('[molecule-obj=Dialog]'));
-        dialog.on('close', function () {
-            table.reject();
-            table.clearError();
-            db2js.render();
-        });
-        dialog.on('submit', save);
-    })
 
     var table = new db2js.DataTable('author', 'test.dbjs', { pageSize: 5 });
     table.on('load', function (error) {
         db2js.render(null, this);
     });
-
-    function save() {
-        db2js.collect();
-
-        table.submit({
-            callback: function (error) {
-                db2js.render();
-                if (!error) {
-                    $('[molecule-obj=Dialog]').modal('hide');
-                    this.reload();
-                }
-            }
-        });
-    }
-
-    function search(form) {
-        db2js.collect(form[0]);
-        table.load();
-    }
-
 
     table.load({ _m: 'fetch' });
 </script>

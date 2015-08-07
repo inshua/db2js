@@ -20,20 +20,20 @@
 
 </head>
 <body>
-    <div class="container">
+    <div molecule="TableList" table="author" edit-dialog="dialog1">
         <h1>表格编辑</h1>
         <div>
             <form class="form-inline text-right">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" placeholder="" data="#author,search,params,name" collector="c|s">
+                <div molecule="SearchFormItem" col="name" text="Name">
+                    <input type="text" molecule="SearchInput">
                 </div>
-                <button type="button" class="btn btn-default" onclick="search($(this).parent('form'))">Search</button>
+                <button molecule="SearchButton">Search</button>
+                <button molecule="AddButton">Add</button>                
             </form>
         </div>
-        <div data="#author,error" renderer="stderr"></div>
+        <div molecule="TableError"></div>
 
-        <table molecule="List" table="author">
+        <table molecule="List">
             <thead>
                 <tr>
                     <th molecule="SortHeader" col="id" text="ID"></th>
@@ -43,71 +43,25 @@
                 </tr>
             </thead>
         </table>
+    </div>
 
-        <div molecule="Dialog" title="Author">
-            <form table="author">
-                <div molecule="FormItem" col="name" text="Name">
-                    <input type="text" molecule="Input">
-                </div>
-                <div molecule="FormItem" col="email" text="Email">
-                    <input type="email" molecule="Input">
-                </div>
-            </form>
-        </div>
-
+    <div molecule="Dialog" title="Author" id="dialog1" table="author">
+        <form>
+            <div molecule="FormItem" col="name" text="Name">
+                <input type="text" molecule="Input">
+            </div>
+            <div molecule="FormItem" col="email" text="Email">
+                <input type="email" molecule="Input">
+            </div>
+        </form>
     </div>
 </body>
 <script>
-    db2js.Renderers.editLink = function (element, v, table) {
-        var e = $(element);
-        e.html('');
-        var a = $(document.createElement('a')).appendTo(e);
-        a.html('EDIT');
-        a.attr('href', '###');
-        a.data('id', v);
-        a.on('click', function () {
-            editRow(table.find('id', $(this).data('id')));
-        });
-    }
-
-    function editRow(row) {
-        table.curr = row;
-        db2js.render($('#myModal')[0], table);
-        $('[molecule-obj=Dialog]').modal('show');
-    }
-
-    $(document).ready(function(){
-    	var dialog = Molecule.of($('[molecule-obj=Dialog]'));
-    	dialog.on('close', function () {
-            table.reject();
-            table.clearError();
-            db2js.render();
-        }); 
-    	dialog.on('submit', function(){
-    		db2js.collect();
-
-            table.submit({
-                callback: function (error) {
-                    db2js.render();
-                    if (!error) {
-                    	$('[molecule-obj=Dialog]').modal('hide');
-                        this.reload();
-                    }
-                }
-            });
-    	});
-    })
 
     var table = new db2js.DataTable('author', 'test.dbjs', { pageSize: 5 });
     table.on('load', function (error) {
         db2js.render(null, this);
     });
-
-    function search(form) {
-        db2js.collect(form[0]);
-        table.load();
-    }
-
     table.load({ _m: 'fetch' });
 </script>
 </html>
