@@ -30,8 +30,19 @@ db2js.KNOWN_COLLECT_PIPELINES = {};
 db2js.collect = function(htmlElement, baseData, direct){
 	baseData = baseData || db2js.dataset;
 
-	htmlElement = htmlElement || document.body;
-	var stk = [htmlElement];
+	var stk = [];
+	if(htmlElement) {
+		if(htmlElement.jquery){
+			stk = htmlElement.toArray();
+			if(stk.length == 0){
+				stk = [document.body];
+			}
+		} else {
+			stk = [htmlElement]
+		}
+	} else {
+		stk = [document.body];
+	}
 	while(stk.length){
 		var e = stk.pop();
 		var dataPath = e.getAttribute('data');
