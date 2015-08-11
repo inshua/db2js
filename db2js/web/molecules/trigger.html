@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Trigger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+    <script src="../jslib/jquery-1.10.2.js"></script>
+    <script src="../jslib/bootstrap-3.3.4/js/bootstrap.js"></script>
+
+    <script src="../jslib/db2js/dataset.js"></script>
+    <script src="../jslib/db2js/render.js"></script>
+    <script src="../jslib/db2js/renderers.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
+    <script src="../jslib/db2js/collector.js"></script>
+
+    <script src="../jslib/molecule.js"></script>
+
+
+</head>
+<body>
+
+	<div molecule-def="DropDown" class="input-group">
+        <input type="text" class="form-control">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+            	<!-- {INNER_HTML} -->                    
+            </div>
+        </div>
+        <script id="molecule">
+        	// MOLECULE_DEF
+        	function DropDown() {
+        		this.toggle = function(){
+        			this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
+        		}
+        		this.setText = function(text){
+        			this.container.find('input').value = text;
+        		}
+            }
+        	// MOLECULE_DEF_END
+        	Molecule.create(DropDown, document.currentScript);
+        </script>
+    </div>
+
+	<table><tr>    
+    	<th molecule-def="CheckHeader" renderer="check">
+        	<input type="checkbox" id="ckAll">
+        	<script id="molecule">
+        	// MOLECULE_DEF
+            function CheckHeader() {
+            	var checked = [];
+           	    var checkboxes = [];
+                var col = this.container.attr('col');
+                this.container.attr('data-t', 'rows,N,' + col);
+                
+                this.container.attr('check-all-id', this.id);
+                
+                this.container.find('#ckAll').on('change', function (e) {
+                    checkboxes.forEach(function (ck) {
+                        ck.checked = this.checked;
+                    }, this);
+                    if (!this.checked) {
+                        checked = []
+                    } else {
+                        checkboxes.forEach(function (ck) {
+                            if (ck.checked == true) $(ck).change();
+                        });
+                    }
+                });
+                
+                this.checkboxes = checkboxes;
+                
+                this.checked = function(v){
+                	if(v == null){
+                		return checked;
+                	} else {
+                		//TODO
+                	}
+                }
+            }
+        	
+            db2js.Renderers.check = function (element, v, table) {
+            	var checkAllId = $(element).attr('check-all-id');
+            	var checkAll = $(element).closest('table').find('thead').find('th[check-all-id=' + checkAllId +']');
+            	checkAll = Molecule.of(checkAll);
+            	
+            	var checked = checkAll.checked();
+            	var checkboxes = checkAll.checkboxes;
+            	
+                var e = $(element).html('');
+                var ck = $(document.createElement('input')).attr('type', 'checkbox')
+                		.prop('checked', checked.indexOf(v) != -1)
+                		.appendTo(e);
+                checkboxes.push(ck[0]);
+
+                ck.on('change', function () {
+                    if (this.checked) {
+                        if (checked.indexOf(v) == -1) {
+                            checked.push(v);
+                        }
+                        if (checkboxes.every(function (ck) { return ck.checked })) {
+                            $('#ckAll').prop('checked', true);
+                        }
+                    } else if (checked.indexOf(v) != -1) {
+                        checked.splice(checked.indexOf(v), 1);
+                        if (!checkboxes.every(function (ck) { return ck.checked })) {
+                            $('#ckAll').prop('checked', false);
+                        }
+                    }
+                });
+            }
+         	// MOLECULE_DEF_END
+         	Molecule.create(CheckHeader, document.currentScript);
+        	</script>
+        </th>
+	</tr></table>
+
+    <div class="container">
+        <label>Test</label>
+        <div molecule="DropDown">
+       		<div molecule="TableList" table="author" edit-dialog="dialog1">
+                  <h1>表格编辑</h1>
+                  <div>
+                      <form class="form-inline text-right">
+                          <div molecule="SearchFormItem" col="name" text="Name">
+                              <input type="text" molecule="SearchInput">
+                          </div>
+                          <button molecule="SearchButton">Search</button>
+                          <button molecule="AddButton">Add</button>
+                      </form>
+                  </div>
+                  <div molecule="TableError"></div>
+
+                  <table molecule="List">
+                      <thead>
+                          <tr>
+                              <th molecule="CheckHeader" col="id"></th>
+                              <th molecule="SortHeader" col="id" text="ID"></th>
+                              <th molecule="SortHeader" col="name" text="Name"></th>
+                              <th molecule="SortHeader" col="email" text="Email"></th>
+                              <th data-t="rows,N,id" renderer="testLink"></th>
+                          </tr>
+                      </thead>
+                  </table>
+              </div>
+        </div>
+</body>
+<script>
+
+    db2js.Renderers.testLink = function (element, v, table) {
+        var e = $(element).html('');
+        var a = $(document.createElement('a')).appendTo(e);
+        a.html('CLICK').attr('href', '###').data('id', v).on('click', function () {
+            console.log('u clicked ' + v);
+            Molecule.of($(this).closest('[molecule-obj=DropDown]')).toggle();
+            
+            var checked = Molecule.of($('table>thead>tr>th[molecule-obj=CheckHeader]')).checked()
+            console.log('checked ' + checked); 
+        });
+    };
+
+    var table = new db2js.DataTable('author', '../db2js_test/test.dbjs', { pageSize: 5 });
+    table.on('load', function (error) {
+        db2js.render(null, this);
+    });
+
+    table.load({ _m: 'fetch' });
+
+</script>
+</html>

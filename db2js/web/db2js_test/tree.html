@@ -321,16 +321,19 @@
         </div>
         <div molecule="TableError"></div>
 
-        <table molecule="List">
+        <table class="table table-striped" renderer="tree" data="#author" checkable="true">
             <thead>
                 <tr>
-                    <th molecule="SortHeader" col="id" text="ID"></th>
-                    <th molecule="SortHeader" col="name" text="Name"></th>
-                    <th molecule="SortHeader" col="email" text="Email"></th>
+                	<th renderer="path" data-n="row,name">
+                		<a data="#author" renderer="sortLink('name','Name')" href="###">Name</a>
+	            	</th>
+                    <th renderer="std" col="email" text="Email" molecule-obj="SortHeader" data-t="rows,N,email">
+	                	<a data="#author" renderer="sortLink('email','Email')" href="###">Email</a>
+	            	</th>
                     <th data-t="rows,N,id" renderer="editLink"></th>
                 </tr>
             </thead>
-        </table>
+    	</table>
     </div>
 
     <div molecule="Dialog" title="Author" id="dialog1" table="author">
@@ -347,11 +350,158 @@
 </body>
 <script>
 
+	db2js.Renderers.tree = function(hTable, table){
+		var checkable = hTable.getAttribute('checkable');
+		checkable = (checkable && checkable != 'false');	
+		var tree = table.tree || buildTree(table);
+		
+		function buildTree(table){
+			var roots = table.rows.filter(function(row){
+				return table.find('id', row.parent_id) == null;		// 没有父节点的即是根节点
+			}).map(function (row){return toNode(row, 0)});				
+			
+			function toNode(row, depth, parentNode){
+				var node = {row: row, expanded: true, depth : depth, parent : parentNode};
+				node.children = table.rows
+							.filter(function(crow){return crow.parent_id == row.id})
+							.map(function(crow){return toNode(crow, depth + 1, node)});
+				if(checkable){
+					node.checked = false;		// false | true | undefined
+				}
+				return node;
+			}
+			
+			return table.tree = roots;
+		}
+		
+		
+		var columnRenders = [];
+		var headRow = hTable.tHead.rows[0];
+		for(var i=0; i<headRow.cells.length; i++){
+			var cell = headRow.cells[i];
+			var attrs = {};
+			for(var j=0; j<cell.attributes.length; j++){
+				var attr = cell.attributes[j].name;
+				var v = $(cell).attr(attr);
+				switch(attr){
+				case 'data-t' : attrs['data'] = v; break;
+				default : attrs[attr] = v;
+				} 
+			}
+			columnRenders.push(attrs);
+		}
+		
+		if(hTable.tBodies.length == 0){
+			var tBody = hTable.createTBody();
+		} else {
+			var tBody = hTable.tBodies[0];
+			while(tBody.rows.length){
+				tBody.rows[0].remove();
+			}
+		}
+		
+		var stk = tree.slice(); stk.reverse();
+		while(stk.length){
+			var nd = stk.pop();
+			var idx = nd.row._table.rows.indexOf(nd.row);
+			
+			var tr = tBody.insertRow();
+			columnRenders.forEach(function(column){
+				var cell = document.createElement('td');
+				var isTreeNode = false;
+				for(var attr in column){if(column.hasOwnProperty(attr)){
+					if(attr == 'data'){
+						$(cell).attr('data', hTable.getAttribute('data') + ',' + column.data.replace(/,\s*N\s*,/, ',' + (idx) + ','));
+					} else if(attr == 'data-n'){
+						$(cell).attr('data', column[attr]);
+						isTreeNode = true;
+					} else {
+						$(cell).attr(attr, column[attr]);
+					}
+				}}
+				tr.appendChild(cell);
+				if(isTreeNode) db2js.render(cell, nd, true);
+			});
+			
+			if(nd.expanded){
+				for(var i = nd.children.length-1; i >= 0; i--){
+					stk.push(nd.children[i]);
+				}
+			}
+		}
+	}
+
+	db2js.Renderers.path = function (element, v, node, _1, row) {
+		var path = row.path;
+		var depth = node.depth
+		var s = '';
+		for(var i=0; i<depth; i++) s+= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+		var checkHtml = typeof node.checked != 'undefined' ? '<input type="checkbox">&nbsp;&nbsp;' : '';
+		if(node.children.length == 0){
+			$(element).html(s + checkHtml + v);
+		} else {
+			if(node.expanded){
+				$(element).html(s + '<a class=""><span class="glyphicon glyphicon-menu-down"></span></a>&nbsp;&nbsp;' + checkHtml + v);
+				$(element).find('a').on('click', function(){
+					node.expanded = false;
+					db2js.render(element.closest('table')[0]);
+				})
+			} else {
+				$(element).html(s + '<a class=""><span class="glyphicon glyphicon-menu-right"></span></a>' + checkHtml + v);
+				$(element).find('a').on('click', function(){
+					node.expanded = true;
+					db2js.render(element.closest('table')[0]);
+				})
+			}
+		}
+		if(typeof node.checked != 'undefined')
+			$(element).find('input[type=checkbox]').prop('checked', node.checked);
+		
+		$(element).find('input[type=checkbox]').on('change', function(){
+			var checked = this.checked;
+			var update = false;
+			(function down(node){
+				node.checked = checked; 
+				if(node.children.length) {
+					update = true;
+					node.children.forEach(down);
+				}
+			})(node);
+			(function up(pnode){
+				if(pnode == null) return;
+				if(checked && pnode.children.every(function(c){return c.checked == true})) {
+					update = true;
+					pnode.checked = true;
+					up(pnode.parent)
+				} else if(!checked && pnode.children.every(function(c){return c.checked === false})) {
+					pnode.checked = false;
+					update = true;
+					up(pnode.parent)
+				}
+			})(node.parent);
+			
+			if(update){
+				db2js.render(element.closest('table')[0]);
+			}
+		})
+	};
+
     var table = new db2js.DataTable('author', 'test.dbjs', { pageSize: 5 });
     table.on('load', function (error) {
         db2js.render(null, this);
     });
 
-    table.load({ _m: 'fetch' });
+    $(function(){
+	    table.fill([
+	        {id : 1, name : '东方航空', email : 'dh@xxx.com', parent_id : null},
+	        {id : 2, name : '东方航空华东公司', email : 'dh@xxx.com', parent_id : 1},
+	        {id : 8, name : '空管部', email : 'dh@xxx.com', parent_id : 2},
+	        {id : 3, name : '信息部', email : 'dh@xxx.com', parent_id : 2},
+	        {id : 4, name : '东方航空华北公司', email : 'dh@xxx.com', parent_id : 1},
+	        {id : 5, name : '厦门航空', email : 'dh@xxx.com', },
+	        {id : 6, name : '厦门航空华南公司', email : 'dh@xxx.com', parent_id : 5},
+	        {id : 7, name : '吉祥航空', email : 'dh@xxx.com'},
+	    ], true);
+    });
 </script>
 </html>
