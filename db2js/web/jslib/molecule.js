@@ -71,6 +71,7 @@ Molecule.create = function(fun, currentScript){
 	if(!container.length){
 		throw new Error('container must has molecule-obj attribute');
 	}
+	// console.log('create molecule ' + fun);
 	var id = Molecule.nextId();
 	var p = new Molecule(container);
 	p.id = id;
@@ -82,6 +83,9 @@ Molecule.create = function(fun, currentScript){
 	fun.apply(p, args);
 	var obj = p;
 	Molecule.instances[id] = obj;
+	
+	// console.log('create molecule ' + fun + ' complete');
+	
 	var existed = obj.container.attr('molecule-id');
 	if(existed){
 		obj.container.attr('molecule-id',  existed + ',' + id);
@@ -276,6 +280,9 @@ Molecule.scanMolecules = function(starter, manual){
 			def.html = removeDefineScript(def.html);
 			def.defined = true;
 		}
+		
+		$(ele).trigger('molecue-inited', [instance, fullname]);
+		
 		
 		return instance;
 	}

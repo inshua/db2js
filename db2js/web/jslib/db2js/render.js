@@ -88,7 +88,8 @@ db2js.render = function(htmlElement, baseData, direct){
 					renderer = parr[parr.length -1];
 				} 
 				var fun = extractRenderer(renderer.trim());
-				fun.apply(null, data);
+				fun.apply(null, data);				
+				$(e).trigger('db2js.rendered', data);
 			}
 		}
 		
@@ -123,6 +124,18 @@ db2js.render = function(htmlElement, baseData, direct){
 	}
 }
 
+/**
+ * 按 element 指定的 data 路径定位数据
+ */
+db2js.locateData = function(element, baseData, direct){
+	if(element.jquery) element = element[0];
+	baseData = baseData || db2js.dataset;
+	var dataPath = element.getAttribute('data');
+	var data = [];
+	this.extractData(baseData, dataPath, data, direct);
+	data.splice(0, 0, data[data.length - 1]);		// value 设为第一个值
+	return data;
+}
 
 db2js.extractData = function(baseData, dataPath, output, direct){
 	var arr = dataPath.split(',');
