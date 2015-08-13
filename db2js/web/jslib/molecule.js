@@ -107,7 +107,13 @@ Molecule.of = function(element){
 		return ids.split(',').map(function(id){return Molecule.instances[id]});;
 	} 
 	return Molecule.instances[ids];
-}
+};
+
++(function ( $ ) {
+    $.fn.molecule = function() {
+    	return Molecule.of(this);
+    };
+}( jQuery ));
 
 /**
  * 是否正在测试原型定义页面。测试原型定义页面时，不创建实例，不删除用于定义原型的 HTML 元素。
