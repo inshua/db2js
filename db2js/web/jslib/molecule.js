@@ -365,7 +365,7 @@ while(Array.prototype.defCss == null){		// i dont known why plug this function a
 	* [{$ : 'p', color : 'red', 'font-size' : 'large'}, {$ : 'h1', color : 'blue'}];
 	*/
 	Array.prototype.defCss = function(container){
-		container == container || document.head;
+		container = container || document.head;
 		var styleElement = document.createElement("style");
         styleElement.type = "text/css";
         container.appendChild(styleElement);
