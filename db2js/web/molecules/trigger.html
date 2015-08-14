@@ -17,11 +17,25 @@
 
     <script src="../jslib/molecule.js"></script>
 
+    <script>
+        Molecule.ModulesPath = '/botao/molecules/';
+    </script>
+
+    <style>
+        table.table-selectable > tbody > tr > td {
+            border-top: 0px;
+        }
+
+        table.table-selectable > tbody > tr {
+            cursor: pointer;
+        }
+    </style>
 
 </head>
 <body>
 
-	<div molecule-def="DropDown" class="input-group">
+    <!-- 下拉控件 -->
+    <div molecule-def="DropDown" class="input-group">
         <input type="text" class="form-control">
         <div class="input-group-btn">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -29,126 +43,178 @@
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <div class="dropdown-menu dropdown-menu-right">
-            	<!-- {INNER_HTML} -->                    
+                <!-- {INNER_HTML} -->
             </div>
         </div>
         <script id="molecule">
-        	// MOLECULE_DEF
-        	function DropDown() {
-        		this.toggle = function(){
-        			this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
-        		}
-        		this.setText = function(text){
-        			this.container.find('input').value = text;
-        		}
+            // MOLECULE_DEF
+            function DropDown() {
+                this.toggle = function () {
+                    this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
+                }
+                this.setText = function (text) {
+                    this.container.find('input').value = text;
+                }
             }
-        	// MOLECULE_DEF_END
-        	Molecule.create(DropDown, document.currentScript);
+            // MOLECULE_DEF_END
+            Molecule.create(DropDown, document.currentScript);
         </script>
     </div>
 
-	<table><tr>    
-    	<th molecule-def="CheckHeader" renderer="check">
-        	<input type="checkbox" id="ckAll">
-        	<script id="molecule">
-        	// MOLECULE_DEF
-            function CheckHeader() {
-            	var checked = [];
-           	    var checkboxes = [];
-                var col = this.container.attr('col');
-                this.container.attr('data-t', 'rows,N,' + col);
-                
-                this.container.attr('check-all-id', this.id);
-                
-                this.container.find('#ckAll').on('change', function (e) {
-                    checkboxes.forEach(function (ck) {
-                        ck.checked = this.checked;
-                    }, this);
-                    if (!this.checked) {
-                        checked = []
-                    } else {
-                        checkboxes.forEach(function (ck) {
-                            if (ck.checked == true) $(ck).change();
+    <table>
+        <tr>
+            <!-- 
+            	多选列头  <th col="id"> 
+            -->
+            <th molecule-def="CheckHeader" renderer="check">
+                <input type="checkbox" id="ckAll">
+                <script id="molecule">
+                    // MOLECULE_DEF
+                    function CheckHeader() {
+                        var checked = [];
+                        var checkboxes = [];
+                        var col = this.container.attr('col');
+                        this.container.attr('data-t', 'rows,N,' + col);
+
+                        this.container.attr('check-all-id', this.id);
+                        
+                        var me = this;
+                        this.container.find('#ckAll').on('change', function (e) {
+                            checkboxes.forEach(function (ck) {
+                                ck.checked = this.checked;
+                            }, this);
+                            if (!this.checked) {
+                                checked = []
+                                me.container.trigger('change', [checked]);
+                            } else {
+                                checkboxes.forEach(function (ck) {
+                                    if (ck.checked == true) $(ck).change();
+                                });
+                                me.container.trigger('change', [checked]);
+                            }
+                        });
+
+                        this.checkboxes = checkboxes;
+
+                        this.checked = function (v) {
+                            if (v == null) {
+                                return checked;
+                            } else {
+                                //TODO
+                            }
+                        }
+                    }
+
+                    db2js.Renderers.check = function (element, v, table) {
+                        var checkAllId = $(element).attr('check-all-id');
+                        var checkAll = $(element).closest('table').find('thead').find('th[check-all-id=' + checkAllId + ']').molecule();
+
+                        var checked = checkAll.checked();
+                        var checkboxes = checkAll.checkboxes;
+
+                        var e = $(element).html('');
+                        var ck = $(document.createElement('input')).attr('type', 'checkbox')
+                                .prop('checked', checked.indexOf(v) != -1)
+                                .appendTo(e);
+                        checkboxes.push(ck[0]);
+
+                        ck.on('change', function (event) {
+                            if (this.checked) {
+                                if (checked.indexOf(v) == -1) {
+                                    checked.push(v);
+                                }
+                                if (checkboxes.every(function (ck) { return ck.checked })) {
+                                    $('#ckAll').prop('checked', true);
+                                }
+                                if (event.originalEvent) checkAll.container.trigger('change', [checked]);
+                            } else if (checked.indexOf(v) != -1) {
+                                checked.splice(checked.indexOf(v), 1);
+                                if (!checkboxes.every(function (ck) { return ck.checked })) {
+                                    $('#ckAll').prop('checked', false);
+                                }
+                                if (event.originalEvent) checkAll.container.trigger('change', [checked]);
+                            }
                         });
                     }
-                });
+                    // MOLECULE_DEF_END
+                    Molecule.create(CheckHeader, document.currentScript);
+                </script>
+            </th>
+        </tr>
+    </table>
+
+
+    <!-- 列表。可单选多选。 <table multi-select="true|false" show-header="true|false"><th>...</table> -->
+    <table molecule-def="ListView" molecule="List"  class="table table-hover table-condensed table-selectable" paging="false">
+        <thead>
+            <tr>
+                <!-- {INNER_HTML} -->
+            </tr>
+        </thead>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function ListView() {
                 
-                this.checkboxes = checkboxes;
-                
-                this.checked = function(v){
-                	if(v == null){
-                		return checked;
-                	} else {
-                		//TODO
-                	}
-                }
             }
-        	
-            db2js.Renderers.check = function (element, v, table) {
-            	var checkAllId = $(element).attr('check-all-id');
-            	var checkAll = $(element).closest('table').find('thead').find('th[check-all-id=' + checkAllId +']');
-            	checkAll = Molecule.of(checkAll);
-            	
-            	var checked = checkAll.checked();
-            	var checkboxes = checkAll.checkboxes;
-            	
-                var e = $(element).html('');
-                var ck = $(document.createElement('input')).attr('type', 'checkbox')
-                		.prop('checked', checked.indexOf(v) != -1)
-                		.appendTo(e);
-                checkboxes.push(ck[0]);
+            // MOLECULE_DEF_END
+            jQuery.extend();
+        </script>
+    </table>
 
-                ck.on('change', function () {
-                    if (this.checked) {
-                        if (checked.indexOf(v) == -1) {
-                            checked.push(v);
+    <!-- 下拉单选列表，可展示表格 <div data-value="5" table="author" valueColumn="id" dispColumn="name"><table></table></div> -->
+    <div molecule-def="" molecule="DropDown">
+        <div molecule="TableList" class="contaienr">
+            <div molecule="TableError"></div>
+           
+            <table molecule="List" class="table table-hover table-condensed table-selectable" paging="false">
+                <thead>
+                    <tr>
+                        <th molecule="CheckHeader" col="id"></th>
+                        <th molecule="SortHeader" col="id" text="ID"></th>
+                        <th molecule="SortHeader" col="name" text="Name"></th>
+                        <th molecule="SortHeader" col="email" text="Email"></th>
+                    </tr>
+                </thead>
+            </table>
+            <script>
+                $('.table-selectable').on('molecue-inited', function (event, newEle) {
+                    $(newEle).on('db2js.rendered', function f(event) {
+                        if ($(event.target).is('.table-selectable')) {
+                            var dropdown = $(newEle).closest('[molecule-obj=DropDown]');
+                            var table = db2js.dataset[dropdown.find('[table]').attr('table')];
+                            var valueColumn = $(newEle).closest('[valueColumn]').attr('valueColumn');
+                            var dispColumn = $(newEle).closest('[dispColumn]').attr('dispColumn');
+                            var row = table.find(valueColumn, JSON.parse(dropdown.data('value')));
+                            var tx = dropdown.find('input');
+                            tx.val(row[dispColumn]);
+
+                            $('.table-selectable>tbody>tr>td').each(function (idx, td) {
+                                if ($(td).is('[molecule-obj=CheckHeader]')) return;
+                                $(td).bind('click', function () {
+                                    var me = $(this);
+                                    var valueColumn = me.closest('[valueColumn]').attr('valueColumn');
+                                    var dispColumn = me.closest('[dispColumn]').attr('dispColumn');
+                                    var dropdown = me.closest('[molecule-obj=DropDown]');
+                                    var tx = dropdown.find('input');
+                                    var data = db2js.locateData(td);
+                                    var row = data[data.length - 3];
+                                    tx.val(row[dispColumn]);
+                                    dropdown.molecule().toggle();
+                                    dropdown.data('value', JSON.stringify(row[valueColumn]));
+                                });
+                            });
                         }
-                        if (checkboxes.every(function (ck) { return ck.checked })) {
-                            $('#ckAll').prop('checked', true);
-                        }
-                    } else if (checked.indexOf(v) != -1) {
-                        checked.splice(checked.indexOf(v), 1);
-                        if (!checkboxes.every(function (ck) { return ck.checked })) {
-                            $('#ckAll').prop('checked', false);
-                        }
-                    }
+
+                    });
                 });
-            }
-         	// MOLECULE_DEF_END
-         	Molecule.create(CheckHeader, document.currentScript);
-        	</script>
-        </th>
-	</tr></table>
-
-    <div class="container">
-        <label>Test</label>
-        <div molecule="DropDown">
-       		<div molecule="TableList" table="author" edit-dialog="dialog1">
-                  <h1>表格编辑</h1>
-                  <div>
-                      <form class="form-inline text-right">
-                          <div molecule="SearchFormItem" col="name" text="Name">
-                              <input type="text" molecule="SearchInput">
-                          </div>
-                          <button molecule="SearchButton">Search</button>
-                          <button molecule="AddButton">Add</button>
-                      </form>
-                  </div>
-                  <div molecule="TableError"></div>
-
-                  <table molecule="List">
-                      <thead>
-                          <tr>
-                              <th molecule="CheckHeader" col="id"></th>
-                              <th molecule="SortHeader" col="id" text="ID"></th>
-                              <th molecule="SortHeader" col="name" text="Name"></th>
-                              <th molecule="SortHeader" col="email" text="Email"></th>
-                              <th data-t="rows,N,id" renderer="testLink"></th>
-                          </tr>
-                      </thead>
-                  </table>
-              </div>
+            </script>
         </div>
+
+        <div class="container">
+            <label>Test</label>
+
+        </div>
+
 </body>
 <script>
 
@@ -158,9 +224,9 @@
         a.html('CLICK').attr('href', '###').data('id', v).on('click', function () {
             console.log('u clicked ' + v);
             Molecule.of($(this).closest('[molecule-obj=DropDown]')).toggle();
-            
+
             var checked = Molecule.of($('table>thead>tr>th[molecule-obj=CheckHeader]')).checked()
-            console.log('checked ' + checked); 
+            console.log('checked ' + checked);
         });
     };
 
@@ -169,7 +235,18 @@
         db2js.render(null, this);
     });
 
-    table.load({ _m: 'fetch' });
+    $(function () {
+        table.fill([
+	        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
+	        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },
+	        { id: 8, name: '空管部', email: 'dh@xxx.com', parent_id: 2 },
+	        { id: 3, name: '信息部', email: 'dh@xxx.com', parent_id: 2 },
+	        { id: 4, name: '东方航空华北公司', email: 'dh@xxx.com', parent_id: 1 },
+	        { id: 5, name: '厦门航空', email: 'dh@xxx.com', },
+	        { id: 6, name: '厦门航空华南公司', email: 'dh@xxx.com', parent_id: 5 },
+	        { id: 7, name: '吉祥航空', email: 'dh@xxx.com' },
+        ], true);
+    });
 
 </script>
 </html>

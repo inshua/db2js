@@ -159,7 +159,7 @@ Molecule.loadModule = function(module){
 	var result = false;
 	$.ajax({
 		url : Molecule.ModulesPath + '/' + module + '.json',
-		async : false, type : 'get',
+		async : false, type : 'get', cache : false,
 		complete : function(resp, status){
 			if(status == 'success'){
 				resp = resp.responseJSON;

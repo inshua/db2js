@@ -155,3 +155,15 @@ db2js.Collectors.Pipelines.d = db2js.KNOWN_COLLECT_PIPELINES['d'] = function(ele
 }
 
 
+/**
+ * 对支持 setValue/getValue 的 molecule 收集 
+ * 用法: colector="m|s"
+ */
+db2js.Collectors.Pipelines.m = db2js.KNOWN_COLLECT_PIPELINES['m'] = function(element, value, table, _1, rows, index, row, columnName){
+	var m = Molecule.of(element);
+	if(m == null || !m.getValue){
+		return;
+	} else {
+		return m.getValue();
+	}
+}

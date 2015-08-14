@@ -175,7 +175,7 @@ db2js.Renderers.table = db2js.KNOWN_RENDERERS['table'] = function(hTable,  value
 		}
 		columnRenders.push(attrs);
 	}
-	
+
 	if(hTable.tBodies.length == 0){
 		var tBody = hTable.createTBody();
 	} else {
@@ -186,6 +186,7 @@ db2js.Renderers.table = db2js.KNOWN_RENDERERS['table'] = function(hTable,  value
 	}
 	for(var i=0; i<table.rows.length; i++){
 		var tr = tBody.insertRow();
+		tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + i));
 		columnRenders.forEach(function(column){
 			var cell = document.createElement('td');
 			for(var attr in column){if(column.hasOwnProperty(attr)){
@@ -394,4 +395,20 @@ db2js.Renderers.flderr = db2js.KNOWN_RENDERERS['flderr'] = function(element,  va
 	}
 }
 
-
+/**
+ * 对支持 setValue/getValue 的 molecule 渲染
+ */
+db2js.Renderers.molecule = db2js.KNOWN_RENDERERS['molecule'] = function(element, value, table, _1, rows, index, row, columnName){
+	var m = Molecule.of(element);
+	if(m != null){
+		if(m.setValue){
+			m.setValue(value);
+		}
+	} else if(element.hasAttribute('molecule')){	// 还不是 molecule-obj
+		$(element).on('molecule-init', function a(){
+			$(element).off('molecule-init', a);
+			var m = Molecule.of(element);
+			m.setValue && m.setValue(value);
+		})
+	}
+}
