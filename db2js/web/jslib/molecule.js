@@ -72,26 +72,25 @@ Molecule.create = function(fun, currentScript){
 		throw new Error('container must has molecule-obj attribute');
 	}
 	// console.log('create molecule ' + fun);
-	var id = Molecule.nextId();
-	var p = new Molecule(container);
-	p.id = id;
-		
+	var existed = container.attr('molecule-id');
+	var obj = null;
+	if(!existed){
+		var id = Molecule.nextId(); 
+		obj = new Molecule(container);
+		obj.id = id;
+		Molecule.instances[id] = obj;
+		container.attr('molecule-id', id); 
+	} else {
+		obj = Molecule.instances[existed * 1]
+	}
+	
 	//fun.prototype = p;
 	var args = [];
 	for(var i=2; i<arguments.length; i++) args.push(arguments[i]);
 	//var obj = new (Function.prototype.bind.apply(fun, args));
-	fun.apply(p, args);
-	var obj = p;
-	Molecule.instances[id] = obj;
+	fun.apply(obj, args);
 	
 	// console.log('create molecule ' + fun + ' complete');
-	
-	var existed = obj.container.attr('molecule-id');
-	if(existed){
-		obj.container.attr('molecule-id',  existed + ',' + id);
-	} else {
-		obj.container.attr('molecule-id',  id);
-	}
 	
 	if(container.attr('molecule-obj')){
 		var fullname = container.attr('molecule-obj');
@@ -274,7 +273,6 @@ Molecule.scanMolecules = function(starter, manual){
 		
 		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
 		
-		$(ele).trigger('molecule-will-init')
 		ele.outerHTML = replaceInnerHtml ? def.html.replace('<!-- {INNER_HTML} -->', inner) : def.html;
 		var instance = p.children[pos];
 		var inherited = (instance.hasAttribute('molecule') && instance.getAttribute('molecule') != fullname); // 继承自另一 molecule
@@ -290,7 +288,12 @@ Molecule.scanMolecules = function(starter, manual){
 			}
 			instance.setAttribute(attr, v);
 		}
-		instance.setAttribute('molecule-obj', fullname);
+		// if(fullname == 'YellowBlock') debugger;	
+		if(ele.hasAttribute('molecule-obj') == false){
+			instance.setAttribute('molecule-obj', fullname);
+		} else {
+			instance.setAttribute('molecule-obj', ele.getAttribute('molecule-obj'));
+		}
 		if(inherited){
 			instance = createMolecule(instance);
 		} else {
