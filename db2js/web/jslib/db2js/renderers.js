@@ -186,7 +186,9 @@ db2js.Renderers.table = db2js.KNOWN_RENDERERS['table'] = function(hTable,  value
 	}
 	for(var i=0; i<table.rows.length; i++){
 		var tr = tBody.insertRow();
-		tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + i));
+		if(headRow.hasAttribute('data')){
+			tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + i));
+		}
 		columnRenders.forEach(function(column){
 			var cell = document.createElement('td');
 			for(var attr in column){if(column.hasOwnProperty(attr)){
