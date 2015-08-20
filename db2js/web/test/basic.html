@@ -156,9 +156,9 @@
 
     <!-- 列表
     		<table table=xxx [paging="true"] select="none|single|multi" show-header="true|false"></table>
-    	当启用 select应设置 valueColumn="id"，之后可使用 $(table).data('value') 设置和获取选中的值，当为 multi 模式时，值为数组    	 
+    	当启用 select应设置 value-col="id"，之后可使用 $(table).data('value') 设置和获取选中的值，当为 multi 模式时，值为数组    	 
     -->
-    <table molecule-def="List" class="table table-striped" renderer="table" paging="true" valueColumn="id">
+    <table molecule-def="List" class="table table-striped" renderer="table" paging="true" value-col="id">
         <!-- {INNER_HTML} -->
         <tfoot>
             <tr>
@@ -177,19 +177,19 @@
     		].defCss();
             function List() {
                 var table = this.container.closest('[table]').attr('table');
-                var valueColumn = this.container.closest('[valueColumn]').attr('valueColumn')
+                var valueColumn = this.container.closest('[value-col]').attr('value-col')
                 this.container.attr('data', '#' + table);
-                var paging = this.container.attr('paging');
+                var paging = this.container.closest('[paging]').attr('paging');
                 if (paging == 'false') {
                     this.container.find('.pagination').closest('tfoot').remove();
                 }
-                if(this.container.attr('show-header') == 'false'){
+                if(this.container.closest('[show-header]').attr('show-header') == 'false'){
                 	this.container.find('thead').hide();
                 }
                 this.container.find('thead>tr').attr('data', "rows,N");
                 
 				var me = this;
-                var select = this.container.attr('select') || 'none';
+                var select = this.container.closest('[select]').attr('select') || 'none';
                 switch(select){
                 case 'none' : ;
                 	break;
@@ -213,15 +213,18 @@
 	                                    me.container.data('value', value);
 	                                    $(tr).addClass('info');
 	                                    me.container.data('prev_selected_tr', tr);
-	                                    me.container.trigger('list.select', [value, row]);
+	                                    me.container.trigger('valuechange', [value, row]);
                                     }
                                 });
                             });
                         }
                     });
                 	this.setValue = function(value){
-                		me.container.data('value', value);
-                		db2js.render(me.container);
+                		if(value != this.getValue()){
+	                		me.container.data('value', value);
+	                		db2js.render(me.container);
+	                		this.container.trigger('valuechange', [value]);
+                		}
                 	}
                 	this.getValue = function(){
                 		return me.container.data('value');
@@ -230,20 +233,23 @@
                 case 'multi' :
 	                this.container[0].className = 'table table-hover table-condensed table-selectable';
 	                var checkAll = $(document.createElement('th')).attr('molecule', 'CheckHeader');
-	                checkAll.attr('col', this.container.attr('valueColumn'));
+	                checkAll.attr('col', this.container.attr('value-col'));
 	                var tr = this.container.find('thead>tr');
 	                checkAll.insertBefore(tr.children()[0]);
 	                
 	                $(this.container).on('valuechange', function(evt, checked){
-	                	me.container.find('tbody>tr').each(function(idx, tr){
-	                		var row = db2js.locateData(tr)[0];
-                            var value = row[valueColumn];
-                            if(checked.indexOf(value) != -1){
-                            	$(tr).addClass('info')
-                            } else {
-                            	$(tr).removeClass('info')
-                            }
-	                	});
+	                	if(evt.target != me.container[0]){
+		                	me.container.find('tbody>tr').each(function(idx, tr){
+		                		var row = db2js.locateData(tr)[0];
+	                            var value = row[valueColumn];
+	                            if(checked.indexOf(value) != -1){
+	                            	$(tr).addClass('info')
+	                            } else {
+	                            	$(tr).removeClass('info')
+	                            }
+		                	});
+		                	me.container.trigger('valuechange', [checked]);
+	                	}
 	                });
 	                
 	                this.container.on('db2js.rendered', function f(event) {
@@ -263,8 +269,9 @@
 	                });
 	                
 	                this.setValue = function(value){
-	                	me.container.find('thead>tr>th[molecule-obj=CheckHeader]').molecule().checked(value);
-	                	$(this.container).trigger('valuechange', [value])
+	                	var ck = me.container.find('thead>tr>th[molecule-obj=CheckHeader]');
+	                	ck.molecule().checked(value);
+	                	ck.trigger('valuechange', [value])
                 	}
                 	this.getValue = function(){
                 		return me.container.find('thead>tr>th[molecule-obj=CheckHeader]').molecule().checked();
@@ -274,6 +281,7 @@
                 }                
             }
             // MOLECULE_DEF_END
+            console.log('init List');
             Molecule.create(List, document.currentScript);
         </script>
     </table>

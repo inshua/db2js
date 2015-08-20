@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Trigger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+    <script src="../jslib/jquery-1.10.2.js"></script>
+    <script src="../jslib/bootstrap-3.3.4/js/bootstrap.js"></script>
+
+    <script src="../jslib/db2js/dataset.js"></script>
+    <script src="../jslib/db2js/render.js"></script>
+    <script src="../jslib/db2js/renderers.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
+    <script src="../jslib/db2js/collector.js"></script>
+
+    <script src="../jslib/molecule.js"></script>
+
+    <script>
+        Molecule.ModulesPath = '/db2js/molecules/';
+        Molecule.loadHtml('test/basic.html');
+        Molecule.loadHtml('test/tree.html');
+    </script>
+
+    <style>
+        table.table-selectable > tbody > tr > td {
+            border-top: 0px;
+        }
+
+        table.table-selectable > tbody > tr {
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- 下拉控件 -->
+    <div molecule-def="DropDown" class="input-group">
+        <input type="text" class="form-control">
+        <div class="input-group-btn">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <!-- {INNER_HTML} -->
+            </div>
+        </div>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function DropDown() {
+            	this.isDropDown = true;
+                this.toggle = function () {
+                    this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
+                }
+                this.setText = function (text) {
+                    this.container.find('input').val(text);
+                }
+            }
+            // MOLECULE_DEF_END
+            console.log('------ init DropDown');
+            Molecule.create(DropDown, document.currentScript);
+        </script>
+    </div>
+
+    <!-- 下拉列表
+    	<div data-value="5" table="author" value-col="id" display-col=""></div> 
+    -->
+    <div molecule-def="DropDownList" molecule="DropDown" select="single">
+        <div molecule="TableList" class="contaienr">
+            <div molecule="TableError"></div>
+           
+            <table molecule="List">
+                <thead>
+                    <tr>
+                        <!-- {INNER_HTML} -->
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function DropDownList() {
+            	this.isDropDownList = true;
+            	var me = this;
+            	this.container.on('valuechange',function(event, value){
+            		var t = $(event.target);
+            		if(t.is('[molecule-obj=List]')){
+            			var table = db2js.locateData(t)[0];
+            			var dispCol = t.closest('[display-col]').attr('display-col');
+            			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
+            			var select = t.closest('[select]').attr('select');
+            			if(select == 'multi'){
+            				me.setText(value.map(function(v){return table.find(valueCol, v)[dispCol]}).join(', '));	
+            			} else {
+            				me.setText(table.find(valueCol, value)[dispCol]);
+            				if(me.container.find('.input-group-btn').is('.open')){
+                				me.toggle();
+            				}
+            			}
+            		}
+                });
+            	this.setValue = function(value){this.container.find('[molecule-obj=List]').molecule().setValue(value);}
+            	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
+            }
+            // MOLECULE_DEF_END
+            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDown]');            
+            if(c.length && c.molecule()){
+            	DropDownList.call(c.molecule());
+            }
+        </script>
+    </div>
+    
+    
+    <!-- 下拉列表
+    	<div data-value="5" table="author" value-col="id" display-col=""></div> 
+    -->
+    <div molecule-def="DropDownTree" molecule="DropDown" select="single">
+        <div molecule="TableList" class="contaienr">
+            <div molecule="TableError"></div>
+           
+            <table molecule="Tree">
+                <thead>
+                    <tr>
+                        <!-- {INNER_HTML} -->
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function DropDownTree() {
+            	this.isDropDownTree = true;
+            	var me = this;
+            	this.container.on('valuechange',function(event, value){
+            		var t = $(event.target);
+            		if(t.is('[molecule-obj=Tree]')){
+            			var table = db2js.locateData(t)[0];
+            			var dispCol = t.closest('[display-col]').attr('display-col');
+            			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
+            			var select = t.closest('[select]').attr('select');
+            			if(select == 'multi'){
+            				me.setText(value.map(function(v){return table.find(valueCol, v)[dispCol]}).join(', '));	
+            			} else {
+            				me.setText(table.find(valueCol, value)[dispCol]);
+            				if(me.container.find('.input-group-btn').is('.open')){
+                				me.toggle();
+            				}
+            			}
+            		}
+                });
+            	this.setValue = function(value){
+            		if(JSON.stringify(value) != JSON.stringify(this.getValue())){
+	            		var t = this.container.find('[molecule-obj=Tree]');
+	            		t.molecule().setValue(value);
+	            		t.trigger('valuechange', [value]);
+            		}
+            	}
+            	this.getValue = function(value){return this.container.find('[molecule-obj=Tree]').molecule().getValue();}
+            }
+            // MOLECULE_DEF_END
+            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDown]');            
+            if(c.length && c.molecule()){
+            	DropDownTree.call(c.molecule());
+            }
+        </script>
+    </div>
+
+
+    <div class="container">
+          <label>Test</label>
+		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false">
+		  		<m:th molecule="SortHeader" col="id" text="ID"></m:th>
+		        <m:th molecule="SortHeader" col="name" text="Name"></m:th>
+		        <m:th molecule="SortHeader" col="email" text="Email"></m:th>
+		  </div>
+		  
+		  
+		  <label>Test</label>
+		  <div molecule="DropDownTree" table="author" value-col="id" display-col="name" parent-col="parent_id" select="multi" show-header="true">
+				<m:th molecule="TreeNode" col="name" text="Name"></m:th>		  
+		  		<m:th molecule="SortHeader" col="id" text="ID"></m:th>
+		        <m:th molecule="SortHeader" col="name" text="Name"></m:th>
+		        <m:th molecule="SortHeader" col="email" text="Email"></m:th>
+		  </div>
+		  
+    </div> 
+
+</body>
+<script>
+
+    db2js.Renderers.testLink = function (element, v, table) {
+        var e = $(element).html('');
+        var a = $(document.createElement('a')).appendTo(e);
+        a.html('CLICK').attr('href', '###').data('id', v).on('click', function () {
+            console.log('u clicked ' + v);
+            Molecule.of($(this).closest('[molecule-obj=DropDown]')).toggle();
+
+            var checked = Molecule.of($('table>thead>tr>th[molecule-obj=CheckHeader]')).checked()
+            console.log('checked ' + checked);
+        });
+    };
+
+    var table = new db2js.DataTable('author', '../db2js_test/test.dbjs', { pageSize: 5 });
+    table.on('load', function (error) {
+        db2js.render(null, this);
+    });
+
+    $(function () {
+        table.fill([
+	        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
+	        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },
+	        { id: 8, name: '空管部', email: 'dh@xxx.com', parent_id: 2 },
+	        { id: 3, name: '信息部', email: 'dh@xxx.com', parent_id: 2 },
+	        { id: 4, name: '东方航空华北公司', email: 'dh@xxx.com', parent_id: 1 },
+	        { id: 5, name: '厦门航空', email: 'dh@xxx.com', },
+	        { id: 6, name: '厦门航空华南公司', email: 'dh@xxx.com', parent_id: 5 },
+	        { id: 7, name: '吉祥航空', email: 'dh@xxx.com' },
+        ], true);
+    });
+
+</script>
+</html>
