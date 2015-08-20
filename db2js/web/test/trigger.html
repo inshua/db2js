@@ -60,7 +60,6 @@
                 }
             }
             // MOLECULE_DEF_END
-            console.log('------ init DropDown');
             Molecule.create(DropDown, document.currentScript);
         </script>
     </div>
@@ -106,7 +105,7 @@
             	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
             }
             // MOLECULE_DEF_END
-            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDown]');            
+            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownList]');            
             if(c.length && c.molecule()){
             	DropDownList.call(c.molecule());
             }
@@ -161,7 +160,7 @@
             	this.getValue = function(value){return this.container.find('[molecule-obj=Tree]').molecule().getValue();}
             }
             // MOLECULE_DEF_END
-            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDown]');            
+            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownTree]');            
             if(c.length && c.molecule()){
             	DropDownTree.call(c.molecule());
             }
