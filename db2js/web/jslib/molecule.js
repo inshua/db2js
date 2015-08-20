@@ -92,16 +92,7 @@ Molecule.create = function(fun, currentScript){
 	
 	// console.log('create molecule ' + fun + ' complete');
 	
-	if(container.attr('molecule-obj')){
-		var fullname = container.attr('molecule-obj');
-		var desc = Molecule.getModuleName(fullname);
-		var def = Molecule.defines[desc.module][desc.name];
-		if(def.defined){
-			$(currentScript).remove();		// remove define script
-		} else {
-			currentScript.removeAttribute('id');
-		}
-	}
+	$(currentScript).remove();
 	
 	return obj;
 }
