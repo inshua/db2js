@@ -94,7 +94,14 @@ Molecule.create = function(fun, currentScript){
 	}
 	
 	if(container.attr('molecule-obj')){
-		$(currentScript).remove();		// remove define script
+		var fullname = container.attr('molecule-obj');
+		var desc = Molecule.getModuleName(fullname);
+		var def = Molecule.defines[desc.module][desc.name];
+		if(def.defined){
+			$(currentScript).remove();		// remove define script
+		} else {
+			currentScript.removeAttribute('id');
+		}
 	}
 	
 	return obj;
@@ -163,15 +170,42 @@ Molecule.loadModule = function(module){
 		complete : function(resp, status){
 			if(status == 'success'){
 				resp = resp.responseJSON;
+				var m = Molecule.defines[module];
+				if(m == null){
+					m = Molecule.defines[module] = {};
+				}
 				for(var k in resp){ if(resp.hasOwnProperty(k)){
+					Molecule.definesByFullname[module + '.' + k] = m[k] = resp[k];
+				}};
+				Molecule.loadedModules[module] = true;
+				result = true;
+			}
+		}
+	});
+	return result;
+}
+
+Molecule.loadHtml = function(html){
+	var result = false;
+	$.ajax({
+		url : Molecule.ModulesPath + '/extract.jssp',		
+		data : {html : html}, processData: true,
+		method : 'post',
+		async : false, cache : false,
+		complete : function(resp, status){
+			if(status == 'success'){
+				resp = resp.responseJSON;
+				for(var module in resp){ if(resp.hasOwnProperty(module)){
 					var m = Molecule.defines[module];
 					if(m == null){
 						m = Molecule.defines[module] = {};
 					}
-					
-					Molecule.definesByFullname[module + '.' + k] = m[k] = resp[k];
-				}};
-				Molecule.loadedModules[module] = true;
+					var defs = resp[module];
+					for(var name in defs){ if(defs.hasOwnProperty(name)){						
+						Molecule.definesByFullname[module + '.' + name] = m[name] = defs[name];	
+					}}
+					Molecule.loadedModules[module] = true;					
+				}};				
 				result = true;
 			}
 		}
@@ -233,10 +267,14 @@ Molecule.scanMolecules = function(starter, manual){
 		var p = ele.parentElement;
 		var pos = getIndexInParent(ele, p);
 		
+		// if(name == 'List') debugger;
+		
 		var inner = ele.innerHTML;		// 保留原来的子节点
+		inner = inner.replace(/m\:/g, '');		// 遇到 <m:th> 之类替换为 <th>		
 		
 		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
 		
+		$(ele).trigger('molecule-will-init')
 		ele.outerHTML = replaceInnerHtml ? def.html.replace('<!-- {INNER_HTML} -->', inner) : def.html;
 		var instance = p.children[pos];
 		var inherited = (instance.hasAttribute('molecule') && instance.getAttribute('molecule') != fullname); // 继承自另一 molecule
@@ -287,8 +325,10 @@ Molecule.scanMolecules = function(starter, manual){
 			def.defined = true;
 		}
 		
-		$(ele).trigger('molecue-inited', [instance, fullname]);
-		
+		// console.log(fullname + ' inited')
+		// console.log(ele);
+		$(ele).trigger('molecule-inited', [instance, fullname]);
+		$(instance).trigger('molecule-inited', [instance, fullname]);
 		
 		return instance;
 	}
