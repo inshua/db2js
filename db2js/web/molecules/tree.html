@@ -96,15 +96,17 @@
                 		} else {
                 			if(node.expanded){
                 				$(element).html(s + '<a class=""><span class="glyphicon glyphicon-menu-down"></span></a>&nbsp;&nbsp;' + checkHtml + v);
-                				$(element).find('a').on('click', function(){
+                				$(element).find('a').on('click', function(event){
                 					node.expanded = false;
-                					db2js.render(element.closest('table')[0]);
+                					db2js.render(element.closest('table')[0]);                					
+                					event.stopPropagation();
                 				})
                 			} else {
                 				$(element).html(s + '<a class=""><span class="glyphicon glyphicon-menu-right"></span></a>' + checkHtml + v);
                 				$(element).find('a').on('click', function(){
                 					node.expanded = true;
                 					db2js.render(element.closest('table')[0]);
+                					event.stopPropagation();
                 				})
                 			}
                 		}
@@ -127,16 +129,18 @@
                 					update = true;
                 					pnode.checked = true;
                 					up(pnode.parent)
-                				} else if(!checked && pnode.children.every(function(c){return c.checked === false})) {
+                				} else if(!checked && pnode.children.some(function(c){return c.checked === false})) {
                 					pnode.checked = false;
                 					update = true;
                 					up(pnode.parent)
                 				}
                 			})(node.parent);
                 			
+                			var t = $(element).closest('table');
                 			if(update){
                 				db2js.render(element.closest('table')[0]);
                 			}
+                			t.trigger('checkchange');
                 		})
                 	};
                     // MOLECULE_DEF_END
@@ -147,7 +151,14 @@
         </tr>
     </table>
     
-    <!-- 树，<table table=xxx [paging="true"] [checkable="false"]></table> -->
+    <!-- 树，
+    	<table table=xxx [paging="true"] [checkable="false"] [id-col="id"] [parent-col="parent_id"] [value-col="id"] [select="none|single|multi"] [show-header="true|false"]></table>
+    	checkable 是否支持复选
+    	id-col id 字段名
+    	parent-col parent_id 字段名，反身关联 
+    	select 选择模式
+    	show-header 是否显示表头
+    -->
     <table molecule-def="Tree" class="table table-striped" renderer="tree" paging="true" checkable="false">
         <!-- {INNER_HTML} -->
         <tfoot>
@@ -161,6 +172,10 @@
         </tfoot>
         <script id="molecule">
             // MOLECULE_DEF
+            [
+    		 {$ : 'table.table-selectable > tbody > tr > td', 'border-top': '0px'}, 
+    		 {$ : 'table.table-selectable > tbody > tr', cursor : 'pointer'}
+    		].defCss();
             function Tree() {
                 var table = this.container.closest('[table]').attr('table');
                 this.container.attr('data', '#' + table);
@@ -170,25 +185,125 @@
                 } else {
                 	this.container.find('.pagination').attr('data', '#' + table);
                 }
+                this.container.find('thead>tr').attr('data', "rows,N");
+                
+                var idColumn = this.container.closest('[id-col]').attr('id-col') || 'id';
+        		var valueColumn = this.container.closest('[value-col]').attr('value-col') || idColumn;
+        		
+                if(this.container.closest('[show-header]').attr('show-header') == 'false'){
+                	this.container.find('thead').hide();
+                }
+
+                var me = this;
+                var select = this.container.closest('[select]').attr('select') || 'none';
+                switch(select){
+                case 'none' : ;
+                	break;
+                case 'single' : 
+                case 'multi' :
+	                this.container[0].className = 'table table-hover table-condensed table-selectable';
+	                this.container.attr('checkable', (select == 'multi') + '');
+	                if(select == 'multi'){
+		                this.container.on('checkchange', function(){
+		                	var table = db2js.locateData($(this))[0];
+		                	var checked = getCheckedItems(table.tree, valueColumn);
+		                	me.container.data('value', checked);
+		                	
+		                	me.container.find('tbody>tr').each(function(idx, tr){
+		                		var row = db2js.locateData(tr)[0];
+	                            if(checked.indexOf(row[valueColumn]) != -1) $(tr).addClass('info'); else $(tr).removeClass('info');                            
+		                	});
+	
+		                	me.container.trigger('valuechange', [checked]);
+		                });
+	                }
+	                
+	                this.container.on('db2js.rendered', function f(event) {
+                        if (event.target == me.container[0]) {
+                        	var value = me.container.data('value');
+    	                	me.container.find('tbody>tr').each(function(idx, tr){
+    	                		var row = db2js.locateData(tr)[0];
+    	                		if(value && value.indexOf(row[valueColumn]) != -1) $(tr).addClass('info'); else $(tr).removeClass('info');                            
+    	                	});
+                            me.container.find('tbody>tr').each(function(idx, tr){
+                            	$(tr).on('click', function(event){
+                            		if(select == 'multi'){
+	                            		if($(event.target).is('td[molecule-obj=TreeNode]>input')){
+	                            			return;
+	                            		}                            		
+		        	                	var ck = $(tr).find('td[molecule-obj=TreeNode]>input');
+		        	                	ck.prop('checked', !ck.prop('checked'));
+		        	                	ck.change();
+                            		} else {
+                            			var row = db2js.locateData(tr)[0];
+                            			var v = row[valueColumn];
+                            			me.setMultiValue([v]);
+                            			me.container.trigger('valuechange', [[v]]);
+                            		}
+	        	                });
+                            });
+                        }
+	                });
+	                
+	                this.setValue = this.setMultiValue = function(value){
+	                	var table = db2js.locateData(this.container)[0];
+	                	table.tree = null;
+	                	this.container.data('value', value);
+	                	db2js.render(this.container);
+	                }
+	                this.getValue = this.getMultiValue = function(){
+	                	return this.container.data('value');
+	                }
+	                
+	                if(select == 'single'){
+	                	this.setValue = function(value){this.setMultiValue([value]);}
+	                	this.getValue = function(){return this.getMultiValue()[0];}
+	                }
+	                
+	            	break;
+                }                
+                              
             }
+            function getCheckedItems(roots, valueColumn){
+            	var items = [];
+            	for(var stk = roots.slice(); stk.length;){
+            		var item = stk.pop();
+            		if(item.checked){	// 忽略选中的子节点
+            			items.push(item)
+            		} else {
+            			for(var i=0;i<item.children.length; i++){
+            				stk.push(item.children[i]);
+            			}
+            		}
+            	}
+            	return items.map(function(nd){ return nd.row[valueColumn]});
+            }
+            
             db2js.Renderers.tree = function(hTable, table){
+            	var checked = $(hTable).data('value');
         		var checkable = hTable.getAttribute('checkable');
         		checkable = (checkable && checkable != 'false');	
-        		var tree = table.tree || buildTree(table);
+        		var idColumn = $(hTable).closest('[id-col]').attr('id-col') || 'id';
+        		var valueColumn = $(hTable).closest('[value-col]').attr('value-col') || idColumn;
+        		var parentColumn = $(hTable).closest('[parent-col]').attr('parent-col') || 'parent_id';
+        		var tree = table.tree || buildTree(table, idColumn, parentColumn);
         		
-        		function buildTree(table){
+        		function buildTree(table, idColumn, parentColumn){
         			var roots = table.rows.filter(function(row){
-        				return table.find('id', row.parent_id) == null;		// 没有父节点的即是根节点
+        				return table.find('id', row[parentColumn]) == null;		// 没有父节点的即是根节点
         			}).map(function (row){return toNode(row, 0)});				
         			
         			function toNode(row, depth, parentNode){
         				var node = {row: row, expanded: true, depth : depth, parent : parentNode};
-        				node.children = table.rows
-        							.filter(function(crow){return crow.parent_id == row.id})
-        							.map(function(crow){return toNode(crow, depth + 1, node)});
         				if(checkable){
         					node.checked = false;		// false | true | undefined
+        					if((parentNode && parentNode.checked) || (checked && checked.indexOf(row[valueColumn]) != -1)){
+        						node.checked = true;
+        					}
         				}
+        				node.children = table.rows
+        							.filter(function(crow){return crow[parentColumn] == row[idColumn]})
+        							.map(function(crow){return toNode(crow, depth + 1, node)});
         				return node;
         			}
         			
@@ -227,6 +342,7 @@
         			var idx = nd.row._table.rows.indexOf(nd.row);
         			
         			var tr = tBody.insertRow();
+        			tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + idx));
         			columnRenders.forEach(function(column){
         				var cell = document.createElement('td');
         				var isTreeNode = false;
@@ -269,7 +385,7 @@
         </div>
         <div molecule="TableError"></div>
 
-        <table molecule="Tree" checkable="true">
+        <table molecule="Tree" checkable="true" select="single">
             <thead>
                 <tr>
                     <th molecule="TreeNode" col="name" text="Name"></th>

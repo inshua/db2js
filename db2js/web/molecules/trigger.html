@@ -18,7 +18,9 @@
     <script src="../jslib/molecule.js"></script>
 
     <script>
-        Molecule.ModulesPath = '/botao/molecules/';
+        Molecule.ModulesPath = '/db2js/molecules/';
+        Molecule.loadHtml('test/basic.html');
+        Molecule.loadHtml('test/tree.html');
     </script>
 
     <style>
@@ -49,171 +51,142 @@
         <script id="molecule">
             // MOLECULE_DEF
             function DropDown() {
+            	this.isDropDown = true;
                 this.toggle = function () {
                     this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
                 }
                 this.setText = function (text) {
-                    this.container.find('input').value = text;
+                    this.container.find('input').val(text);
                 }
             }
             // MOLECULE_DEF_END
+            console.log('------ init DropDown');
             Molecule.create(DropDown, document.currentScript);
         </script>
     </div>
 
-    <table>
-        <tr>
-            <!-- 
-            	多选列头  <th col="id"> 
-            -->
-            <th molecule-def="CheckHeader" renderer="check">
-                <input type="checkbox" id="ckAll">
-                <script id="molecule">
-                    // MOLECULE_DEF
-                    function CheckHeader() {
-                        var checked = [];
-                        var checkboxes = [];
-                        var col = this.container.attr('col');
-                        this.container.attr('data-t', 'rows,N,' + col);
-
-                        this.container.attr('check-all-id', this.id);
-                        
-                        var me = this;
-                        this.container.find('#ckAll').on('change', function (e) {
-                            checkboxes.forEach(function (ck) {
-                                ck.checked = this.checked;
-                            }, this);
-                            if (!this.checked) {
-                                checked = []
-                                me.container.trigger('change', [checked]);
-                            } else {
-                                checkboxes.forEach(function (ck) {
-                                    if (ck.checked == true) $(ck).change();
-                                });
-                                me.container.trigger('change', [checked]);
-                            }
-                        });
-
-                        this.checkboxes = checkboxes;
-
-                        this.checked = function (v) {
-                            if (v == null) {
-                                return checked;
-                            } else {
-                                //TODO
-                            }
-                        }
-                    }
-
-                    db2js.Renderers.check = function (element, v, table) {
-                        var checkAllId = $(element).attr('check-all-id');
-                        var checkAll = $(element).closest('table').find('thead').find('th[check-all-id=' + checkAllId + ']').molecule();
-
-                        var checked = checkAll.checked();
-                        var checkboxes = checkAll.checkboxes;
-
-                        var e = $(element).html('');
-                        var ck = $(document.createElement('input')).attr('type', 'checkbox')
-                                .prop('checked', checked.indexOf(v) != -1)
-                                .appendTo(e);
-                        checkboxes.push(ck[0]);
-
-                        ck.on('change', function (event) {
-                            if (this.checked) {
-                                if (checked.indexOf(v) == -1) {
-                                    checked.push(v);
-                                }
-                                if (checkboxes.every(function (ck) { return ck.checked })) {
-                                    $('#ckAll').prop('checked', true);
-                                }
-                                if (event.originalEvent) checkAll.container.trigger('change', [checked]);
-                            } else if (checked.indexOf(v) != -1) {
-                                checked.splice(checked.indexOf(v), 1);
-                                if (!checkboxes.every(function (ck) { return ck.checked })) {
-                                    $('#ckAll').prop('checked', false);
-                                }
-                                if (event.originalEvent) checkAll.container.trigger('change', [checked]);
-                            }
-                        });
-                    }
-                    // MOLECULE_DEF_END
-                    Molecule.create(CheckHeader, document.currentScript);
-                </script>
-            </th>
-        </tr>
-    </table>
-
-
-    <!-- 列表。可单选多选。 <table multi-select="true|false" show-header="true|false"><th>...</table> -->
-    <table molecule-def="ListView" molecule="List"  class="table table-hover table-condensed table-selectable" paging="false">
-        <thead>
-            <tr>
-                <!-- {INNER_HTML} -->
-            </tr>
-        </thead>
-        <script id="molecule">
-            // MOLECULE_DEF
-            function ListView() {
-                
-            }
-            // MOLECULE_DEF_END
-            jQuery.extend();
-        </script>
-    </table>
-
-    <!-- 下拉单选列表，可展示表格 <div data-value="5" table="author" valueColumn="id" dispColumn="name"><table></table></div> -->
-    <div molecule-def="" molecule="DropDown">
+    <!-- 下拉列表
+    	<div data-value="5" table="author" value-col="id" display-col=""></div> 
+    -->
+    <div molecule-def="DropDownList" molecule="DropDown" select="single">
         <div molecule="TableList" class="contaienr">
             <div molecule="TableError"></div>
            
-            <table molecule="List" class="table table-hover table-condensed table-selectable" paging="false">
+            <table molecule="List">
                 <thead>
                     <tr>
-                        <th molecule="CheckHeader" col="id"></th>
-                        <th molecule="SortHeader" col="id" text="ID"></th>
-                        <th molecule="SortHeader" col="name" text="Name"></th>
-                        <th molecule="SortHeader" col="email" text="Email"></th>
+                        <!-- {INNER_HTML} -->
                     </tr>
                 </thead>
             </table>
-            <script>
-                $('.table-selectable').on('molecue-inited', function (event, newEle) {
-                    $(newEle).on('db2js.rendered', function f(event) {
-                        if ($(event.target).is('.table-selectable')) {
-                            var dropdown = $(newEle).closest('[molecule-obj=DropDown]');
-                            var table = db2js.dataset[dropdown.find('[table]').attr('table')];
-                            var valueColumn = $(newEle).closest('[valueColumn]').attr('valueColumn');
-                            var dispColumn = $(newEle).closest('[dispColumn]').attr('dispColumn');
-                            var row = table.find(valueColumn, JSON.parse(dropdown.data('value')));
-                            var tx = dropdown.find('input');
-                            tx.val(row[dispColumn]);
-
-                            $('.table-selectable>tbody>tr>td').each(function (idx, td) {
-                                if ($(td).is('[molecule-obj=CheckHeader]')) return;
-                                $(td).bind('click', function () {
-                                    var me = $(this);
-                                    var valueColumn = me.closest('[valueColumn]').attr('valueColumn');
-                                    var dispColumn = me.closest('[dispColumn]').attr('dispColumn');
-                                    var dropdown = me.closest('[molecule-obj=DropDown]');
-                                    var tx = dropdown.find('input');
-                                    var data = db2js.locateData(td);
-                                    var row = data[data.length - 3];
-                                    tx.val(row[dispColumn]);
-                                    dropdown.molecule().toggle();
-                                    dropdown.data('value', JSON.stringify(row[valueColumn]));
-                                });
-                            });
-                        }
-
-                    });
+        </div>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function DropDownList() {
+            	this.isDropDownList = true;
+            	var me = this;
+            	this.container.on('valuechange',function(event, value){
+            		var t = $(event.target);
+            		if(t.is('[molecule-obj=List]')){
+            			var table = db2js.locateData(t)[0];
+            			var dispCol = t.closest('[display-col]').attr('display-col');
+            			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
+            			var select = t.closest('[select]').attr('select');
+            			if(select == 'multi'){
+            				me.setText(value.map(function(v){return table.find(valueCol, v)[dispCol]}).join(', '));	
+            			} else {
+            				me.setText(table.find(valueCol, value)[dispCol]);
+            				if(me.container.find('.input-group-btn').is('.open')){
+                				me.toggle();
+            				}
+            			}
+            		}
                 });
-            </script>
+            	this.setValue = function(value){this.container.find('[molecule-obj=List]').molecule().setValue(value);}
+            	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
+            }
+            // MOLECULE_DEF_END
+            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDown]');            
+            if(c.length && c.molecule()){
+            	DropDownList.call(c.molecule());
+            }
+        </script>
+    </div>
+    
+    
+    <!-- 下拉列表
+    	<div data-value="5" table="author" value-col="id" display-col=""></div> 
+    -->
+    <div molecule-def="DropDownTree" molecule="DropDown" select="single">
+        <div molecule="TableList" class="contaienr">
+            <div molecule="TableError"></div>
+           
+            <table molecule="Tree">
+                <thead>
+                    <tr>
+                        <!-- {INNER_HTML} -->
+                    </tr>
+                </thead>
+            </table>
         </div>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function DropDownTree() {
+            	this.isDropDownTree = true;
+            	var me = this;
+            	this.container.on('valuechange',function(event, value){
+            		var t = $(event.target);
+            		if(t.is('[molecule-obj=Tree]')){
+            			var table = db2js.locateData(t)[0];
+            			var dispCol = t.closest('[display-col]').attr('display-col');
+            			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
+            			var select = t.closest('[select]').attr('select');
+            			if(select == 'multi'){
+            				me.setText(value.map(function(v){return table.find(valueCol, v)[dispCol]}).join(', '));	
+            			} else {
+            				me.setText(table.find(valueCol, value)[dispCol]);
+            				if(me.container.find('.input-group-btn').is('.open')){
+                				me.toggle();
+            				}
+            			}
+            		}
+                });
+            	this.setValue = function(value){
+            		if(JSON.stringify(value) != JSON.stringify(this.getValue())){
+	            		var t = this.container.find('[molecule-obj=Tree]');
+	            		t.molecule().setValue(value);
+	            		t.trigger('valuechange', [value]);
+            		}
+            	}
+            	this.getValue = function(value){return this.container.find('[molecule-obj=Tree]').molecule().getValue();}
+            }
+            // MOLECULE_DEF_END
+            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDown]');            
+            if(c.length && c.molecule()){
+            	DropDownTree.call(c.molecule());
+            }
+        </script>
+    </div>
 
-        <div class="container">
-            <label>Test</label>
 
-        </div>
+    <div class="container">
+          <label>Test</label>
+		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false">
+		  		<m:th molecule="SortHeader" col="id" text="ID"></m:th>
+		        <m:th molecule="SortHeader" col="name" text="Name"></m:th>
+		        <m:th molecule="SortHeader" col="email" text="Email"></m:th>
+		  </div>
+		  
+		  
+		  <label>Test</label>
+		  <div molecule="DropDownTree" table="author" value-col="id" display-col="name" parent-col="parent_id" select="multi" show-header="true">
+				<m:th molecule="TreeNode" col="name" text="Name"></m:th>		  
+		  		<m:th molecule="SortHeader" col="id" text="ID"></m:th>
+		        <m:th molecule="SortHeader" col="name" text="Name"></m:th>
+		        <m:th molecule="SortHeader" col="email" text="Email"></m:th>
+		  </div>
+		  
+    </div> 
 
 </body>
 <script>
