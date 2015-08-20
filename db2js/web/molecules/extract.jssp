@@ -3,20 +3,38 @@
 	 /*
 	  * 创建 molecule 定义  
 	  */
- 
-	var path = request.getRealPath("molecules");
 
-	logger.info('path = ' + path);
-
-	var files = new java.io.File(path).listFiles();
-	var defines = {};
-	for(var i=0; i< files.length; i++){
-		var file = files[i];
+ 	var defines = {};
+ 	if(request.html){
+ 		response.contentType = 'application/json';
+ 		var path = request.getRealPath(request.html);
+ 		processFile(new java.io.File(path));
+ 		out.print(JSON.stringify(defines));
+ 	} else {
+		var path = request.getRealPath("molecules");
+	
+		logger.info('path = ' + path);
+	
+		var files = new java.io.File(path).listFiles();
+		for(var i=0; i< files.length; i++){
+			var file = files[i];
+			out.print(processFile(file));
+		}
+		
+		for(var module in defines){ if(defines.hasOwnProperty(module)){
+			var path = request.getRealPath("molecules/" + module +  ".json");
+			logger.debug('write molecule module : ' +  path);
+			org.apache.commons.io.FileUtils.write(new java.io.File(path), JSON.stringify(defines[module]), "utf-8");
+		}}
+ 	}
+	
+	function processFile(file){
+		var sout = '';
 		if(file.name.endsWith(".html") || file.name.endsWith(".htm")){
-			out.print("<h2>parse " + file.name + "</h2>");
+			sout +=  ("<h2>parse " + file.name + "</h2>");
 			var document = org.jsoup.Jsoup.parse(file, "utf-8");
 			var defs = document.select("[molecule-def]");
-			out.print("<p>" + defs.size() + " molecule defs found</p>");
+			sout +=  ("<p>" + defs.size() + " molecule defs found</p>");
 			if(defs.size() > 0){
 				for(var j=0; j<defs.size(); j++){
 					var element = defs.get(j);
@@ -29,7 +47,7 @@
 					}
 					var depends = element.attr("molecule-depends") || '';
 					
-					out.print("<h3>find " + fullname + "</h3>");
+					sout +=  ("<h3>find " + fullname + "</h3>");
 					element.removeAttr('molecule-def');
 					element.removeAttr('molecule-depends');
 					
@@ -47,19 +65,16 @@
 					defines[module][name] = def;
 				}
 			} else {
-				out.print("<h3>(empty)</h3>");
+				sout +=  ("<h3>(empty)</h3>");
 			}
+		}
+		return sout;
+		
+		function printError(error){
+			sout +=  ('<p class="error">' + error + '</p>');
 		}
 	}
 	
-	for(var module in defines){ if(defines.hasOwnProperty(module)){
-		var path = request.getRealPath("molecules/" + module +  ".json");
-		logger.debug('write molecule module : ' +  path);
-		org.apache.commons.io.FileUtils.write(new java.io.File(path), JSON.stringify(defines[module]), "utf-8");
-	}}
 	
 	
-	function printError(error){
-		out.print('<p class="error">' + error + '</p>');
-	}
 %]
