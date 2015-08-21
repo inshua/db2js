@@ -87,20 +87,35 @@
             	this.container.on('valuechange',function(event, value){
             		var t = $(event.target);
             		if(t.is('[molecule-obj=List]')){
-            			var table = db2js.locateData(t)[0];
-            			var dispCol = t.closest('[display-col]').attr('display-col');
-            			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
-            			var select = t.closest('[select]').attr('select');
-            			if(select == 'multi'){
-            				me.setText(value.map(function(v){return table.find(valueCol, v)[dispCol]}).join(', '));	
-            			} else {
-            				me.setText(table.find(valueCol, value)[dispCol]);
-            				if(me.container.find('.input-group-btn').is('.open')){
-                				me.toggle();
-            				}
-            			}
+            			updateText(t, value);
             		}
                 });
+            	
+            	this.container.on('db2js.rendered',function(event, value){
+            		var t = $(event.target);
+            		if(t.is('[molecule-obj=List]')){
+            			updateText(t, me.getValue());
+            		}
+                });
+            	
+            	function updateText(t, value){
+            		var table = db2js.locateData(t)[0];
+        			var dispCol = t.closest('[display-col]').attr('display-col');
+        			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
+        			var select = t.closest('[select]').attr('select');
+        			if(select == 'multi'){
+        				if(value) me.setText(value.map(function(v){
+        					var row = table.find(valueCol, v);
+        					return row ? row[dispCol] : v;
+        				}).join(', '));		
+        			} else {
+        				var row = table.find(valueCol, value);
+        				me.setText(row ? row[dispCol] : value);
+        				if(me.container.find('.input-group-btn').is('.open')){
+            				me.toggle();
+        				}
+        			}
+            	}
             	this.setValue = function(value){this.container.find('[molecule-obj=List]').molecule().setValue(value);}
             	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
             }
@@ -136,20 +151,35 @@
             	this.container.on('valuechange',function(event, value){
             		var t = $(event.target);
             		if(t.is('[molecule-obj=Tree]')){
-            			var table = db2js.locateData(t)[0];
-            			var dispCol = t.closest('[display-col]').attr('display-col');
-            			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
-            			var select = t.closest('[select]').attr('select');
-            			if(select == 'multi'){
-            				me.setText(value.map(function(v){return table.find(valueCol, v)[dispCol]}).join(', '));	
-            			} else {
-            				me.setText(table.find(valueCol, value)[dispCol]);
-            				if(me.container.find('.input-group-btn').is('.open')){
-                				me.toggle();
-            				}
-            			}
+            			updateText(t, value);
             		}
                 });
+            	
+            	this.container.on('db2js.rendered',function(event, value){
+            		var t = $(event.target);
+            		if(t.is('[molecule-obj=Tree]')){
+            			updateText(t, me.getValue());
+            		}
+                });
+            	
+            	function updateText(t, value){
+            		var table = db2js.locateData(t)[0];
+        			var dispCol = t.closest('[display-col]').attr('display-col');
+        			var valueCol = t.closest('[value-col]').attr('value-col') || 'id';
+        			var select = t.closest('[select]').attr('select');
+        			if(select == 'multi'){
+        				if(value) me.setText(value.map(function(v){
+        					var row = table.find(valueCol, v);
+        					return row ? row[dispCol] : v;
+        				}).join(', '));		
+        			} else {
+        				var row = table.find(valueCol, value);
+        				me.setText(row ? row[dispCol] : value);
+        				if(me.container.find('.input-group-btn').is('.open')){
+            				me.toggle();
+        				}
+        			}
+            	}
             	this.setValue = function(value){
             		if(JSON.stringify(value) != JSON.stringify(this.getValue())){
 	            		var t = this.container.find('[molecule-obj=Tree]');
@@ -208,6 +238,7 @@
     });
 
     $(function () {
+    	return;
         table.fill([
 	        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
 	        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },
@@ -220,5 +251,17 @@
         ], true);
     });
 
+    function test(){
+    	table.fill([
+    		        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
+    		        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },
+    		        { id: 8, name: '空管部', email: 'dh@xxx.com', parent_id: 2 },
+    		        { id: 3, name: '信息部', email: 'dh@xxx.com', parent_id: 2 },
+    		        { id: 4, name: '东方航空华北公司', email: 'dh@xxx.com', parent_id: 1 },
+    		        { id: 5, name: '厦门航空', email: 'dh@xxx.com', },
+    		        { id: 6, name: '厦门航空华南公司', email: 'dh@xxx.com', parent_id: 5 },
+    		        { id: 7, name: '吉祥航空', email: 'dh@xxx.com' },
+    	        ], true);
+    }
 </script>
 </html>

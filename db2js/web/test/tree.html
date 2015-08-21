@@ -286,7 +286,15 @@
         		var idColumn = $(hTable).closest('[id-col]').attr('id-col') || 'id';
         		var valueColumn = $(hTable).closest('[value-col]').attr('value-col') || idColumn;
         		var parentColumn = $(hTable).closest('[parent-col]').attr('parent-col') || 'parent_id';
-        		var tree = table.tree || buildTree(table, idColumn, parentColumn);
+        		var rebuildTree = false;
+        		if(!table.tree){ 
+        			rebuildTree = true;
+        		} else if(table.rows.length && table.tree.length == 0){
+        			rebuildTree = true;
+        		} else if(table.rows.indexOf(table.tree[0].row) == -1){
+        			rebuildTree = true;
+        		}
+        		var tree = rebuildTree ? buildTree(table, idColumn, parentColumn) : table.tree ;
         		
         		function buildTree(table, idColumn, parentColumn){
         			var roots = table.rows.filter(function(row){
