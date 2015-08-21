@@ -1,10 +1,10 @@
 dbjs.fetch = function(params){
 	sql{.
-		select * from authors
+		select * from author
 		code{.
-			if(params.last_name){
+			if(params.name){
 				sql{.
-					where instr(last_name, :last_name) > 0
+					where strpos(name, :name) > 0
 				.}
 			}
 		.}

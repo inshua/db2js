@@ -22,11 +22,11 @@
     <servlet-class>org.siphon.db2js.DispatchServlet</servlet-class>
     <init-param>
       <param-name>JSLIB</param-name>
-      <param-value>WEB-INF/jslib/</param-value>
+      <param-value>/WEB-INF/jslib/</param-value>
     </init-param>
     <init-param>
       <param-name>PRELOADJS</param-name>
-      <param-value>WEB-INF/jslib/db2js.js</param-value>
+      <param-value>/WEB-INF/jslib/db2js.js</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
@@ -43,11 +43,11 @@
     <servlet-class>org.siphon.jssp.JsspServlet</servlet-class>
     <init-param>
       <param-name>JSLIB</param-name>
-      <param-value>WEB-INF/jslib/</param-value>
+      <param-value>/WEB-INF/jslib/</param-value>
     </init-param>
     <init-param>
       <param-name>PRELOADJS</param-name>
-      <param-value>WEB-INF/jslib/jssp.js</param-value>
+      <param-value>/WEB-INF/jslib/jssp.js</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>

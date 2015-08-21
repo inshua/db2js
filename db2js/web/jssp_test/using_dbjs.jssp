@@ -4,12 +4,12 @@
 <body>
 
 <form action="using_dbjs.jssp" method="get">
-	Last Name : <input name="last_name">
+	Last Name : <input name="name">
 	<input type="submit">
 </form>
 
 [% 
-	var r = this.callDbjs('authors.dbjs', 'fetch', {last_name : request.last_name, _sort : [{property : 'id', direction : 'asc'}]}, null, null);
+	var r = this.callDbjs('authors.dbjs', 'fetch', {name : request.name, _sort : [{property : 'id', direction : 'asc'}]}, null, null);
 	logger.info(JSON.stringify(r));
 %]
 	
