@@ -289,7 +289,7 @@
         		var rebuildTree = false;
         		if(!table.tree){ 
         			rebuildTree = true;
-        		} else if(table.rows.length && table.tree.length == 0){
+        		} else if((table.rows.length == 0) != (table.tree.length == 0)){
         			rebuildTree = true;
         		} else if(table.rows.indexOf(table.tree[0].row) == -1){
         			rebuildTree = true;
