@@ -98,7 +98,7 @@ public class DbjsRunner {
 
 		JsEngineHandlerContext engineContext = null;
 		try {
-			engineContext = dbjsManager.getEngineContext(jsfile, jsfile, dataSource, otherArgs);
+			engineContext = dbjsManager.getEngineContext(jsfile, request.getServletPath(), dataSource, otherArgs);
 		} catch (Exception e3) {
 			logger.error("", e3);
 			engineContext.free();
@@ -244,7 +244,7 @@ public class DbjsRunner {
 			throws Exception {
 		JsEngineHandlerContext engineContext = null;
 		try {
-			engineContext = dbjsManager.getEngineContext(jsfile, jsfile, dataSource, otherArgs);
+			engineContext = dbjsManager.getEngineContext(jsfile, request.getContextPath(), dataSource, otherArgs);
 
 			initEngineContext(engineContext, request, response);
 

@@ -17,7 +17,7 @@
  * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *******************************************************************************/
-if(!println) engine.put('println', print);
+if(typeof println == 'undefined') engine.put('println', print);
 
 /**
  * 引用另一个脚本，如果已经引用过，不再重复引用
@@ -68,7 +68,7 @@ function imports(scriptFile){
 					if(!IMPORTED_FILES[abspath]){
 						//println('include ' + abspath + ' found at default path');
 						IMPORTED_FILES[abspath] = true;
-						engine.put("javax.script.filename", abspath);
+						engine.put("javax.script.filename", scriptFile);
 						result = engine.eval(new java.io.InputStreamReader(new java.io.FileInputStream(abspath), "utf-8"));
 					}
 				} catch(e){
@@ -99,7 +99,7 @@ function include(scriptFile){
 		try{
 			//println('include ' + abspath + ' found at stack');
 			IMPORTED_FILES[abspath] = true;
-			engine.put("javax.script.filename", abspath);
+			engine.put("javax.script.filename", scriptFile);
 			result = engine.eval(new java.io.InputStreamReader(new java.io.FileInputStream(abspath), "utf-8"));
 		} catch(e){
 			throw e;

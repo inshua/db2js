@@ -70,9 +70,10 @@ public class DbjsUnitManager extends ServerUnitManager {
 		engine.put("dataSource", dataSource);
 		engine.put("application", otherArgs.get("application"));
 		// 由 js 根据业务需要创建，创建后由 java 关闭
-		if (StringUtils.isEmpty((String) otherArgs.get("preloadJs")) == false) {
-			logger.info("evaluate preload js: " + otherArgs.get("preloadJs"));
-			JsEngineUtil.eval(engine, (String) otherArgs.get("preloadJs"), true, false);
+		if (otherArgs.get("preloadJs") != null) {
+			String[] preloadJs = (String[]) otherArgs.get("preloadJs");		// [abs path, alias]
+			logger.info("evaluate preload js: " + preloadJs[0]);
+			JsEngineUtil.eval(engine, preloadJs[1], FileUtils.readFileToString(new File(preloadJs[0]), "utf-8"), true, false);
 		}
 
 		File src = new File(srcFile);
@@ -83,7 +84,7 @@ public class DbjsUnitManager extends ServerUnitManager {
 		if (logger.isDebugEnabled())
 			logger.debug(srcFile + " converted as " + tmp.getAbsolutePath());
 
-		JsEngineUtil.eval(engine, srcFile, covertedCode, false, true);
+		JsEngineUtil.eval(engine, aliasPath, covertedCode, false, true);
 
 		JsEngineHandlerContext ctxt = new JsEngineHandlerContext();
 		ctxt.setScriptEngine(engine);

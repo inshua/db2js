@@ -50,9 +50,9 @@ import org.siphon.jssp.JsspSession;
 public abstract class JsServlet extends HttpServlet {
 
 	private static Logger logger = Logger.getLogger(JsServlet.class);
-	
+
 	protected static Map<String, Object> application = new JsspGlobal();
-	
+
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -62,27 +62,28 @@ public abstract class JsServlet extends HttpServlet {
 		watchFileChange(dir);
 
 	}
-	
-	public String getPreloadJs(){
-		String js= this.getServletConfig().getInitParameter("PRELOADJS");
-		if(StringUtils.isEmpty(js)){
+
+	public String[] getPreloadJs() {
+		String js = this.getServletConfig().getInitParameter("PRELOADJS");
+		if (StringUtils.isEmpty(js)) {
 			return null;
 		} else {
-			return this.getServletContext().getRealPath(js);
+			return new String[] { this.getServletContext().getRealPath(js), js };
 		}
 	}
 
 	public Object[] getJsLibs() {
-		String lib = this.getServletConfig().getInitParameter("JSLIB");
-		if (!StringUtils.isEmpty(lib)) {
-			String jslib = this.getServletContext().getRealPath(lib);
+		String jslib = this.getServletConfig().getInitParameter("JSLIB");
+		if (!StringUtils.isEmpty(jslib)) {
 			if (StringUtils.isEmpty(jslib)) {
 				return new Object[] {};
 			} else {
 				List<Object> ls = new ArrayList<Object>();
 				for (String s : jslib.split(",")) {
 					if (!StringUtils.isEmpty(s)) {
-						ls.add(s.trim());
+						String path = this.getServletContext().getRealPath(s.trim());
+						ls.add(path);
+						// ls.add(s.trim());
 					}
 				}
 				return ls.toArray();
