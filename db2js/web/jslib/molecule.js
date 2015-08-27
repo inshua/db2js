@@ -45,9 +45,7 @@ Molecule._nextId = 1;
 Molecule.nextId = function(){return Molecule._nextId ++; }
 Molecule.instances = {};
 
-Molecule.create = function(fun, currentScript){
-	currentScript = currentScript 
-				|| document.getElementById('molecule');		// for ie
+Molecule._locateContainer = function(currentScript){
 	if(currentScript == null){
 		throw new Error('cannot retreive current script');
 	}
@@ -71,6 +69,13 @@ Molecule.create = function(fun, currentScript){
 	if(!container.length){
 		throw new Error('container must has molecule-obj attribute');
 	}
+	return container;
+}
+
+Molecule.create = function(fun, currentScript){
+	currentScript = currentScript || document.getElementById('molecule');		// for ie
+	var container = Molecule._locateContainer(currentScript);
+	if(container == null) return;
 	// console.log('create molecule ' + fun);
 	var existed = container.attr('molecule-id');
 	var obj = null;
@@ -95,6 +100,21 @@ Molecule.create = function(fun, currentScript){
 	$(currentScript).remove();
 	
 	return obj;
+}
+
+/**
+ * 继承
+ * @param fun 新定义函数
+ * @param currentScript 调用中的 document.currentScript
+ */
+Molecule.extend = function(fun, currentScript){
+	currentScript = currentScript || document.getElementById('molecule');		// for ie
+
+	var container = Molecule._locateContainer(currentScript);
+	
+    if(container && container.molecule()){
+    	fun.call(container.molecule());
+    }
 }
 
 Molecule.of = function(element){
@@ -128,6 +148,8 @@ Molecule.scanDefines = function(){
 		var fullname = e.attr('molecule-def');
 		var depends = e.attr('molecule-depends');
 		ele.removeAttribute('molecule-def');
+		var escapeTag = e.attr('escape-tag');
+		if(escapeTag) ele.removeAttribute('escape-tag');
 		
 		var r = Molecule.getModuleName(fullname);
 
@@ -137,7 +159,7 @@ Molecule.scanDefines = function(){
 		}
 		console.log('define molecule ' + fullname);
 		
-		var def = {name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML};
+		var def = {name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML, escapeTag : escapeTag};
 		
 		var script = $(ele.nextElementSibling);
 		if(script.length && (script.attr('molecule-for') == fullname || script.attr('molecule-for') == r.name)){
@@ -257,14 +279,29 @@ Molecule.scanMolecules = function(starter, manual){
 		var p = ele.parentElement;
 		var pos = getIndexInParent(ele, p);
 		
-		// if(name == 'List') debugger;
+		//console.info('process ' + name);
+		
+		// if(name == 'List') debugger; 
 		
 		var inner = ele.innerHTML;		// 保留原来的子节点
-		inner = inner.replace(/m\:/g, '');		// 遇到 <m:th> 之类替换为 <th>		
+		if(def.escapeTag){
+//			console.log('unescape tag, from ')
+//			console.log(inner);
+			inner = unescapeTag(inner, def.escapeTag);
+//			console.log('to');
+//			console.log(inner);
+		}
+		// if(def.escapeTag) console.log('def escapeTag : ' + def.escapeTag);
 		
 		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
-		
 		ele.outerHTML = replaceInnerHtml ? def.html.replace('<!-- {INNER_HTML} -->', inner) : def.html;
+//		if(replaceInnerHtml){
+//			console.log('replace inner html, from ');
+//			console.log(def.html);
+//			console.log('to');
+//			console.log(def.html.replace('<!-- {INNER_HTML} -->', inner));
+//		}
+		
 		var instance = p.children[pos];
 		var inherited = (instance.hasAttribute('molecule') && instance.getAttribute('molecule') != fullname); // 继承自另一 molecule
 		for(var i=0; i<ele.attributes.length; i++){
@@ -279,7 +316,6 @@ Molecule.scanMolecules = function(starter, manual){
 			}
 			instance.setAttribute(attr, v);
 		}
-		// if(fullname == 'YellowBlock') debugger;	
 		if(ele.hasAttribute('molecule-obj') == false){
 			instance.setAttribute('molecule-obj', fullname);
 		} else {
@@ -325,6 +361,17 @@ Molecule.scanMolecules = function(starter, manual){
 		$(instance).trigger('molecule-inited', [instance, fullname]);
 		
 		return instance;
+	}
+	
+	function unescapeTag(html, tags){	// 遇到 <m:th> 之类替换为 <th>
+		var tags = tags.split(',');
+		for(var i=0; i<tags.length; i++){
+			var tag = tags[i];
+			html = html
+				.replace(new RegExp('<m\:' + tag + '([^>]*)>', 'gi'), '<' + tag + '$1>')
+				.replace(new RegExp('</m\:' + tag + '>', 'gi'), '</' + tag + '>');
+		}
+		return html;
 	}
 	
 	function ensureDepends(def){
