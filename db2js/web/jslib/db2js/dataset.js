@@ -29,6 +29,13 @@ db2js.dataset = {}
 db2js.dataset.relations = [];
 
 /**
+ * 所有词典数据
+ * 用法如：
+ * 	Dicts.gendor = {M : 'Male', F : 'Female'}
+ */
+var Dicts = db2js.dataset.dicts = { isDb2jsTerm : true, db2js: 'dicts'};  
+
+/**
  * 增加一个关系
  */
 db2js.dataset.addRelation = function(parent, parentColumn, child, childColumn){
@@ -230,11 +237,20 @@ db2js.DataTable.prototype.initSchema = function(columns, raiseEvent){
 }
 
 /**
- * 
- * @param params {_action : action, param1 : value1, param2 : value2, ...}
+ * @param method optional. default: fetch, can put in params 
+ * @param params {_m : method, param1 : value1, param2 : value2, ...}
  * @param option { callback : function(ex){}, timeout : 30000, async : true, method : 'GET'}
  */
-db2js.DataTable.prototype.load = function(params, option){
+db2js.DataTable.prototype.load = function(method, params, option){
+	if(method instanceof Object){
+		option = params;
+		params = method;
+	}
+	
+	if(params instanceof Function){
+		option = params;
+		params = null;
+	}
 	if(option == null) option = {};
 	if(option instanceof Function){
 		option = {callback : option};
@@ -257,6 +273,8 @@ db2js.DataTable.prototype.load = function(params, option){
 	}
 	q._page = {start : this.page * this.pageSize, limit : this.pageSize};
 	
+	method = method || q._m || 'fetch';
+	
 	this.clearError();
 	this.setState('loading');
 	var me = this;
@@ -265,7 +283,7 @@ db2js.DataTable.prototype.load = function(params, option){
 	
 	$.ajax({
 		url : this.url,
-		data : {_m : q._m || 'fetch', params : JSON.stringify(q)}, 
+		data : {_m : method, params : JSON.stringify(q)}, 
 		type : option.method || 'get',
 		timeout : option.timeout || 30000,
 		async : option.async != null ? option.async : true,
