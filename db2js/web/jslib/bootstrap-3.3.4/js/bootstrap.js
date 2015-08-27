@@ -827,13 +827,8 @@ if (typeof jQuery === 'undefined') {
   }
 
   function clearMenus(e) {
-    if (e && e.which === 3) return
-    var $this         = $(this)
-    var $parent       = getParent($this)
-    var container = $parent.find('.dropdown-menu')
-    if(e && $(e.target).parentsUntil(container).length){
-    	return;
-    }
+    if (e && e.which === 3) return    
+    if(e && $(e.target).closest('.dropdown-menu').length) return;
     		
     $(backdrop).remove()
     $(toggle).each(function () {
