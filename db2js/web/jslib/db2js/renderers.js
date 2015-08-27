@@ -122,27 +122,26 @@ db2js.Renderers.expr = db2js.KNOWN_RENDERERS['expr'] = function(e, data){
  *  </div>
  */
 db2js.Renderers.options = function(dispCol, valueCol, allowEmpty){
+	
 	return function(element, rows, table){
 		var sel = $(element).find('select')[0];		// SELECT
 		
 		while(sel.options.length) sel.options.remove(0);
 		
+		if(allowEmpty){
+			var option = document.createElement('option');
+			option.text = "-";
+			option.value = '';
+			sel.options.add(option);
+		}
+		if(!rows) return;
 		for(var i=0; i<rows.length; i++){
-			if(allowEmpty){
-				var option = document.createElement('option');
-				option.text = "-";
-				option.value = '';
-				sel.options.add(option);
-			}
-			
-			for(var i = 0; i < rows.length; i++){
-				var option = document.createElement('option');
-				var dispCell = rows[i][dispCol];
-				var valueCell = rows[i][valueCol];
-				if(dispCell) option.text = dispCell;
-				if(valueCell) option.value = valueCell;
-				sel.options.add(option);
-			}
+			var option = document.createElement('option');
+			var dispCell = rows[i][dispCol];
+			var valueCell = rows[i][valueCol];
+			if(dispCell) option.text = dispCell;
+			if(valueCell) option.value = valueCell;
+			sel.options.add(option);
 		}
 	}
 }
@@ -383,11 +382,17 @@ db2js.Renderers.stderr = db2js.KNOWN_RENDERERS['stderr'] = function(element,  va
  */
 db2js.Renderers.flderr = db2js.KNOWN_RENDERERS['flderr'] = function(element,  value, table, _1, rows, index, row, columnName){
 	var e = $(element), v = value;
-	var helpDiv = e.find('.help-block.with-errors');
-	if(helpDiv.length == 0){
-		helpDiv = $(document.createElement('div')).appendTo(e);
-		helpDiv.addClass('help-block with-errors');
-	}
+	var helpDiv = null;
+	if(e.is('.help-block.with-errors')){
+		helpDiv = e;
+		e = helpDiv.parent();
+	} else {
+		helpDiv = e.find('.help-block.with-errors');
+		if(helpDiv.length == 0){
+			helpDiv = $(document.createElement('div')).appendTo(e);
+			helpDiv.addClass('help-block with-errors');
+		}
+	}	
 	if(value == null){
 		e.removeClass('has-error');
 		helpDiv.html('');
@@ -414,3 +419,5 @@ db2js.Renderers.molecule = db2js.KNOWN_RENDERERS['molecule'] = function(element,
 		})
 	}
 }
+
+
