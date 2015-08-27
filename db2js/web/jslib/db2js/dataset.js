@@ -289,7 +289,7 @@ db2js.DataTable.prototype.load = function(method, params, option){
 		async : option.async != null ? option.async : true,
 		dataType : 'text',
 		success : onSuccess,
-		error : function (error){onError(new Error(error.responseText));}
+		error : function (error){onError(new Error(error.responseText || 'cannot establish connection to server'));}
 	});
 	
 	function onSuccess(text, status){
