@@ -29,12 +29,30 @@ db2js.Renderers.Pipelines.date = function(element, value, table, _1, rows, index
 
 /**
  * 词典值
- * usage : <input renderer="dict({N:'正常', S:'停用'})|std">
+ * usage : 
+ * 		<input data="xxx" renderer="dict({N:'正常', S:'停用'})|std">
+ * 或
+ * 		Dicts.gendor = {M : 'Male', F : 'Female'};
+ * 		<input dict="gendor" data="xxx" renderer="dict|std">
  */
-db2js.Renderers.Pipelines.dict = function(dict){
-	return function(element, value, table, _1, rows, index, row, columnName){
-		if(value == null) return '';
-		return dict[value] || '';
+db2js.Renderers.Pipelines.dict = function(element, value, table, _1, rows, index, row, columnName){
+	if(element && element.tagName){	// if it's html element
+		if(value == null) return null;
+		var lov = element.getAttribute('dict');
+		if(!lov) return 'no dict attribute';
+		var dict = Dicts[lov];
+		if(dict == null) return lov + ' not exist';
+		if(value instanceof Array){
+			return value.map(function(v){return dict[v] || v}) 
+		} else {
+			return dict[value] || value;
+		}
+	} else {
+		var dict = element;
+		return function(element, value, table, _1, rows, index, row, columnName){
+			if(value == null) return '';
+			return dict[value] || '';
+		}
 	}
 }
 
@@ -42,17 +60,38 @@ db2js.Renderers.Pipelines.dict = function(dict){
  * 将词典翻译为列表
  * usage : 
  *  <div data="#anything" renderer="dictToList({N:'正常', S:'停用'})|options('name','id')">
- * 		<select data="#bindTable,rows,N,type"></select>
+ * 		<select data="#bindTable,rows,N,status" render="std"></select>
  *  </div>
+ *  或
+ *   Dicts.status = {N:'正常', S:'停用'}   
+ *   <div data="#anything" dict="status" renderer="dictToList|options('name','id')">
+ * 		<select data="#bindTable,rows,N,status" render="std"></select>
+ *   </div>
+ *  anything 可以随意提供一个可绑定数据,并不用于实际渲染，例如 dicts
  */
-db2js.Renderers.Pipelines.dictToList = function(dict){
-	return function(element){
+db2js.Renderers.Pipelines.dictToList = function(element, value, table, _1, rows, index, row, columnName){
+	if(element && element.tagName){	// if it's html element
+		if(value == null) return null;
+		var lov = element.getAttribute('dict');
+		if(!lov) return [];
+		var dict = Dicts[lov];
 		if(dict == null) return [];
+		
 		var arr = [];
 		for(var k in dict){if(dict.hasOwnProperty(k)){
 			arr.push({name : dict[k], id : k});
 		}}
 		return arr;
+	} else {
+		var dict = element;
+		return function(element){
+			if(dict == null) return [];
+			var arr = [];
+			for(var k in dict){if(dict.hasOwnProperty(k)){
+				arr.push({name : dict[k], id : k});
+			}}
+			return arr;
+		}
 	}
 }
 
@@ -65,3 +104,36 @@ db2js.Renderers.Pipelines.uppercase = function(element, value, table, _1, rows, 
 		return (value + '').toUpperCase();
 	}
 }
+
+
+/**
+ * 将词典文字收集为词典值
+ * 
+ * 用法：
+ * <tag dict="gendor" data="xxx" collector="c|dict({M : 'Male', F : 'Female'})|s">
+ * 或
+ * Dicts.gendor = {M : 'Male', F : 'Female'};
+ * <tag dict="gendor" data="xxx" collector="c|dict|s">
+ */
+db2js.Collectors.Pipelines.dict = db2js.KNOWN_COLLECT_PIPELINES['dict'] = function(element, value, table, _1, rows, index, row, columnName){
+	var lov = element.getAttribute('lov');
+	if(!lov) return 'no dict attribute';
+	var dict = Dicts[lov];
+	if(dict == null) return lov + ' not exist';
+	if(value instanceof Array){
+		var arr = [];
+		for(var k in dict){if(dict.hasOwnProperty(k)){
+			if(dict[k] == value) arr.push(k);
+		}}
+		return arr;
+	} else {
+		for(var k in dict){if(dict.hasOwnProperty(k)){
+			if(dict[k] == value) return k;
+		}}
+		return value;
+	}
+}
+
+
+
+
