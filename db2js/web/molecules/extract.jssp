@@ -11,7 +11,7 @@
  		processFile(new java.io.File(path));
  		out.print(JSON.stringify(defines));
  	} else {
-		var path = request.getRealPath("molecules");
+		var path = request.getRealPath("/molecules");
 	
 		logger.info('path = ' + path);
 	
@@ -22,7 +22,7 @@
 		}
 		
 		for(var module in defines){ if(defines.hasOwnProperty(module)){
-			var path = request.getRealPath("molecules/" + module +  ".json");
+			var path = request.getRealPath("/molecules/" + module +  ".json");
 			logger.debug('write molecule module : ' +  path);
 			org.apache.commons.io.FileUtils.write(new java.io.File(path), JSON.stringify(defines[module]), "utf-8");
 		}}
@@ -50,13 +50,15 @@
 					sout +=  ("<h3>find " + fullname + "</h3>");
 					element.removeAttr('molecule-def');
 					element.removeAttr('molecule-depends');
+					var escapeTag = element.attr('escape-tag');
+					if(escapeTag) element.removeAttr('escape-tag');
 					
 					var html = element.outerHtml();
 					if(defines[module] == null) defines[module] = {};
 					if(defines[module][name] != null){
 						printError(fullname + ' defined more than one time');
 					}
-					var def = {name : name, module : module, depends : depends && depends.split(','), 
+					var def = {name : name, module : module, depends : depends && depends.split(','), escapeTag : escapeTag, 
 		                         tagName : element.tagName(), html : html};
 					var n = element.nextElementSibling();
 					if(n && n.tagName() == 'script' && (n.attr('molecule-for') == fullname || n.attr('molecule-for') == name)){
