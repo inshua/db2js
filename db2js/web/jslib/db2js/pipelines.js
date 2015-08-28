@@ -134,6 +134,50 @@ db2js.Collectors.Pipelines.dict = db2js.KNOWN_COLLECT_PIPELINES['dict'] = functi
 	}
 }
 
+/**
+ * 将词典表映射为含义
+ * 
+ * 用法：
+ * 设有表 gendor, 字段为 id, desc, 有数据
+ * 
+ * id    |   desc
+ * ------+----------
+ * M     |   Male
+ * F     |   Female
+ * 
+ * <tag data="xxx" renderer="lov('gender', 'id', 'desc)">
+ * 如数据不会轻易变动，或不依赖索引，直接提供数组也可以
+ * <tag data="xxx" renderer="lov(gendor.rows, 'id', 'desc)">
+ */
+db2js.Renderers.Pipelines.lov = function(table, idColumn, nameColumn){
+	return function(element, value){
+		if(table instanceof Array){
+			var rows = table;
+			if(value instanceof Array){
+				return value.map(f)
+			} else {
+				return f(value);
+			}					
+		} else {
+			if(value instanceof Array){
+				return value.map(f2)
+			} else {
+				return f2(value);
+			}			
+		}
+		
+		function f(value){
+			var row = rows.filter(function(row){row[idColumn] == value})[0];
+			return row && row[nameColumn];
+		}
+		
+		function f2(value){
+			var row = db2js.dataset[table].find(idColumn, value);
+			return row && row[nameColumn];
+		}
+	}
+}
+
 
 
 
