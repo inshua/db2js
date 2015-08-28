@@ -291,6 +291,10 @@ db2js.Renderers.bootstrap.badge = db2js.KNOWN_RENDERERS['bootstrap.badge'] = fun
  * @param table
  */
 db2js.Renderers.pagination = db2js.KNOWN_RENDERERS['pagination'] = function(element,  value, table){
+	[{$:'.pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus, .pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus, .pagination > li > span:focus'
+		,cursor : 'pointer'
+	}].defCss();
+	
 	var ul = $(element);
 	ul.html('');
 	
