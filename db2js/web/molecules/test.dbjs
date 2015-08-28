@@ -5,6 +5,9 @@ dbjs.fetch = function(params){
 			if(params.name){
 				sql{. and strpos(name, :name) > 0 .}
 			}
+			if(params.gendor){
+				sql{. and gendor = :gendor .}
+			}
 		.}
 	.}
 	

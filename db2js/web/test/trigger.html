@@ -12,15 +12,15 @@
     <script src="../jslib/db2js/dataset.js"></script>
     <script src="../jslib/db2js/render.js"></script>
     <script src="../jslib/db2js/renderers.js"></script>
-    <script src="../jslib/db2js/pipelines.js"></script>
     <script src="../jslib/db2js/collector.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
 
     <script src="../jslib/molecule.js"></script>
-
+    
     <script>
         Molecule.ModulesPath = '/db2js/molecules/';
-        Molecule.loadHtml('test/basic.html');
-        Molecule.loadHtml('test/tree.html');
+        Molecule.loadHtml('/test/basic.html');
+        Molecule.loadHtml('/test/tree.html');
     </script>
 
     <style>
@@ -53,6 +53,7 @@
             function DropDown() {
             	this.isDropDown = true;
                 this.toggle = function () {
+                	debugger;
                     this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
                 }
                 this.setText = function (text) {
@@ -67,15 +68,13 @@
     <!-- 下拉列表
     	<div data-value="5" table="author" value-col="id" display-col=""></div> 
     -->
-    <div molecule-def="DropDownList" molecule="DropDown" select="single">
+    <div molecule-def="DropDownList" molecule="DropDown" select="single" escape-tag="th" collector="m|s" renderer="molecule">
         <div molecule="TableList" class="contaienr">
             <div molecule="TableError"></div>
            
             <table molecule="List">
                 <thead>
-                    <tr>
-                        <!-- {INNER_HTML} -->
-                    </tr>
+                    <!-- {INNER_HTML} -->
                 </thead>
             </table>
         </div>
@@ -112,6 +111,7 @@
         				var row = table.find(valueCol, value);
         				me.setText(row ? row[dispCol] : value);
         				if(me.container.find('.input-group-btn').is('.open')){
+        					debugger;
             				me.toggle();
         				}
         			}
@@ -119,11 +119,12 @@
             	this.setValue = function(value){this.container.find('[molecule-obj=List]').molecule().setValue(value);}
             	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
             }
-            // MOLECULE_DEF_END
-            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownList]');            
-            if(c.length && c.molecule()){
-            	DropDownList.call(c.molecule());
-            }
+            // MOLECULE_DEF_END            
+//             var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownList]');            
+//             if(c.length && c.molecule()){
+//             	DropDownList.call(c.molecule());
+//             }
+			Molecule.extend(DropDownList, document.currentScript);
         </script>
     </div>
     
@@ -131,15 +132,13 @@
     <!-- 下拉列表
     	<div data-value="5" table="author" value-col="id" display-col=""></div> 
     -->
-    <div molecule-def="DropDownTree" molecule="DropDown" select="single">
+    <div molecule-def="DropDownTree" molecule="DropDown" select="single" escape-tag="th" collector="m|s" renderer="molecule">
         <div molecule="TableList" class="contaienr">
             <div molecule="TableError"></div>
            
             <table molecule="Tree">
                 <thead>
-                    <tr>
-                        <!-- {INNER_HTML} -->
-                    </tr>
+                    <!-- {INNER_HTML} -->
                 </thead>
             </table>
         </div>
@@ -190,29 +189,34 @@
             	this.getValue = function(value){return this.container.find('[molecule-obj=Tree]').molecule().getValue();}
             }
             // MOLECULE_DEF_END
-            var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownTree]');            
-            if(c.length && c.molecule()){
-            	DropDownTree.call(c.molecule());
-            }
+//             var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownTree]');            
+//             if(c.length && c.molecule()){
+//             	DropDownTree.call(c.molecule());
+//             }
+            Molecule.extend(DropDownTree, document.currentScript);
         </script>
     </div>
 
 
     <div class="container">
           <label>Test</label>
-		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false">
-		  		<m:th molecule="SortHeader" col="id" text="ID"></m:th>
-		        <m:th molecule="SortHeader" col="name" text="Name"></m:th>
-		        <m:th molecule="SortHeader" col="email" text="Email"></m:th>
+		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="multi" show-header="false">
+		  		<tr>
+			  		<m:th molecule="Header" col="id" text="ID"></m:th>
+			        <m:th molecule="Header" col="name" text="Name"></m:th>
+			        <m:th molecule="Header" col="email" text="Email"></m:th>
+		        </tr>
 		  </div>
 		  
 		  
 		  <label>Test</label>
 		  <div molecule="DropDownTree" table="author" value-col="id" display-col="name" parent-col="parent_id" select="multi" show-header="true">
-				<m:th molecule="TreeNode" col="name" text="Name"></m:th>		  
-		  		<m:th molecule="SortHeader" col="id" text="ID"></m:th>
-		        <m:th molecule="SortHeader" col="name" text="Name"></m:th>
-		        <m:th molecule="SortHeader" col="email" text="Email"></m:th>
+		  		<tr>
+					<m:th molecule="TreeNode" col="name" text="Name"></m:th>		  
+			  		<m:th molecule="Header" col="id" text="ID"></m:th>
+			        <m:th molecule="Header" col="name" text="Name"></m:th>
+			        <m:th molecule="Header" col="email" text="Email"></m:th>
+		      	</tr>
 		  </div>
 		  
     </div> 
@@ -238,7 +242,6 @@
     });
 
     $(function () {
-    	return;
         table.fill([
 	        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
 	        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },

@@ -22,57 +22,6 @@
 <body>
     <table>
         <tr>
-    		<!-- 可排序的列头，<th col=xxx text=xxx [renderer=xxx,默认为 std] sortable="true|false"></th> -->
-            <th molecule-def="Header" renderer="std">
-                <a></a>
-                <script id="molecule">
-                    // MOLECULE_DEF
-                    var Header = function () {
-                        var table = this.container.closest('[table]').attr('table');
-                        var col = this.container.attr('col');
-                        var text = this.container.attr('text');
-                        this.container.attr('data-t', 'rows,N,' + col);
-
-                        var sortable = this.container.attr('sortable');
-                        sortable = (sortable && sortable != 'false')
-                        
-                        if(sortable){
-	                        var a = this.container.find('a');
-	                        a.attr('data', '#' + table);
-	                        a.attr('renderer', "sortLink('" + col + "','" + text + "')");
-                        } else {
-                        	a.outerHtml(text);
-                        }
-                    }
-                    db2js.Renderers.sortLink = function (colName, text) {
-                        return function (element, table) {
-                            var e = $(element);
-                            e.attr('href', '###');
-                            element.onclick = function () {
-                                var sort = {};
-                                var old = table.search._sorts && table.search._sorts[colName];
-                                if (old == 'asc') {
-                                    sort[colName] = 'desc';
-                                } else {
-                                    sort[colName] = 'asc';
-                                }
-                                table.search._sorts = sort;
-                                table.load();
-                            };
-                            var icon = null;
-                            var sorts = table.search._sorts || {};
-                            switch (sorts[colName]) {
-                                case 'asc': icon = 'glyphicon glyphicon-arrow-up'; break;
-                                case 'desc': icon = 'glyphicon glyphicon-arrow-down'; break;
-                            }
-                            e.html(text + (icon ? '<span class="' + icon + '">' : ''));
-                        }
-                    }
-                    // MOLECULE_DEF_END
-                    Molecule.create(Header, document.currentScript);
-                </script>
-            </th>
-            
             <!-- 树的缩进节点，<th col=xxx text=xxx></th> -->
             <th molecule-def="TreeNode" renderer="treeNode">
               	<script id="molecule">
