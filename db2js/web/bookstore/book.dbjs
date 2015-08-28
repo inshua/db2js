@@ -5,6 +5,15 @@ dbjs.fetch = function(params){
 			if(params.title){ 
 				sql{. and strpos(b.title, :title) > 0  .}
 			}
+			if(params.kind){
+				sql{. and b.kind = :kind  .}
+			}
+			if(params.author && params.author instanceof Array && params.author.length){
+				params.author = $ARRAY('int', params.author);
+				sql{. and b.author = ANY(:author) .}
+			} else if(params.author && (params.author *= 1)){
+				sql{. and b.author = :author .}
+			}
 		.}
 	.}
 	sql = this.orderBy(sql, params._sorts, {'b.title' : 'asc'});

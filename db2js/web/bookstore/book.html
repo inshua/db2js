@@ -153,7 +153,8 @@
 	
 	function search(form){
 		db2js.collect(form[0]);
-		books.load();
+		// books.load();
+		books.navigatePage(0);
 	}
 
 	db2js.Renderers.editLink = function(element, v, table){
