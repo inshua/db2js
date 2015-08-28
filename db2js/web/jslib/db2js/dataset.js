@@ -892,6 +892,13 @@ db2js.DataRow = function(table, rowData){
 		return table.findParentRows(this, parentTable)[0];
 	}
 	
+	/**
+	 * 为本数据行加上删除标记
+	 */
+	this._remove = function(){
+		this._state = 'remove';
+	}
+	
 	// 初始化
 	for(var i=0; i<table.columnNames.length; i++){
 		var cname = table.columnNames[i];
