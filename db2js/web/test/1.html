@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Db2js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="../jslib/bootstrap-3.3.4/css/bootstrap.css" rel="stylesheet" media="screen">
+    <script src="../jslib/jquery-1.10.2.js"></script>
+    <script src="../jslib/bootstrap-3.3.4/js/bootstrap.js"></script>
+
+    <script src="../jslib/date.js/Date.js"></script>
+
+    <script src="../jslib/db2js/dataset.js"></script>
+    <script src="../jslib/db2js/render.js"></script>
+    <script src="../jslib/db2js/renderers.js"></script>
+    <script src="../jslib/db2js/collector.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
+
+    <script src="../jslib/molecule.js"></script>
+	<script>
+        Molecule.ModulesPath = '/db2js/molecules/';
+        Molecule.loadHtml('/test/basic.html');
+        Molecule.loadHtml('/test/tree.html');
+        Molecule.loadHtml('/test/trigger.html');
+    </script>
+
+</head>
+<body>
+
+    <div molecule="TableList" table="book" edit-dialog="dialog1">
+        <h1>Book</h1>
+        <div>
+            <form class="form-inline text-right">
+                <div molecule="SearchFormItem" col="name" text="Name">
+                    <input type="text" molecule="SearchInput">
+                </div>
+                <div molecule="SearchFormSelectItem" col="kind" text="Kind" dict="book_kind">                    
+                </div>
+                <div molecule="SearchFormItem" col="author" text="Author">
+                    <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="multi" show-header="true" data="#book,search,params,author">
+                    	<tr>
+					  		<m:th molecule="Header" col="id" text="ID"></m:th>
+					        <m:th molecule="Header" col="name" text="Name"></m:th>
+					        <m:th molecule="Header" col="email" text="Email"></m:th>
+				        </tr>
+					</div>
+                </div>
+                <button molecule="SearchButton">Search</button>
+                <button molecule="AddButton">Add</button>                
+            </form>
+        </div>
+        <div molecule="TableError"></div>
+
+        <table molecule="List" show-header="true" select="none" allow-delete="true">
+            <thead>
+                <tr>
+                	<th molecule="CheckHeader"></th>
+                    <th molecule="Header" col="id" text="ID"></th>
+                    <th molecule="Header" col="title" text="Title" sortable="true"></th>
+                    <th molecule="Header" col="kind" text="Kind" dict="book_kind" renderer="dict|std"></th>
+                    <th molecule="Header" col="publish_date" text="Publish Date" format="yyyy-MM-dd" renderer="date|std"></th>
+                    <th data-t="rows,N,id" renderer="editLink"></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div molecule="Dialog" title="Book" id="dialog1" table="book">
+        <form>
+            <div molecule="FormItem" col="title" text="Title">
+                <input type="text" molecule="Input">
+            </div>
+            <div molecule="FormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',false)" >
+                <select molecule="Select"></select>
+            </div>
+            <div molecule="FormItem" col="kind" text="Kind" dict="book_kind">
+                <select molecule="Select"></select>
+            </div>
+            <div molecule="FormItem" col="publish_date" text="Publish Date">
+                <input type="date" molecule="Input" format="yyyy-MM-dd" renderer="date|std" collector="c|d|s">
+            </div>
+        </form>
+    </div>
+
+</body>
+<script>
+
+	Dicts.book_kind = {f :'小说', k : '武侠', p : '哲学'} 
+
+    var table = new db2js.DataTable('book', '../bookstore/book.dbjs', { pageSize: 5 });
+	table.search.params = {gendor : 'M'};
+    table.on('load', function (error) { db2js.render(null, this); });
+
+    table.load('fetch', {gendor : 'F'});
+    
+    var author = new db2js.DataTable('author', '../bookstore/author.dbjs');
+    author.load('listAll', function(error){ db2js.render(null, this); });
+    
+</script>
+</html>
