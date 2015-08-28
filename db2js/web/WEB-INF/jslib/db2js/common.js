@@ -992,9 +992,9 @@ DBJS.prototype.updateTable = function(table, parentRow, isSelf){
 				case 'remove' : 
 					row._children && updateChildren.call(this, row);
 					if(isSelf){
-						this.remove(row, table.columns);
+						this.destroy(row, table.columns);
 					} else {
-						this.callDbjs(src, 'remove', [row, table.columns]);
+						this.callDbjs(src, 'destroy', [row, table.columns]);
 					}
 					break;
 				case 'none' :
