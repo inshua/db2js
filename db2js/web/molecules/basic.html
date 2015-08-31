@@ -166,7 +166,7 @@
     		<table table=xxx [paging="true"] select="none|single|multi" show-header="true|false"></table>
     	当启用 select应设置 value-col="id"，之后可使用 $(table).data('value') 设置和获取选中的值，当为 multi 模式时，值为数组    	 
     -->
-    <table molecule-def="List" class="table table-striped" renderer="table" value-col="id" escape-tag="th">
+    <table molecule-def="List" class="table table-striped list" renderer="table" value-col="id" escape-tag="th">
         <!-- {INNER_HTML} -->
         <tbody class="empty">
         	<tr><td colspan="100%"></td></tr>
@@ -192,7 +192,8 @@
     		 {$ : 'table.table-selectable > tbody > tr', cursor : 'pointer'},
     		 {$ : 'tbody.empty > tr:nth-child(even)', height : '300px'},
     		 {$ : 'tbody.empty > tr:nth-child(odd)', display: 'none'},
-    		 {$ : 'tbody.empty > tr > td', 'vertical-align' : 'middle', 'text-align' : 'center'}
+    		 {$ : 'tbody.empty > tr > td', 'vertical-align' : 'middle', 'text-align' : 'center'},
+    		 {$ : 'table.list > thead > tr > th', 'white-space': 'nowrap'},
     		].defCss();
             function List() {
                 var table = this.container.closest('[table]').attr('table');
