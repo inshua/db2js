@@ -175,30 +175,37 @@ db2js.Renderers.table = db2js.KNOWN_RENDERERS['table'] = function(hTable,  value
 		columnRenders.push(attrs);
 	}
 
-	if(hTable.tBodies.length == 0){
+	var tBodyEmpty = hTable.querySelector('tbody.empty');
+	var tBody = hTable.querySelector('tbody.data');
+	if(tBody == null){
 		var tBody = hTable.createTBody();
+		tBody.className = 'data';
 	} else {
-		var tBody = hTable.tBodies[0];
 		while(tBody.rows.length){
 			tBody.rows[0].remove();
 		}
 	}
-	for(var i=0; i<table.rows.length; i++){
-		var tr = tBody.insertRow();
-		if(headRow.hasAttribute('data')){
-			tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + i));
+	if(table.rows.length == 0){
+		if(tBodyEmpty) tBodyEmpty.style.display = '';
+	} else {
+		if(tBodyEmpty) tBodyEmpty.style.display = 'none';
+		for(var i=0; i<table.rows.length; i++){
+			var tr = tBody.insertRow();
+			if(headRow.hasAttribute('data')){
+				tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + i));
+			}
+			columnRenders.forEach(function(column){
+				var cell = document.createElement('td');
+				for(var attr in column){if(column.hasOwnProperty(attr)){
+					if(attr == 'data'){
+						$(cell).attr('data', hTable.getAttribute('data') + ',' + column.data.replace(/,\s*N\s*,/, ',' + i + ','));
+					} else {
+						$(cell).attr(attr, column[attr]);
+					}
+				}}
+				tr.appendChild(cell);
+			});
 		}
-		columnRenders.forEach(function(column){
-			var cell = document.createElement('td');
-			for(var attr in column){if(column.hasOwnProperty(attr)){
-				if(attr == 'data'){
-					$(cell).attr('data', hTable.getAttribute('data') + ',' + column.data.replace(/,\s*N\s*,/, ',' + i + ','));
-				} else {
-					$(cell).attr(attr, column[attr]);
-				}
-			}}
-			tr.appendChild(cell);
-		});
 	}
 }
 
