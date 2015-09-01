@@ -310,9 +310,9 @@ Molecule.scanMolecules = function(starter, manual){
 			
 			var v = ele.getAttribute(attr);
 			if(attr == 'class' && v && v.charAt(0) == '+'){		// molecule="block" class="+ myclass"
-				v = instance.getAttribute(attr) + ' ' + v.substr(1);
+				v = (instance.getAttribute(attr) || '') + ' ' + v.substr(1);
 			} else if(attr == 'style' && v && v.charAt(0) == '+'){
-				v = instance.getAttribute(attr) + ' ' + v.substr(1);
+				v = (instance.getAttribute(attr) || '') + ' ' + v.substr(1);
 			}
 			instance.setAttribute(attr, v);
 		}
