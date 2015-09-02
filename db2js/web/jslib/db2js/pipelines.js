@@ -34,6 +34,11 @@ db2js.Renderers.Pipelines.date = function(element, value, table, _1, rows, index
  * 或
  * 		Dicts.gendor = {M : 'Male', F : 'Female'};
  * 		<input dict="gendor" data="xxx" renderer="dict|std">
+ * 
+ * 		<input data="xxx" renderer="dict(['正常','停用'])|std">
+ * 或
+ * 		Dicts.gendor = ['正常','停用'];
+ * 		<input dict="gendor" data="xxx" renderer="dict|std">
  */
 db2js.Renderers.Pipelines.dict = function(element, value, table, _1, rows, index, row, columnName){
 	if(element && element.tagName){	// if it's html element
@@ -41,6 +46,9 @@ db2js.Renderers.Pipelines.dict = function(element, value, table, _1, rows, index
 		var lov = element.getAttribute('dict');
 		if(!lov) return 'no dict attribute';
 		var dict = Dicts[lov];
+		if(dict instanceof Array){
+			dict = dict.reduce(function(acc, item){acc[item] = item; return acc}, {});
+		}
 		if(dict == null) return lov + ' not exist';
 		if(value instanceof Array){
 			return value.map(function(v){return dict[v] || v}) 
@@ -49,6 +57,9 @@ db2js.Renderers.Pipelines.dict = function(element, value, table, _1, rows, index
 		}
 	} else {
 		var dict = element;
+		if(dict instanceof Array){
+			dict = dict.reduce(function(acc, item){acc[item] = item; return acc}, {});
+		}
 		return function(element, value, table, _1, rows, index, row, columnName){
 			if(value == null) return '';
 			return dict[value] || '';
