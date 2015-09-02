@@ -35,6 +35,7 @@ db2js.Renderers.Pipelines.date = function(element, value, table, _1, rows, index
  * 		Dicts.gendor = {M : 'Male', F : 'Female'};
  * 		<input dict="gendor" data="xxx" renderer="dict|std">
  * 
+ * 词典也可以使用数组
  * 		<input data="xxx" renderer="dict(['正常','停用'])|std">
  * 或
  * 		Dicts.gendor = ['正常','停用'];
@@ -45,6 +46,7 @@ db2js.Renderers.Pipelines.dict = function(element, value, table, _1, rows, index
 		if(value == null) return null;
 		var lov = element.getAttribute('dict');
 		if(!lov) return 'no dict attribute';
+		if(lov == 'pilot_info_operation_base') debugger;
 		var dict = Dicts[lov];
 		if(dict instanceof Array){
 			dict = dict.reduce(function(acc, item){acc[item] = item; return acc}, {});
@@ -78,7 +80,9 @@ db2js.Renderers.Pipelines.dict = function(element, value, table, _1, rows, index
  *   <div data="#anything" dict="status" renderer="dictToList|options('name','id')">
  * 		<select data="#bindTable,rows,N,status" render="std"></select>
  *   </div>
- *  anything 可以随意提供一个可绑定数据,并不用于实际渲染，例如 dicts
+ *  anything 可以随意提供一个可绑定数据,并不用于实际渲染，例如 #dicts
+ *  
+ *  词典也可以是一个数组，同 dict 管道
  */
 db2js.Renderers.Pipelines.dictToList = function(element, value, table, _1, rows, index, row, columnName){
 	if(element && element.tagName){	// if it's html element
@@ -87,6 +91,9 @@ db2js.Renderers.Pipelines.dictToList = function(element, value, table, _1, rows,
 		if(!lov) return [];
 		var dict = Dicts[lov];
 		if(dict == null) return [];
+		if(dict instanceof Array){
+			dict = dict.reduce(function(acc, item){acc[item] = item; return acc}, {});
+		}
 		
 		var arr = [];
 		for(var k in dict){if(dict.hasOwnProperty(k)){
@@ -97,6 +104,9 @@ db2js.Renderers.Pipelines.dictToList = function(element, value, table, _1, rows,
 		var dict = element;
 		return function(element){
 			if(dict == null) return [];
+			if(dict instanceof Array){
+				dict = dict.reduce(function(acc, item){acc[item] = item; return acc}, {});
+			}
 			var arr = [];
 			for(var k in dict){if(dict.hasOwnProperty(k)){
 				arr.push({name : dict[k], id : k});
