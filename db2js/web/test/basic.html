@@ -232,6 +232,7 @@
     		 {$ : 'tbody.empty > tr:nth-child(odd)', display: 'none'},
     		 {$ : 'tbody.empty > tr > td', 'vertical-align' : 'middle', 'text-align' : 'center'},
     		 {$ : 'table.list > thead > tr > th', 'white-space': 'nowrap'},
+    		 {$ : '.list > tbody + tbody', 'border-top': '0px'}
     		].defCss();
             function List() {
                 var table = this.container.closest('[table]').attr('table');
@@ -389,6 +390,13 @@
         <div class="help-block with-errors" renderer="flderr"></div>
         <script id="molecule">
             // MOLECULE_DEF
+            [{$ : 'form.table-form', display: 'table'},
+        	 {$ : '.table-form > .form-group', display: 'table-row'},
+        	 {$ : '.table-form > .form-group > label, .form-group > .form-control' , display: 'table-cell'},        	
+        	 {$ : '.table-form > .form-group > label', 'padding-right': '8px', 'text-align': 'right', 'font-weight': 'normal'},
+        	 // {$ : 'form.table-form', 'min-height': '480px',	'max-height': '800px'; overflow: 'scroll'}
+        	].defCss();
+        	
             function FormItem() {
                 var table = this.container.closest('[table]').attr('table');
                 var col = this.container.attr('col');
@@ -583,6 +591,11 @@
         </div>
         <script id="molecule">
             // MOLECULE_DEF
+            [{$:'.modal-body',
+        		'min-height': '320px',
+        		'max-height': '640px',
+        		'overflow-y': 'scroll'}].defCss();
+            
             function Dialog() {
                 var title = this.container.attr('title');
                 this.container.find('.modal-title').html(title);
@@ -742,6 +755,76 @@
             Molecule.create(Confirm, document.currentScript);
          </script>
 	</div>
+	
+	<!--
+		复选框组
+	 -->
+	<div molecule-def="CheckGroup" renderer="molecule" collector="m|s">
+		<ul class="list-inline checkgroup" renderer="dictToList|checkgroup('name','id')" data="#dicts"></ul>
+        <script id="molecule">
+            // MOLECULE_DEF
+            function CheckGroup() {
+                var table = this.container.closest('[table]').attr('table');
+                var col = this.container.closest('[col]').attr('col');
+                this.container.attr('data', '#' + table + ',curr,' + col);
+
+                var dict = this.container.is('[dict]') || this.container.parent('[dict][molecule-obj=FormItem]').attr('dict');
+                var ckgrp = this.container.find('.checkgroup');
+                if(dict){                	
+                	ckgrp.attr('dict', dict);
+                }
+                
+                this.value = [];
+                
+                var me = this;
+                this.setValue = function(v){
+                	me.value = v;
+                	me.container.find('input[type=checkbox]').each(function(idx, ck){
+                		ck.checked = (v && v.indexOf(ck.value) != -1)
+                	});
+                }                
+                
+                this.getValue = function(){ return me.value; }
+                
+                this.updateValue = function(){
+                	var arr = [];
+                	me.container.find('input[type=checkbox]').each(function(idx, ck){
+                		if(ck.checked){
+                			arr.push(ck.value);
+                		}
+                	});
+                	me.value = arr;
+                }
+                
+                this.container.on('change', function(event){
+                	if(event.target && $(event.target).is('input[type=checkbox]')){
+                		me.updateValue();
+                		me.container.trigger('change', [me.value]);
+                	}
+                })
+            }
+            db2js.Renderers.checkgroup = function(dispCol, valueCol){
+            	return function(element, rows, table){
+	           		$(element).find('*').each(function(idx, ele){ele.remove()});
+	           		           	
+	           		if(rows == null) return;
+	           		for(var i=0; i<rows.length; i++){
+	           			var li = $(document.createElement('li'));
+	           			$(document.createElement('input'))
+	           				.attr('type', 'checkbox').val(rows[i][valueCol])
+	           				.appendTo(li);
+	           			$(document.createElement('span')).html(rows[i][dispCol]).appendTo(li);
+	           			li.appendTo(element);
+	           		}
+	           		var m = $(element).parent().molecule();
+	           		if(m) m.setValue(m.getValue());
+	            }
+            }
+            
+            // MOLECULE_DEF_END
+            Molecule.create(CheckGroup, document.currentScript);
+        </script>
+    </div>
     
 
     <div molecule="TableList" table="book" edit-dialog="dialog1" allow-remove="true">
