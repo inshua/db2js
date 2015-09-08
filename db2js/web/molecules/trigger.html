@@ -53,7 +53,6 @@
             function DropDown() {
             	this.isDropDown = true;
                 this.toggle = function () {
-                	debugger;
                     this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
                 }
                 this.setText = function (text) {
@@ -111,7 +110,6 @@
         				var row = table.find(valueCol, value);
         				me.setText(row ? row[dispCol] : value);
         				if(me.container.find('.input-group-btn').is('.open')){
-        					debugger;
             				me.toggle();
         				}
         			}
@@ -120,16 +118,12 @@
             	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
             }
             // MOLECULE_DEF_END            
-//             var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownList]');            
-//             if(c.length && c.molecule()){
-//             	DropDownList.call(c.molecule());
-//             }
 			Molecule.extend(DropDownList, document.currentScript);
         </script>
     </div>
     
     
-    <!-- 下拉列表
+    <!-- 下拉树
     	<div data-value="5" table="author" value-col="id" display-col=""></div> 
     -->
     <div molecule-def="DropDownTree" molecule="DropDown" select="single" escape-tag="th" collector="m|s" renderer="molecule">
@@ -189,10 +183,6 @@
             	this.getValue = function(value){return this.container.find('[molecule-obj=Tree]').molecule().getValue();}
             }
             // MOLECULE_DEF_END
-//             var c = $(document.currentScript||document.getElementById('molecule')).closest('[molecule-obj=DropDownTree]');            
-//             if(c.length && c.molecule()){
-//             	DropDownTree.call(c.molecule());
-//             }
             Molecule.extend(DropDownTree, document.currentScript);
         </script>
     </div>

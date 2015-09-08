@@ -206,7 +206,7 @@
 	                
 	                if(select == 'single'){
 	                	this.setValue = function(value){this.setMultiValue([value]);}
-	                	this.getValue = function(){return this.getMultiValue()[0];}
+	                	this.getValue = function(){return this.getMultiValue() && this.getMultiValue()[0];}
 	                }
 	                
 	            	break;

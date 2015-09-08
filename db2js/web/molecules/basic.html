@@ -259,7 +259,7 @@
                 	this.container.on('db2js.rendered', function f(event) {
                         if (event.target == me.container[0]) {
                             var storeValue = me.container.data('value'); 
-                            $(event.target).find('tbody>tr').each(function (idx, tr) {
+                            $(event.target).find('tbody.data>tr').each(function (idx, tr) {
                                 var row = db2js.locateData(tr)[0];
                                 var value = row[valueColumn];
                                 if(storeValue && storeValue == value){
@@ -300,7 +300,7 @@
 	                
 	                $(this.container).on('valuechange', function(evt, checked){
 	                	if(evt.target != me.container[0]){
-		                	me.container.find('tbody>tr').each(function(idx, tr){
+		                	me.container.find('tbody.data>tr').each(function(idx, tr){
 		                		var d = db2js.locateData(tr);
 		                		if(!d) return;
 		                		var row = d && d[0];
@@ -311,6 +311,7 @@
 	                            	$(tr).removeClass('info')
 	                            }
 		                	});
+		                	console.log(me.container[0] + ' trigger valuechange');
 		                	me.container.trigger('valuechange', [checked]);
 	                	}
 	                });
@@ -318,7 +319,7 @@
 	                this.container.on('db2js.rendered', function f(event) {
                         if (event.target == me.container[0]) {
                             var storeValue = me.container.data('value'); 
-                            $(event.target).find('tbody>tr').each(function(idx, tr){
+                            $(event.target).find('tbody.data>tr').each(function(idx, tr){
                             	$(tr).on('click', function(event){
                             		if($(event.target).is('td[molecule-obj=CheckHeader]>input')){
                             			return;

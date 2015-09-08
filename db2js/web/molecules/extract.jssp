@@ -53,13 +53,19 @@
 					var escapeTag = element.attr('escape-tag');
 					if(escapeTag) element.removeAttr('escape-tag');
 					
-					var html = element.outerHtml();
+					var html = element.html();
+					var attributes = {};
+					var lsAttrs = element.attributes().asList();
+					for(var i=0; i< lsAttrs.size(); i++){
+						var attr = lsAttrs.get(i);
+						attributes[attr.key] = attr.value; 
+					}
 					if(defines[module] == null) defines[module] = {};
 					if(defines[module][name] != null){
 						printError(fullname + ' defined more than one time');
 					}
 					var def = {name : name, module : module, depends : depends && depends.split(','), escapeTag : escapeTag, 
-		                         tagName : element.tagName(), html : html};
+		                         tagName : element.tagName(), html : html, attributes : attributes};
 					var n = element.nextElementSibling();
 					if(n && n.tagName() == 'script' && (n.attr('molecule-for') == fullname || n.attr('molecule-for') == name)){
 						def.script = n.html();

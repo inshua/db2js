@@ -22,7 +22,7 @@ function Molecule(container){
 	if(container.length == 0) debugger;
 	var me = this;
 	container.on('DOMNodeRemoved', function(evt){
-		if(container.is(evt.target)){
+		if(container[0] == evt.originalEvent.srcElement){
 			me.dispose && me.dispose();
 			delete Molecule.instances[me.id];
 		}
@@ -83,7 +83,7 @@ Molecule.create = function(fun, currentScript){
 		var id = Molecule.nextId(); 
 		obj = new Molecule(container);
 		obj.id = id;
-		Molecule.instances[id] = obj;
+		Molecule.instances[id] = obj;		
 		container.attr('molecule-id', id); 
 	} else {
 		obj = Molecule.instances[existed * 1]
@@ -159,7 +159,12 @@ Molecule.scanDefines = function(){
 		}
 		console.log('define molecule ' + fullname);
 		
-		var def = {name : r.name, depends : depends && depends.split(','), appeared : true, html : ele.outerHTML, escapeTag : escapeTag};
+		var attributes = {};
+		for(var i=0; i< ele.attributes.length; i++){
+			attributes[ele.attributes[i].name] = ele.getAttribute(ele.attributes[i].name); 
+		}
+		var def = {name : r.name, depends : depends && depends.split(','), appeared : true, 
+		           html : ele.innerHTML, attributes : attributes, escapeTag : escapeTag};
 		
 		var script = $(ele.nextElementSibling);
 		if(script.length && (script.attr('molecule-for') == fullname || script.attr('molecule-for') == r.name)){
@@ -247,18 +252,17 @@ Molecule.scanMolecules = function(starter, manual){
 	while(stk.length){
 		var ele = stk.pop();
 		if(ele.hasAttribute('molecule')){
-			// if(ele.getAttribute('molecule-init') == 'manual' && !manual) continue;		// 跳过声明为手工创建的元素
-			var ele = createMolecule(ele);
+			// if(ele.getAttribute('molecule-init') == 'manual' && !maual) continue;		// 跳过声明为手工创建的元素
+			var ele = createMolecule(ele, ele.getAttribute('molecule'));
 		}
 		for(var i=ele.children.length-1; i>=0; i--){
 			stk.push(ele.children[i]);
 		}
 	}
 	
-	function createMolecule(ele){
-		var fullname = ele.getAttribute('molecule');
-		var def = Molecule.definesByFullname[fullname];
-		var moduleDesc = Molecule.getModuleName(fullname);
+	function createMolecule(ele, moleculeName, inheritedDepth){
+		var def = Molecule.definesByFullname[moleculeName];
+		var moduleDesc = Molecule.getModuleName(moleculeName);
 		var name = moduleDesc.name;
 		var module = moduleDesc.module;
 		if(def == null){
@@ -276,64 +280,75 @@ Molecule.scanMolecules = function(starter, manual){
 			ensureDepends(def);
 			def.appeared = true;
 		}
+		var eleAttributes = {};
+		for(var i=0; i<ele.attributes.length; i++) {
+			eleAttributes[ele.attributes[i].name] = ele.getAttribute(ele.attributes[i].name); 
+		}
+		inheritedDepth = inheritedDepth || 0;
+		var inner = null;
+		if(inheritedDepth == 0){
+			inner = ele.innerHTML;
+		}
+		
+		var inherited = def.attributes['molecule'];		 
+		if(inherited){
+			ele = createMolecule(ele, def.attributes['molecule'], inheritedDepth + 1);
+		}
+		
 		var p = ele.parentElement;
 		var pos = getIndexInParent(ele, p);
 		
-		//console.info('process ' + name);
+		console.info(' '.repeat(inheritedDepth * 4) + ' process ' + name); 
 		
-		// if(name == 'List') debugger; 
+		// if(name == 'GreenBlock') debugger; 
 		
-		var inner = ele.innerHTML;		// 保留原来的子节点
-		if(def.escapeTag){
-//			console.log('unescape tag, from ')
-//			console.log(inner);
-			inner = unescapeTag(inner, def.escapeTag);
-//			console.log('to');
-//			console.log(inner);
-		}
-		// if(def.escapeTag) console.log('def escapeTag : ' + def.escapeTag);
-		
-		var replaceInnerHtml = (def.html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
-		ele.outerHTML = replaceInnerHtml ? def.html.replace('<!-- {INNER_HTML} -->', inner) : def.html;
-//		if(replaceInnerHtml){
-//			console.log('replace inner html, from ');
-//			console.log(def.html);
-//			console.log('to');
-//			console.log(def.html.replace('<!-- {INNER_HTML} -->', inner));
-//		}
-		
-		var instance = p.children[pos];
-		var inherited = (instance.hasAttribute('molecule') && instance.getAttribute('molecule') != fullname); // 继承自另一 molecule
-		for(var i=0; i<ele.attributes.length; i++){
-			var attr = ele.attributes[i].name;
+		var instance = ele;
+		for(var attr in def.attributes){if(def.attributes.hasOwnProperty(attr)){
 			if(attr.indexOf('molecule') == 0) continue;
 			
-			var v = ele.getAttribute(attr);
-			if(attr == 'class' && v && v.charAt(0) == '+'){		// molecule="block" class="+ myclass"
-				v = (instance.getAttribute(attr) || '') + ' ' + v.substr(1);
-			} else if(attr == 'style' && v && v.charAt(0) == '+'){
-				v = (instance.getAttribute(attr) || '') + ' ' + v.substr(1);
+			var v = instance.getAttribute(attr);
+			if(v){		// 应该覆盖的定义
+				if(eleAttributes[attr] == null){		// 是父类所赋予的属性而不是用户指定的，应当被子类覆盖
+					instance.setAttribute(attr, combineValue(attr, v, def.attributes[attr]));
+				} else {
+					instance.setAttribute(attr, combineValue(attr, def.attributes[attr], v));
+				}
+			} else {
+				instance.setAttribute(attr, def.attributes[attr]);
 			}
-			instance.setAttribute(attr, v);
-		}
-		if(ele.hasAttribute('molecule-obj') == false){
-			instance.setAttribute('molecule-obj', fullname);
-		} else {
-			instance.setAttribute('molecule-obj', ele.getAttribute('molecule-obj'));
-		}
-		if(inherited){
-			instance = createMolecule(instance);
-		} else {
-			instance.removeAttribute('molecule');
-		}
+		}}
 		
-		if(!replaceInnerHtml){
-			instance.insertAdjacentHTML('beforeEnd', inner);
+		if(ele.hasAttribute('molecule-obj') == false){
+			instance.setAttribute('molecule-obj', moleculeName);
 		}
+		instance.removeAttribute('molecule');
+		
+		if(!inherited){
+			if(inheritedDepth > 0){		// bottom
+				instance.innerHTML = def.html;
+			} else {		// == 0				
+				if(def.escapeTag){
+					inner = unescapeTag(inner, def.escapeTag);
+				}
+				replaceHtml(ele, def.html, inner, false);
+			}
+		} else {
+			if(inheritedDepth > 0){
+				replaceHtml(ele, ele.innerHTML, def.html, true);
+			} else {	// == 0
+				replaceHtml(ele, ele.innerHTML, def.html, true);
+				if(def.escapeTag){
+					inner = unescapeTag(inner, def.escapeTag);
+				}
+				replaceHtml(ele, ele.innerHTML, inner, true);
+			}			
+		}
+		//console.log('inner html become ');
+		//console.log(instance.innerHTML);
 		
 		if(def.script){
 			var script = document.createElement('script');
-			script.setAttribute('molecule-for', fullname);
+			script.setAttribute('molecule-for', moleculeName);
 			var t = 'temp';
 			instance.setAttribute('molecule-script-container', t);
 			script.setAttribute('molecule-script-target', t);
@@ -355,12 +370,32 @@ Molecule.scanMolecules = function(starter, manual){
 			def.defined = true;
 		}
 		
-		// console.log(fullname + ' inited')
+		// console.log(moleculeName + ' inited')
 		// console.log(ele);
-		$(ele).trigger('molecule-inited', [instance, fullname]);
-		$(instance).trigger('molecule-inited', [instance, fullname]);
+		$(instance).trigger('molecule-inited', [instance, moleculeName]);
+		
+		
+		function replaceHtml(ele, html, innerHtml, keep){
+			var replaceInnerHtml = (html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
+			if(replaceInnerHtml){
+				ele.innerHTML = html.replace('<!-- {INNER_HTML} -->', innerHtml);
+			} else {
+				if(!keep) ele.innerHTML = html;
+				instance.insertAdjacentHTML('beforeEnd', innerHtml);
+			}			
+		}
 		
 		return instance;
+	}
+	
+	function combineValue(attr, baseValue, inheritedValue){
+		if(attr == 'class' && inheritedValue && inheritedValue.charAt(0) == '+'){		// molecule="block" class="+ myclass"
+			return (baseValue || '') + ' ' + inheritedValue.substr(1);
+		} else if(attr == 'style' && inheritedValue && inheritedValue.charAt(0) == '+'){
+			return (baseValue || '') + ' ' + inheritedValue.substr(1);
+		} else {
+			return inheritedValue;
+		}
 	}
 	
 	function unescapeTag(html, tags){	// 遇到 <m:th> 之类替换为 <th>
