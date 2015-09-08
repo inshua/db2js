@@ -132,6 +132,7 @@ db2js.locateData = function(element, baseData, direct){
 	baseData = baseData || db2js.dataset;
 	var dataPath = element.getAttribute('data');
 	var data = [];
+	if(dataPath == null) return null;
 	this.extractData(baseData, dataPath, data, direct);
 	data.splice(0, 0, data[data.length - 1]);		// value 设为第一个值
 	return data;
