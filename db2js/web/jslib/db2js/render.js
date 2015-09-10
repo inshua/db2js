@@ -71,8 +71,9 @@ db2js.render = function(htmlElement, baseData, direct){
 		if(dataPath && renderer){
 			var data = [e]; 
 			var match = db2js.extractData(baseData, dataPath, data, direct);
-
 			if(match){
+				if(e.hasAttribute('trace-render')) debugger;
+				
 				data.splice(1, 0, data[data.length - 1]);		// value 始终作为第二个参数
 				
 				var pipelined = (renderer.indexOf('|') != -1);
