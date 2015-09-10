@@ -334,9 +334,11 @@ Molecule.scanMolecules = function(starter, manual){
 				resetScripts(ele); 
 				evalDefScript();
 				
-				replaceInner(ele, inner);
+				replaceHtml(ele, ele.innerHTML, inner, true);
+				resetScripts(ele);
 			} else {		// bottom			
 				instance.innerHTML = def.html;
+				resetScripts(ele);
 				evalDefScript();
 			}
 		} else {
@@ -360,51 +362,6 @@ Molecule.scanMolecules = function(starter, manual){
 		}
 		
 		$(instance).trigger('molecule-inited', [instance, moleculeName]);
-		
-		function replaceInner(ele, inner){	// 这种做法确保先执行类的脚本、再执行子类的脚本，先完成父类实例化，再套用进子类，但是无法应付父类模板依赖于子类提供的定制
-			var insertPoint = null;
-			for(var stk = [ele]; stk.length;){
-				var c = stk.pop();
-				if(c.nodeType == 8 && c.nodeValue.trim() == '{INNER_HTML}'){
-					insertPoint = c;
-					break;
-				}
-				for(var i=0; i<c.childNodes.length; i++){
-					stk.push(c.childNodes[i]);
-				}
-			}
-			var scripts = [];
-			if(insertPoint){
-				var p = insertPoint.previousSibling;				
-				var r = insertPoint.parentNode.insertBefore(document.createElement("some"),insertPoint);
-				r.outerHTML = inner;
-				var n = p.nextSibling;
-				do{
-					if(n.nodeType == 1){
-						if(n.tagName == 'SCRIPT') {
-							scripts.push(n);
-						} else {
-							$(n).find('script').each(function(idx, script){scripts.push(script);});
-						}
-					}
-					n = n.nextSibling;
-				} while(n && n != insertPoint); 
-				insertPoint.remove();
-			} else {
-				var last = ele.lastElementChild;
-				ele.insertAdjacentHTML('beforeEnd', inner);
-				var newHead = last ? last.nextElementSibling : ele.firstElementChild;
-				do{					
-					if(newHead.tagName == 'SCRIPT') {
-						scripts.push(newHead);
-					} else {
-						$(newHead).find('script').each(function(idx, script){scripts.push(script);});
-					}
-					newHead = newHead.nextSiblingElement;
-				} while(newHead);				
-			}
-			scripts.forEach(resetScript);
-		}
 		
 		function replaceHtml(ele, html, innerHtml, keep){
 			var replaceInnerHtml = (html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
@@ -472,7 +429,11 @@ Molecule.scanMolecules = function(starter, manual){
 	}
 	
 	function resetScripts(ele){		// 通过 insertAdjacentHTML 加入的 html中的script不会执行，通过该函数使之运行
-		$(ele).find('script').each(function(idx, script){resetScript(script)});
+		$(ele).find('script').each(function(idx, script){
+				if(!script.hasAttribute('done')) {
+					resetScript(script).setAttribute('done', true);
+				}
+			});
 	}
 	function resetScript(script){
 		var p = script.parentElement;
@@ -483,13 +444,14 @@ Molecule.scanMolecules = function(starter, manual){
 			copy.setAttribute(attr, script.getAttribute(attr));
 		}
 		var sibling = script.nextElementSilbling;
-		$(script).remove();
+		script.remove();
 		
 		if(sibling) {
 			p.insertBefore(copy, sibling);
 		} else {
 			p.appendChild(copy);
 		}
+		return copy;
 	}
 	
 	function removeDefineScript(html){		// 移除以 // MOLECULE_DEF ... // MOLECULE_DEF_END 括号包围的部分
