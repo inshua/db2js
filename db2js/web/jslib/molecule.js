@@ -253,6 +253,7 @@ Molecule.scanMolecules = function(starter, manual){
 		var ele = stk.pop();
 		if(ele.hasAttribute('molecule')){
 			// if(ele.getAttribute('molecule-init') == 'manual' && !maual) continue;		// 跳过声明为手工创建的元素
+			console.log('------------------------------'); 
 			var ele = createMolecule(ele, ele.getAttribute('molecule'));
 		}
 		for(var i=ele.children.length-1; i>=0; i--){
@@ -290,7 +291,9 @@ Molecule.scanMolecules = function(starter, manual){
 			inner = ele.innerHTML;
 		}
 		
-		var inherited = def.attributes['molecule'];		 
+		if(ele.hasAttribute('molecule-trace')) debugger;
+		
+		var inherited = def.attributes['molecule'];	
 		if(inherited){
 			ele = createMolecule(ele, def.attributes['molecule'], inheritedDepth + 1);
 		}
@@ -298,10 +301,9 @@ Molecule.scanMolecules = function(starter, manual){
 		var p = ele.parentElement;
 		var pos = getIndexInParent(ele, p);
 		
-		console.info(' '.repeat(inheritedDepth * 4) + ' process ' + name); 
+		console.info('.'.repeat(inheritedDepth * 4) + ' process ' + name); 
 		
-		if(ele.hasAttribute('molecule-trace')) debugger;
-		
+		// attributes
 		var instance = ele;
 		for(var attr in def.attributes){if(def.attributes.hasOwnProperty(attr)){
 			if(attr.indexOf('molecule') == 0) continue;
@@ -323,57 +325,86 @@ Molecule.scanMolecules = function(starter, manual){
 		}
 		instance.removeAttribute('molecule');
 		
+		// inner html
 		if(!inherited){
-			if(inheritedDepth > 0){		// bottom
+			if(inheritedDepth == 0){
+				if(def.escapeTag) inner = unescapeTag(inner, def.escapeTag);
+				
+				ele.innerHTML = def.html;
+				resetScripts(ele); 
+				evalDefScript();
+				
+				replaceInner(ele, inner);
+			} else {		// bottom			
 				instance.innerHTML = def.html;
-			} else {		// == 0				
-				if(def.escapeTag){
-					inner = unescapeTag(inner, def.escapeTag);
-				}
-				replaceHtml(ele, def.html, inner, false);
+				evalDefScript();
 			}
 		} else {
 			if(inheritedDepth > 0){
 				replaceHtml(ele, ele.innerHTML, def.html, true);
+				evalDefScript()
 			} else {	// == 0
 				replaceHtml(ele, ele.innerHTML, def.html, true);
+				evalDefScript();
 				if(def.escapeTag){
 					inner = unescapeTag(inner, def.escapeTag);
 				}
 				replaceHtml(ele, ele.innerHTML, inner, true);
 			}			
 		}
-		//console.log('inner html become ');
-		//console.log(instance.innerHTML);
-		
-		if(def.script){
-			var script = document.createElement('script');
-			script.setAttribute('molecule-for', moleculeName);
-			var t = 'temp';
-			instance.setAttribute('molecule-script-container', t);
-			script.setAttribute('molecule-script-target', t);
-			script.id = 'molecule';
-			script.innerHTML = def.script;
-			// if($(script).attr('molecule-for') == 'SearchButton') debugger;
-			if(instance.nextElementSilbling){
-				instance.parentElement.insertBefore(script, instance.nextElementSilbling);
-			} else {
-				instance.parentElement.appendChild(script);
-			}
-			instance.removeAttribute('molecule-script-container');
-		}
-		
-		resetScripts(instance);
+		// resetScripts(instance);
 		
 		if(!def.defined){
 			def.html = removeDefineScript(def.html);
 			def.defined = true;
 		}
 		
-		// console.log(moleculeName + ' inited')
-		// console.log(ele);
 		$(instance).trigger('molecule-inited', [instance, moleculeName]);
 		
+		function replaceInner(ele, inner){	// 这种做法确保先执行类的脚本、再执行子类的脚本，先完成父类实例化，再套用进子类，但是无法应付父类模板依赖于子类提供的定制
+			var insertPoint = null;
+			for(var stk = [ele]; stk.length;){
+				var c = stk.pop();
+				if(c.nodeType == 8 && c.nodeValue.trim() == '{INNER_HTML}'){
+					insertPoint = c;
+					break;
+				}
+				for(var i=0; i<c.childNodes.length; i++){
+					stk.push(c.childNodes[i]);
+				}
+			}
+			var scripts = [];
+			if(insertPoint){
+				var p = insertPoint.previousSibling;				
+				var r = insertPoint.parentNode.insertBefore(document.createElement("some"),insertPoint);
+				r.outerHTML = inner;
+				var n = p.nextSibling;
+				do{
+					if(n.nodeType == 1){
+						if(n.tagName == 'SCRIPT') {
+							scripts.push(n);
+						} else {
+							$(n).find('script').each(function(idx, script){scripts.push(script);});
+						}
+					}
+					n = n.nextSibling;
+				} while(n && n != insertPoint); 
+				insertPoint.remove();
+			} else {
+				var last = ele.lastElementChild;
+				ele.insertAdjacentHTML('beforeEnd', inner);
+				var newHead = last ? last.nextElementSibling : ele.firstElementChild;
+				do{					
+					if(newHead.tagName == 'SCRIPT') {
+						scripts.push(newHead);
+					} else {
+						$(newHead).find('script').each(function(idx, script){scripts.push(script);});
+					}
+					newHead = newHead.nextSiblingElement;
+				} while(newHead);				
+			}
+			scripts.forEach(resetScript);
+		}
 		
 		function replaceHtml(ele, html, innerHtml, keep){
 			var replaceInnerHtml = (html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
@@ -383,6 +414,25 @@ Molecule.scanMolecules = function(starter, manual){
 				if(!keep) ele.innerHTML = html;
 				instance.insertAdjacentHTML('beforeEnd', innerHtml);
 			}			
+		}
+		
+		function evalDefScript(){
+			if(def.script){
+				var script = document.createElement('script');
+				script.setAttribute('molecule-for', moleculeName);
+				var t = 'temp';
+				instance.setAttribute('molecule-script-container', t);
+				script.setAttribute('molecule-script-target', t);
+				script.id = 'molecule';
+				script.innerHTML = def.script;
+				// if($(script).attr('molecule-for') == 'SearchButton') debugger;
+				if(instance.nextElementSilbling){
+					instance.parentElement.insertBefore(script, instance.nextElementSilbling);
+				} else {
+					instance.parentElement.appendChild(script);
+				}
+				instance.removeAttribute('molecule-script-container');
+			}
 		}
 		
 		return instance;
@@ -421,24 +471,25 @@ Molecule.scanMolecules = function(starter, manual){
 		}
 	}
 	
-	function resetScripts(ele){		// 不如此不能让 script 再次运行
-		$(ele).find('script').each(function(idx, script){
-			var p = script.parentElement;
-			var copy = document.createElement('script');
-			copy.innerHTML = script.innerHTML;
-			for(var i=0; i<script.attributes.length; i++){
-				var attr = script.attributes[i].name;
-				copy.setAttribute(attr, script.getAttribute(attr));
-			}
-			var sibling = script.nextElementSilbling;
-			$(script).remove();
-			
-			if(sibling) {
-				p.insertBefore(copy, sibling);
-			} else {
-				p.appendChild(copy);
-			}
-		});
+	function resetScripts(ele){		// 通过 insertAdjacentHTML 加入的 html中的script不会执行，通过该函数使之运行
+		$(ele).find('script').each(function(idx, script){resetScript(script)});
+	}
+	function resetScript(script){
+		var p = script.parentElement;
+		var copy = document.createElement('script');
+		copy.innerHTML = script.innerHTML;
+		for(var i=0; i<script.attributes.length; i++){
+			var attr = script.attributes[i].name;
+			copy.setAttribute(attr, script.getAttribute(attr));
+		}
+		var sibling = script.nextElementSilbling;
+		$(script).remove();
+		
+		if(sibling) {
+			p.insertBefore(copy, sibling);
+		} else {
+			p.appendChild(copy);
+		}
 	}
 	
 	function removeDefineScript(html){		// 移除以 // MOLECULE_DEF ... // MOLECULE_DEF_END 括号包围的部分
