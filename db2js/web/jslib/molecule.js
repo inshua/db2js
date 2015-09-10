@@ -300,7 +300,7 @@ Molecule.scanMolecules = function(starter, manual){
 		
 		console.info(' '.repeat(inheritedDepth * 4) + ' process ' + name); 
 		
-		// if(name == 'GreenBlock') debugger; 
+		if(ele.hasAttribute('molecule-trace')) debugger;
 		
 		var instance = ele;
 		for(var attr in def.attributes){if(def.attributes.hasOwnProperty(attr)){
