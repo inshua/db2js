@@ -73,7 +73,7 @@ public class DbjsUnitManager extends ServerUnitManager {
 		if (otherArgs.get("preloadJs") != null) {
 			String[] preloadJs = (String[]) otherArgs.get("preloadJs");		// [abs path, alias]
 			logger.info("evaluate preload js: " + preloadJs[0]);
-			JsEngineUtil.eval(engine, preloadJs[1], FileUtils.readFileToString(new File(preloadJs[0]), "utf-8"), true, false);
+			JsEngineUtil.eval(engine, preloadJs[0], preloadJs[1], FileUtils.readFileToString(new File(preloadJs[0]), "utf-8"), true, false);
 		}
 
 		File src = new File(srcFile);
@@ -84,7 +84,7 @@ public class DbjsUnitManager extends ServerUnitManager {
 		if (logger.isDebugEnabled())
 			logger.debug(srcFile + " converted as " + tmp.getAbsolutePath());
 
-		JsEngineUtil.eval(engine, aliasPath, covertedCode, false, true);
+		JsEngineUtil.eval(engine, srcFile, aliasPath, covertedCode, false, true);
 
 		JsEngineHandlerContext ctxt = new JsEngineHandlerContext();
 		ctxt.setScriptEngine(engine);

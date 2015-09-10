@@ -308,10 +308,10 @@ public class JsEngineUtil {
 
 	public static Object eval(ScriptEngine jsEngine, String srcFile, String script, boolean preservePathInStack)
 			throws NoSuchMethodException, ScriptException {
-		return eval(jsEngine, srcFile, script, false, preservePathInStack);
+		return eval(jsEngine, srcFile, srcFile, script, false, preservePathInStack);
 	}
 
-	public static Object eval(ScriptEngine jsEngine, String srcFile, String script, boolean onlyOnce,
+	public static Object eval(ScriptEngine jsEngine, String srcFile, String aliasPath, String script, boolean onlyOnce,
 			boolean preservePathInStack) throws NoSuchMethodException, ScriptException {
 		ScriptObjectMirror importedFiles = (ScriptObjectMirror) jsEngine.get("IMPORTED_FILES");
 		if (importedFiles.containsKey(srcFile)) {
@@ -325,7 +325,7 @@ public class JsEngineUtil {
 		// stk.callMember("push", srcFile);
 
 		try {
-			return eval(jsEngine, srcFile, script);
+			return eval(jsEngine, aliasPath, script);
 		} catch (ScriptException e) {
 			throw e;
 		} finally {
