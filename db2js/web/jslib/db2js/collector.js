@@ -48,6 +48,7 @@ db2js.collect = function(htmlElement, baseData, direct){
 		var dataPath = e.getAttribute('data');
 		var collector = e.getAttribute('collector');
 		if(dataPath && collector){
+			if(e.hasAttribute('trace-collect')) debugger;
 			var data = [e]; 
 			var match = db2js.extractData(baseData, dataPath, data, direct);
 
@@ -69,6 +70,7 @@ db2js.collect = function(htmlElement, baseData, direct){
 				} 
 				var fun = extractCollector(collector.trim());
 				fun.apply(null, data);
+				$(e).trigger('db2js.collected', data);
 			}
 		}
 		
@@ -166,4 +168,22 @@ db2js.Collectors.Pipelines.m = db2js.KNOWN_COLLECT_PIPELINES['m'] = function(ele
 	} else {
 		return m.getValue();
 	}
+}
+
+
+/**
+ * repeater 收集器
+ * usage:
+ * <div data="#authors,rows" collector="repeater">
+		<h2 repeater="true"><span data="name" renderer="std"></span></h2>
+		<h2 repeater-empty="true">no data found</h2>
+	</div>
+ */
+db2js.Collectors.repeater = function(element, rows){
+	var e = $(element);
+	var copies = e.find('[repeater-copy]');
+	copies.each(function(idx, c){
+		var row = $(c).data('repeater-obj');
+		if(row) db2js.collect(c, row, true);
+	});
 }
