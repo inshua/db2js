@@ -248,7 +248,7 @@ db2js.Renderers.repeater = function(element, rows){
 	var repeater = e.find('[repeater]');
 	repeater.hide();
 	
-	if(rows.length == 0){
+	if(rows == null || rows.length == 0){
 		e.find('[repeater-empty]').show();
 	} else {
 		e.find('[repeater-empty]').hide();
@@ -256,6 +256,7 @@ db2js.Renderers.repeater = function(element, rows){
 		for(var i=0; i<rows.length; i++){
 			var r = repeater.clone();
 			r.attr('repeater-copy', true);
+			r.data('repeater-obj', rows[i]);
 			db2js.render(r[0], rows[i], true);
 			r.show();
 			r.insertAfter(prev);
