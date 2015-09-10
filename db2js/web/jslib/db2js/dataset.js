@@ -599,7 +599,7 @@ db2js.DataTable.prototype.buildIndexes = function(){
 			for(var j=0; j< this.indexedColumns.length; j++){
 				var cname = this.indexedColumns[j];
 				var v = row[cname];
-				if(v != null && v != ''){
+				if(v != null && v !== ''){
 					if(this.indexes[cname][v]) throw new Error('unable to create index since same value '  + v + ' existed');
 					this.indexes[cname][v] = row;
 				}
@@ -780,7 +780,7 @@ db2js.DataRow = function(table, rowData){
 	this._error = null;
 	
 	function processValue(v){
-		if(v == null) return null;
+		if(v == null || v == '') return null;
 		return v;
 	}
 	
@@ -790,7 +790,7 @@ db2js.DataRow = function(table, rowData){
 	 */
 	this._set = function(column, value){
 		var v = processValue(value);
-		if(this[column] != v){
+		if(this[column] != v){			
 			if(this._state == 'none') {
 				this._state = 'edit';
 				if(this._origin == null){
@@ -838,6 +838,9 @@ db2js.DataRow = function(table, rowData){
 			return true;
 		case 'new':
 			this._state = 'none';
+			return true;
+		case 'remove' :
+			this._table.rows.splice(this._table.rows.indexOf(this), 1);
 			return true;
 		}
 	}
