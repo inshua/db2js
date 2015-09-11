@@ -135,6 +135,12 @@ db2js.DataTable = function (name, url, option){
 		}}
 	}
 	
+	if(!this.isSilent){
+		this.on('*', function(){ 
+			db2js.render(null, this);
+		});
+	}
+	
 	/**
 	 * 索引化字段列表,可人工设置的数组，如 table.indexedColumns = ['id']; 之后调用 table.buildIndexes() 重建索引，以后使用 find('id', 2) 就会使用索引
 	 * 用于索引的字段，值必须唯一
@@ -730,7 +736,7 @@ function EventDispatcher(){
 			}
 			return;
 		}
-		this.listeners[eventName].push(listener.bind(this));
+		this.listeners[eventName].push(listener);
 		return this;
 	}
 	
