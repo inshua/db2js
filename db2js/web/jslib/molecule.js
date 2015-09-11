@@ -362,10 +362,24 @@ Molecule.scanMolecules = function(starter, manual){
 		$(ele).trigger('molecule-inited', [ele, def.fullname]);
 		
 		function replaceHtml(ele, innerHtml){
-			var html = ele.innerHTML;
-			var replaceInnerHtml = (html.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
+			var replaceInnerHtml = (ele.innerHTML.indexOf('<!-- {INNER_HTML} -->') != -1);		// Inner Html 替换点，实例自身的 html 默认放在最末尾，如果指定了替换点，则放置于替换点
 			if(replaceInnerHtml){
-				ele.innerHTML = html.replace('<!-- {INNER_HTML} -->', innerHtml);
+				var insertPoint = null;
+				for(var stk = [ele]; stk.length;){
+					var c = stk.pop();
+					if(c.nodeType == 8 && c.nodeValue.trim() == '{INNER_HTML}'){
+						insertPoint = c;
+						break;
+					}
+					for(var i=0; i<c.childNodes.length; i++){
+						stk.push(c.childNodes[i]);
+					}
+				}
+				var scripts = [];
+				var p = insertPoint.previousSibling;				
+				var r = insertPoint.parentNode.insertBefore(document.createElement("something"), insertPoint);
+				r.outerHTML = innerHtml;
+				insertPoint.remove();
 			} else {
 				ele.insertAdjacentHTML('beforeEnd', innerHtml);
 			}			
