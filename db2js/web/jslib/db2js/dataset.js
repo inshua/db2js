@@ -731,6 +731,7 @@ function EventDispatcher(){
 			return;
 		}
 		this.listeners[eventName].push(listener.bind(this));
+		return this;
 	}
 	
 	this.fireEvent = function(eventName){
