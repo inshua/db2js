@@ -287,7 +287,7 @@ Molecule.scanMolecules = function(starter, manual){
 	}
 	
 	function createMolecule(ele){
-		console.log('------------------------------'); 
+		if(Molecule.debug) console.log('------------------------------'); 
 		var def = findMoleculeDef(ele.getAttribute('molecule'));
 		
 		var eleAttributes = {};
@@ -306,7 +306,7 @@ Molecule.scanMolecules = function(starter, manual){
 		}
 		for(var d = defs.length -1; d >=0; d--){	// 逐代设置属性
 			var def = defs[d];
-			console.info('.'.repeat(d * 4) + ' process ' + def.name);
+			if(Molecule.debug) console.info('.'.repeat(d * 4) + ' process ' + def.name);
 			
 			for(var attr in def.attributes){if(def.attributes.hasOwnProperty(attr)){
 				if(attr.indexOf('molecule') == 0) continue;
