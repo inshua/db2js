@@ -347,6 +347,7 @@ Molecule.scanMolecules = function(starter, manual){
 			executeScriptsOfGen(ele, d);
 		}
 		executeScriptsOfGen(ele, -1);
+		Molecule.currentContainer = null;
 		
 		
 		if(ele.hasAttribute('molecule-obj') == false){
@@ -399,6 +400,7 @@ Molecule.scanMolecules = function(starter, manual){
 				var copy = resetScript(script);
 				copy.removeAttribute('gen');
 				copy.setAttribute('done', true);
+				Molecule.currentContainer = null;
 			});
 		}
 		
@@ -481,6 +483,7 @@ Molecule.scanMolecules = function(starter, manual){
 		} else {
 			p.appendChild(copy);
 		}
+		Molecule.currentScript = null;
 		return copy;
 	}
 	
