@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="../jslib/jquery-1.10.2.js"></script>
+<script src="../jslib/molecule.js"></script>
+</head>
+<body>
+	<script>Molecule.debug = true </script>
+	
+	<div molecule-def="RedBlock" class="red-block">
+		<!-- {INNER_HTML} -->
+		RED BLOCK
+		<script id="molecule">
+			// MOLECULE_DEF
+			[{$ : '.red-block', 'background-color': 'red', 'min-width':'100px', 'min-height': '100px', margin: '4px'}].defCss();
+			function RedBlock(){
+				this.setBackColor = function(color){
+					var ele = this.container[0];
+					ele.style.backgroundColor = color;
+				}
+			}
+			// MOLECULE_DEF_END
+			console.log('create RedBlock');
+			Molecule.create(RedBlock);
+		</script>
+	</div>
+	
+	<div molecule="RedBlock">
+		one red
+		<script>
+			if(Molecule.processing){
+				console.log('red block object clone');
+			}
+		</script>
+	</div>
+	
+	<div molecule="RedBlock" class="+ green" molecule-def="GreenBlock">
+		<script>
+			if(Molecule.processing){
+				console.log('create green block in def');
+			}
+		</script>
+		<!-- {INNER_HTML} -->
+		GREEN BLOCK
+		<script>
+			// MOLECULE_DEF
+			[{$ : '.green', 'background-color': 'green'}].defCss();
+			// MOLECULE_DEF_END
+		</script>
+	</div>
+	
+	<div molecule="GreenBlock">
+		one green
+		<script>
+			if(Molecule.processing){	
+				console.log('create green block');
+			}
+		</script>
+	</div>
+	
+	
+	<div molecule="GreenBlock" class="+ yellow">
+		let green to yellow
+		<style>
+			.yellow{
+				background-color: yellow; 
+			}
+		</style>
+		<script>
+			if(Molecule.processing){	
+				console.log('create yellow block');
+			}
+		</script>
+	</div>
+	
+	
+	<div molecule="GreenBlock" class="+ yellow" molecule-def="YellowBlock">
+		<!-- {INNER_HTML} -->
+		YELLOW BLOCK
+		<script>
+			// MOLECULE_DEF
+			[{$ : '.yellow', 'background-color': 'yellow'}].defCss();
+			// MOLECULE_DEF_END
+			if(Molecule.processing){	
+				console.log('create yellow block');
+			}
+		</script>
+	</div>
+	
+	<div molecule="YellowBlock">
+		one yellow
+	</div>
+	
+	<div molecule="YellowBlock">
+		<div molecule="RedBlock">
+			<div molecule="GreenBlock"></div>
+		</div>
+	</div>	
+	
+</body>
+</html>

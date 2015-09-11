@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="../jslib/jquery-1.10.2.js"></script>
+<script src="../jslib/molecule.js"></script>
+</head>
+<body>
+	<div molecule-def="RedBlock" class="red-block">
+		RED BLOCK
+		<style>
+			.red-block{
+				background-color: red; width:100px; height: 100px; margin: 4px;
+			}
+		</style>
+		<script id="molecule">
+		// MOLECULE_DEF
+			function RedBlock(){
+				this.setBackColor = function(color){
+					var ele = this.container[0];
+					ele.style.backgroundColor = color;
+				}
+			}
+		// MOLECULE_DEF_END
+			Molecule.create(RedBlock, document.currentScript);
+		</script>
+	</div>
+	
+	<div molecule="RedBlock">
+		<script>
+			//if($(document.currentScript.parentElement).molecule()){	
+				console.log('create red block');
+			//}
+		</script>
+	</div>
+	
+	<div molecule="RedBlock" class="+ green" molecule-def="GreenBlock">
+		<script>
+			//if($(document.currentScript.parentElement).molecule()){
+				console.log('create green block in def');
+			//}
+		</script>
+		GREEN BLOCK
+		<style>
+			.green{
+				background-color: green;
+			}
+		</style>
+	</div>
+	
+	<div molecule="GreenBlock">
+		<script>
+			//if($(document.currentScript.parentElement).molecule()){	
+				console.log('create green block');
+			//}
+		</script>
+	</div>
+	
+	
+	<div molecule="GreenBlock" class="+ yellow">
+		Yellow Block
+		<style>
+			.yellow{
+				background-color: yellow; 
+			}
+		</style>
+		<script>
+			//if($(document.currentScript.parentElement).molecule()){	
+				console.log('create yellow block');
+			//}
+		</script>
+	</div>
+	
+	
+</body>
+</html>
