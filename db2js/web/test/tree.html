@@ -108,7 +108,7 @@
     	select 选择模式
     	show-header 是否显示表头
     -->
-    <table molecule-def="Tree" class="table table-striped" renderer="tree" paging="true" checkable="false">
+    <table molecule-def="Tree" class="table table-striped" renderer="tree" checkable="false">
         <!-- {INNER_HTML} -->
         <tfoot>
             <tr>
@@ -128,7 +128,7 @@
             function Tree() {
                 var table = this.container.closest('[table]').attr('table');
                 this.container.attr('data', '#' + table);
-                var paging = this.container.attr('paging');
+                var paging = this.container.closest('[paging]').attr('paging');
                 if (paging == 'false') {
                     this.container.find('.pagination').closest('tfoot').remove();
                 } else {
