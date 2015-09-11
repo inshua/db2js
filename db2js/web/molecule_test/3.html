@@ -15,8 +15,8 @@
 	
 	<div molecule="GreenBlock">
 		<script>
-			var obj = Molecule.of(document.currentScript.parentElement);
-			if(obj){		// molecule 是通过修改 outerHTML 实现的，在修改完成前，取不到实例
+			if(Molecule.processing){
+				var obj = Molecule.of(Molecule.currentContainer);			
 				console.log('after init instance complete, set bk color to yellow');
 				obj.setBackColor('yellow');
 			}
@@ -26,14 +26,16 @@
 	
 	<div molecule="GreenBlock" molecule-def="YellowBlock">
 		<script>
-			var obj = Molecule.of(document.currentScript.parentElement);
-			if(obj){
+			if(Molecule.processing){
+				var obj = Molecule.of(Molecule.currentContainer);
 				obj.setBackColor('yellow');
 			}
 		</script>
 	</div>
 	
-	<div molecule="YellowBlock"></div>
+	<div molecule="YellowBlock" id="aa">
+		yellow intance
+	</div>
 	
 	<!-- TODO -->
 <!-- 	<div molecule="GreenBlock"> -->

@@ -9,16 +9,16 @@
 <body>
 
 	<div molecule-def="Block" style="background-color: red; width:100px; height: 100px; margin: 4px;">
-		<script id="molecule">
-			if(typeof Block == 'undefined'){
-				function Block(){
-					this.setBackColor = function(color){
-						var ele = this.container[0];
-						ele.style.backgroundColor = color;
-					}
+		<script>
+			// MOLECULE_DEF
+			function Block(){
+				this.setBackColor = function(color){
+					var ele = this.container[0];
+					ele.style.backgroundColor = color;
 				}
 			}
-			Molecule.create(Block, document.currentScript);
+			// MOLECULE_DEF_END
+			Molecule.create(Block);
 		</script>
 	</div>
 	

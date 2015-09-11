@@ -10,21 +10,22 @@
 	这个分子定义于页面内部，Molecule 会自动将定义提出，并删除定义元素。
 	<ol>
 		<li>molecule 使用 molecule-def="包名.分子名" depends="依赖包,依赖包,..." 定义，任何 html 元素都可以变为 molecule<small>包名中可以有 .，不写则默认为 noname</small></li>
-		<li>能动的  molecule 末尾调用 Molecule.create(Function, document.currentScript) 函数，完成 js 和元素间的绑定，使其变为能响应的分子，称之为生命类</li>
-		<li>生命类总是用 if(typeof Function == 'undefined') 判断是否已经定义过了</li>
-		<li>生命类所在的 &lt;script&gt;需要加上 id="molecule",如果不考虑兼容 ie，也可以不加</li>
+		<li>能动的  molecule 末尾调用 Molecule.create(Function) 函数，完成 js 和元素间的绑定，使其变为能响应的分子，称之为生命类</li>
+		<li>生命类定义用 // MOLECULE_DEF, // MOLECULE_DEF_END 包括</li>
 		<li>molecule 实例只要使用 molecule="包名.分子名" 即可创建</li>
 		<li>创建 molecule 实例不需要再执行任何脚本，像 $(createElement(tag)).attr('molecule', '分子名').appendTo(element) 或其它修改 DOM 的方式都可以生效</li>
-		<li>可以通过 Molecule.of(html element) 获取实例的 js 生命对象</li>
+		<li>可以通过 Molecule.of(html element) 或  $(ele).molecule() 获取实例的 js 生命对象</li>
 		<li>molecule 生命类在实例化后，因为是调用 Molecule.create()创建，所以总是派生自 Molecule类，获得该类的方法</li>
 		<li>当 molecule 实例的 html 元素删除时，生命对象也伴随销毁</li>
 		<li>在设计molecule时，可设置 Molecule.TEST_DEFINE = true; 使 molecule-def 元素不被销毁</li>
 		<li>可以重载 dispose 函数 this.dispose= function(){} 进行收尾工作</li>
 		<li>molecule 实例的 html 元素，可以有自己的 innerHTML，这段 html 会追加到 molecule实例化后的 html 末尾</li>
+		<li>也可在 molecule 定义中插入 &lt;!-- {INNER_HTML} --&gt; ，作为实例的插入点</li>
+		<li>实例中的script脚本，会在置入 html 后再执行，所以实例可以放心的使用 molecule 对象，但是应该检查 Molecule.processing == true，避免在 molecule 未启动时执行</li>
 		<li>molecule 实例自定义的 html attribute，在实例化后仍然保留, 通过以上两项可以进行html层面的重载</li>
 		<li>在 molecule 定义中夹杂 css 脚本，可以使css样式、html元素、能动函数混为一体</li>
 		<li>molecule 生命函数可以通过 this.container 访问html元素</li>
-		<li>实例的 html 元素可以通过设置 data-param1="" data-param2="" data-option="json" 提供初始化参数，以实现参数化</li>
+		<li>实例的 html 元素可以通过设置 param1="" param2="" data-option="json" 提供初始化参数，以实现参数化</li>
 		<li>实例显然也可以重载 css 样式表，因为实例自身的 css 样式表总是能覆盖模板的样式表，但是这种覆盖也会影响其它实例，自己想想办法(见下面的例子)</li>
 		<li>实例的 class 和 style 属性，可以使用头字符 +，表示引用 molecule 模板的 css 或 style</li> 
 		<li>实例可以嵌套入其它 molecule，形成更大元素，这种元素可以加上 molecule-def 导出为新的大分子，也就是说分子可以聚合为更大的分子</li>
