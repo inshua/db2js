@@ -73,6 +73,7 @@ Molecule._locateContainer = function(currentScript){
 }
 
 Molecule.create = function(fun, currentScript){
+	if(!Molecule.processing) return;
 	currentScript = Molecule.currentScript || currentScript || document.getElementById('molecule');		// for ie
 	var container = Molecule.currentContainer || Molecule._locateContainer(currentScript);
 	if(container == null) return;
@@ -109,6 +110,8 @@ Molecule.create = function(fun, currentScript){
  * @param currentScript 调用中的 document.currentScript
  */
 Molecule.extend = function(fun, currentScript){
+	if(!Molecule.processing) return;
+	
 	currentScript = Molecule.currentScript || currentScript || document.getElementById('molecule');		// for ie
 
 	var container = Molecule.currentContainer || Molecule._locateContainer(currentScript);
