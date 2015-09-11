@@ -255,7 +255,9 @@ Molecule.scanMolecules = function(starter, manual){
 		var ele = stk.pop();
 		if(ele.hasAttribute('molecule')){
 			// if(ele.getAttribute('molecule-init') == 'manual' && !maual) continue;		// 跳过声明为手工创建的元素
-			var ele = createMolecule(ele);
+			Molecule.processing = true;		// 检查此变量确定是否在 molecule 过程中，如不在过程中可以跳过部分代码
+			createMolecule(ele);
+			Molecule.processing = false;
 		}
 		for(var i=ele.children.length-1; i>=0; i--){
 			stk.push(ele.children[i]);
@@ -304,9 +306,12 @@ Molecule.scanMolecules = function(starter, manual){
 			def = findMoleculeDef(def.attributes['molecule']);
 			defs.push(def);
 		}
+		if(Molecule.debug) {
+			console.info('process ' + def.name + ',hierachy path ' + defs.map(function(def){return def.fullname}).join());
+		}
+		
 		for(var d = defs.length -1; d >=0; d--){	// 逐代设置属性
 			var def = defs[d];
-			if(Molecule.debug) console.info('.'.repeat(d * 4) + ' process ' + def.name);
 			
 			for(var attr in def.attributes){if(def.attributes.hasOwnProperty(attr)){
 				if(attr.indexOf('molecule') == 0) continue;
