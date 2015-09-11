@@ -27,7 +27,7 @@
     		<!-- 可排序的列头，<th col=xxx text=xxx [renderer=xxx,默认为 std] sortable="true|false"></th> -->
             <th molecule-def="Header" renderer="std">
                 <a></a>
-                <script id="molecule">
+                <script>
                     // MOLECULE_DEF
                     function Header() {
                         var table = this.container.closest('[table]').attr('table');
@@ -71,7 +71,7 @@
                         }
                     }
                     // MOLECULE_DEF_END
-                    Molecule.create(Header, document.currentScript);
+                    Molecule.create(Header);
                 </script>
             </th>
             <!-- 
@@ -79,7 +79,7 @@
             -->
             <th molecule-def="CheckHeader" renderer="check">
                 <input type="checkbox" id="ckAll">
-                <script id="molecule">
+                <script>
                     // MOLECULE_DEF
                     function CheckHeader() {
                         var checked = [];
@@ -156,7 +156,7 @@
                         });
                     }
                     // MOLECULE_DEF_END
-                    Molecule.create(CheckHeader, document.currentScript);
+                    Molecule.create(CheckHeader);
                 </script>
             </th>
             
@@ -195,7 +195,7 @@
 	                }
 	            }
 	            // MOLECULE_DEF_END
-	            Molecule.create(ActionHeader, document.currentScript);
+	            Molecule.create(ActionHeader);
 		    </script>
         </tr>
     </table>
@@ -223,7 +223,7 @@
                 </td>
             </tr>
         </tfoot>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
     		[
     		 {$ : 'table.table-selectable > tbody > tr > td', 'border-top': '0px'}, 
@@ -380,7 +380,7 @@
             	}
             }
             // MOLECULE_DEF_END
-            Molecule.create(List, document.currentScript);
+            Molecule.create(List);
         </script>
     </table>
 
@@ -389,7 +389,7 @@
         <label></label>
         <!-- {INNER_HTML} -->
         <div class="help-block with-errors" renderer="flderr"></div>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             [{$ : 'form.table-form', display: 'table'},
         	 {$ : '.table-form > .form-group', display: 'table-row'},
@@ -412,14 +412,14 @@
                 }
             }
             // MOLECULE_DEF_END
-            Molecule.create(FormItem, document.currentScript);
+            Molecule.create(FormItem);
         </script>
     </div>
     
     <div molecule-def="FormImageItem" molecule="FormItem" renderer="molecule" collector="m|s">
         <img id="imgPreview" class="form-control">
         <input type="file" accept="images/*" capture="camera" class="form-control" class="hide">
-        <script id="molecule">
+        <script>
 	        // MOLECULE_DEF
 	        [{$ : 'div[molecule-obj=FormImageItem] > label', 'vertical-align' : 'top'}].defCss();
 	        function FormImageItem() {
@@ -457,7 +457,7 @@
 	            }
 	        }
 	        // MOLECULE_DEF_END
-	        Molecule.extend(FormImageItem, document.currentScript);
+	        Molecule.extend(FormImageItem);
         </script>
     </div>
     
@@ -466,7 +466,7 @@
     <div molecule-def="SearchFormItem" class="form-group">
         <label></label>
         <!-- {INNER_HTML} -->
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function SearchFormItem() {
                 var table = this.container.closest('[table]').attr('table');
@@ -476,7 +476,7 @@
                 this.container.find('label').html(text);
             }
             // MOLECULE_DEF_END
-            Molecule.create(SearchFormItem, document.currentScript);
+            Molecule.create(SearchFormItem);
         </script>
     </div>
 
@@ -491,7 +491,7 @@
             this.container.attr('data', '#' + table + ',curr,' + col);
         }
         // MOLECULE_DEF_END
-        Molecule.create(Input, document.currentScript);
+        Molecule.create(Input);
     </script>
     
 	<!-- 输入的 input, 放在 SearchFormItem 内
@@ -510,7 +510,7 @@
             this.container.attr('data', '#' + table + ',search,params,' + col);
         }
         // MOLECULE_DEF_END
-        Molecule.create(SearchInput, document.currentScript);
+        Molecule.create(SearchInput);
     </script>
 
 	<!-- 输入的 select, 放在 SearchFormItem 内
@@ -530,7 +530,7 @@
             db2js.render(this.container.parent());
         }
         // MOLECULE_DEF_END
-        Molecule.create(SearchSelect, document.currentScript);
+        Molecule.create(SearchSelect);
     </script>
     
     
@@ -554,7 +554,7 @@
 	            db2js.render(this.container);
 	        }
 	        // MOLECULE_DEF_END
-	        Molecule.create(SearchFormSelectItem, document.currentScript);
+	        Molecule.create(SearchFormSelectItem);
 		</script>
 	</div>
 	
@@ -569,7 +569,7 @@
             this.container.attr('data', '#' + table + ',curr,' + col);
         }
         // MOLECULE_DEF_END
-        Molecule.create(Select, document.currentScript);
+        Molecule.create(Select);
     </script>    
 
 
@@ -590,7 +590,7 @@
                 </div>
             </div>
         </div>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             [{$:'.modal-body',
         		'min-height': '320px',
@@ -614,7 +614,7 @@
                 });
             }
             // MOLECULE_DEF_END
-            Molecule.create(Dialog, document.currentScript);
+            Molecule.create(Dialog);
         </script>
     </div>
     
@@ -631,7 +631,7 @@
 	        });	        
 	    }
 	    // MOLECULE_DEF_END
-	    Molecule.create(SearchButton, document.currentScript);
+	    Molecule.create(SearchButton);
     </script>
     
     <!-- 增加按钮, 放在 form 里 -->
@@ -648,12 +648,12 @@
 	        });	        
 	    }
 	    // MOLECULE_DEF_END
-	    Molecule.create(AddButton, document.currentScript);
+	    Molecule.create(AddButton);
     </script>
     
      <!-- TableList, <table table="" edit-dialog="dialog id" allow-remove="true|false"> -->
      <div molecule-def="TableList" class="container">
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             db2js.Renderers.editLink = function (element, v, table) {
          	        var e = $(element);
@@ -707,21 +707,21 @@
             	}
             }
             // MOLECULE_DEF_END
-            Molecule.create(TableList, document.currentScript);
+            Molecule.create(TableList);
         </script>
-    </div>
+    </div>																																																																																					
     
     
     <!-- TableError -->
 	<div molecule-def="TableError" renderer="stderr">
-		<script id="molecule">
+		<script>
             // MOLECULE_DEF
             function TableError() {
             	var tname = this.container.closest('[table]').attr('table');
             	this.container.attr('data', '#' + tname + ',error');
             }
             // MOLECULE_DEF_END
-            Molecule.create(TableError, document.currentScript);
+            Molecule.create(TableError);
         </script>
 	</div>
 	
@@ -732,7 +732,7 @@
 		    	<button class="btn btn-primary">OK</button>
 		    	<button class="btn btn-default">Cancel</button>
 		  </div>
-		  <script id="molecule">
+		  <script>
             // MOLECULE_DEF
             function Confirm() {
             	var me = this;
@@ -753,7 +753,7 @@
             	$(document).on('mousedown', f);
             }
             // MOLECULE_DEF_END
-            Molecule.create(Confirm, document.currentScript);
+            Molecule.create(Confirm);
          </script>
 	</div>
 	
@@ -762,7 +762,7 @@
 	 -->
 	<div molecule-def="CheckGroup" renderer="molecule" collector="m|s">
 		<ul class="list-inline checkgroup" renderer="dictToList|checkgroup('name','id')" data="#dicts"></ul>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function CheckGroup() {
                 var table = this.container.closest('[table]').attr('table');
@@ -823,7 +823,7 @@
             }
             
             // MOLECULE_DEF_END
-            Molecule.create(CheckGroup, document.currentScript);
+            Molecule.create(CheckGroup);
         </script>
     </div>
     

@@ -72,9 +72,9 @@ Molecule._locateContainer = function(currentScript){
 	return container;
 }
 
-Molecule.create = function(fun, currentScript){
+Molecule.create = function(fun){
 	if(!Molecule.processing) return;
-	currentScript = Molecule.currentScript || currentScript || document.getElementById('molecule');		// for ie
+	var currentScript = Molecule.currentScript;		// for ie
 	var container = Molecule.currentContainer || Molecule._locateContainer(currentScript);
 	if(container == null) return;
 	container = $(container);
@@ -107,12 +107,11 @@ Molecule.create = function(fun, currentScript){
 /**
  * 继承
  * @param fun 新定义函数
- * @param currentScript 调用中的 document.currentScript
  */
-Molecule.extend = function(fun, currentScript){
+Molecule.extend = function(fun){
 	if(!Molecule.processing) return;
 	
-	currentScript = Molecule.currentScript || currentScript || document.getElementById('molecule');		// for ie
+	var currentScript = Molecule.currentScript;
 
 	var container = Molecule.currentContainer || Molecule._locateContainer(currentScript);
 	container = $(container);

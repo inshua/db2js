@@ -12,8 +12,8 @@
     <script src="../jslib/db2js/dataset.js"></script>
     <script src="../jslib/db2js/render.js"></script>
     <script src="../jslib/db2js/renderers.js"></script>
-    <script src="../jslib/db2js/pipelines.js"></script>
     <script src="../jslib/db2js/collector.js"></script>
+    <script src="../jslib/db2js/pipelines.js"></script>
 
     <script src="../jslib/molecule.js"></script>
 
@@ -24,7 +24,7 @@
         <tr>
             <!-- 树的缩进节点，<th col=xxx text=xxx></th> -->
             <th molecule-def="TreeNode" renderer="treeNode">
-              	<script id="molecule">
+              	<script>
                     // MOLECULE_DEF
                     var TreeNode = function () {
                         var table = this.container.closest('[table]').attr('table');
@@ -119,7 +119,7 @@
                 </td>
             </tr>
         </tfoot>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             [
     		 {$ : 'table.table-selectable > tbody > tr > td', 'border-top': '0px'}, 
@@ -342,11 +342,11 @@
         </div>
         <div molecule="TableError"></div>
 
-        <table molecule="Tree" checkable="true" select="single">
+        <table molecule="Tree" checkable="true" select="multi">
             <thead>
                 <tr>
                     <th molecule="TreeNode" col="name" text="Name"></th>
-                    <th molecule="SortHeader" col="email" text="Email"></th>
+                    <th molecule="Header" sortable=true col="email" text="Email"></th>
                     <th data-t="rows,N,id" renderer="editLink"></th>
                 </tr>
             </thead>

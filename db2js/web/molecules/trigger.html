@@ -48,7 +48,7 @@
                 <!-- {INNER_HTML} -->
             </div>
         </div>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function DropDown() {
             	this.isDropDown = true;
@@ -77,7 +77,7 @@
                 </thead>
             </table>
         </div>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function DropDownList() {
             	this.isDropDownList = true;
@@ -136,7 +136,7 @@
                 </thead>
             </table>
         </div>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function DropDownTree() {
             	this.isDropDownTree = true;
@@ -190,7 +190,7 @@
 
     <div class="container">
           <label>Test</label>
-		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false">
+		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false" molecule-trace>
 		  		<tr>
 			  		<m:th molecule="Header" col="id" text="ID"></m:th>
 			        <m:th molecule="Header" col="name" text="Name"></m:th>

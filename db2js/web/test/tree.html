@@ -24,7 +24,7 @@
         <tr>
             <!-- 树的缩进节点，<th col=xxx text=xxx></th> -->
             <th molecule-def="TreeNode" renderer="treeNode">
-              	<script id="molecule">
+              	<script>
                     // MOLECULE_DEF
                     var TreeNode = function () {
                         var table = this.container.closest('[table]').attr('table');
@@ -119,7 +119,7 @@
                 </td>
             </tr>
         </tfoot>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             [
     		 {$ : 'table.table-selectable > tbody > tr > td', 'border-top': '0px'}, 
