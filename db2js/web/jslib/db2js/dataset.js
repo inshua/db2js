@@ -251,6 +251,7 @@ db2js.DataTable.prototype.load = function(method, params, option){
 	if(method instanceof Object){
 		option = params;
 		params = method;
+		method = params._m;
 	}
 	
 	if(params instanceof Function){
