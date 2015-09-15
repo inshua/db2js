@@ -113,6 +113,7 @@ db2js.Collectors.Pipelines.c = db2js.KNOWN_COLLECT_PIPELINES['c'] = function(ele
 db2js.Collectors.s = db2js.KNOWN_COLLECTORS['s'] = function(element, newValue, table, _1, rows, index, row, columnName){
 	var obj = arguments[arguments.length -2];
 	var attr = arguments[arguments.length -1];
+	if(newValue === '') newValue = null;
 	if(obj != null){	// dont test attr in obj
 		if(obj.set){
 			obj.set(attr, newValue);
