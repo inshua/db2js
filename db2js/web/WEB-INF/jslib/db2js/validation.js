@@ -68,7 +68,8 @@ var $V = V;
 V.notNull = {
 	name : 'notNull',
 	check : function(v, fld){ 
-		if(v == null || v == '') return '此处不允许为空'; 
+		if(v === 0) return;
+		if(v === null || v == '') return '此处不允许为空'; 
 	}
 };
 
