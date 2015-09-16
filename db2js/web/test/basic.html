@@ -366,6 +366,7 @@
             		}).on('confirm.ok', function(){
             			var t = db2js.dataset[table];
             			willDeleteRows.forEach(function(row){ row._remove(); });
+            			debugger;
             			t.submit(function(error){	    	            				
        	                    if (!error) {
        	                    	this.reload();
@@ -867,7 +868,7 @@
                 <input type="text" molecule="Input">
             </div>
             <div molecule="FormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',false)" >
-                <select molecule="Select"></select>
+                <select molecule="Select" collector="c|n|s"></select>
             </div>
             <div molecule="FormItem" col="kind" text="Kind" dict="book_kind">
                 <select molecule="Select"></select>
