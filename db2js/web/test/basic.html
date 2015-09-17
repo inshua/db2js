@@ -334,7 +334,7 @@
 	                
 	                this.setValue = function(value){
 	                	var ck = me.container.find('thead>tr>th[molecule-obj=CheckHeader]');
-	                	ck.molecule().checked(value);
+	                	ck.molecule().checked(value && value.slice());
 	                	ck.trigger('valuechange', [ck.molecule().checked()])
                 	}
                 	this.getValue = function(){
@@ -366,7 +366,6 @@
             		}).on('confirm.ok', function(){
             			var t = db2js.dataset[table];
             			willDeleteRows.forEach(function(row){ row._remove(); });
-            			debugger;
             			t.submit(function(error){	    	            				
        	                    if (!error) {
        	                    	this.reload();
@@ -417,12 +416,12 @@
         </script>
     </div>
     
-    <div molecule-def="FormImageItem" molecule="FormItem" renderer="molecule" collector="m|s">
+    <div molecule-def="FormImageItem" class="+ form-image-item" molecule="FormItem" renderer="molecule" collector="m|s">
         <img id="imgPreview" class="form-control">
         <input type="file" accept="images/*" capture="camera" class="form-control" class="hide">
         <script>
 	        // MOLECULE_DEF
-	        [{$ : 'div[molecule-obj=FormImageItem] > label', 'vertical-align' : 'top'}].defCss();
+	        [{$ : '.form-image-item > label', 'vertical-align' : 'top'}].defCss();
 	        function FormImageItem() {
 	            var table = this.container.closest('[table]').attr('table');
 	            var col = this.container.closest('.form-group').attr('col');
@@ -494,6 +493,26 @@
         // MOLECULE_DEF_END
         Molecule.create(Input);
     </script>
+    
+    <!-- 
+    	TextArea, <textarea cols="" rows=""> 必须放在 FormItem 内
+    -->
+    <textarea molecule-def="TextArea" class="form-control" renderer="std" collector="c|s"></textarea>
+    <script molecule-for="TextArea" id="molecule">
+        // MOLECULE_DEF
+        [{$ : '.form-textarea-item > label', 'vertical-align' : 'top'}].defCss();
+        function TextArea() {
+            var table = this.container.closest('[table]').attr('table');
+            var col = this.container.closest('.form-group').attr('col');
+
+            this.container.attr('data', '#' + table + ',curr,' + col);
+            
+            this.container.closest('.form-group').addClass('form-textarea-item');
+        }
+        // MOLECULE_DEF_END
+        Molecule.create(TextArea);
+    </script>
+    
     
 	<!-- 输入的 input, 放在 SearchFormItem 内
 		用法：
@@ -596,7 +615,9 @@
             [{$:'.modal-body',
         		'min-height': '320px',
         		'max-height': '640px',
-        		'overflow-y': 'scroll'}].defCss();
+        		'overflow-y': 'scroll'},
+        	 {$:'modal', 'overflow': 'visible'},
+        	].defCss();
             
             function Dialog() {
                 var title = this.container.attr('title');
@@ -644,7 +665,7 @@
 	        var btn = this.container;
 	        btn.on('click', function(){
 	        	var tl = $(this).closest('[molecule-obj=TableList]');
-	        	var row = db2js.dataset[table].addRow();
+	        	var row = db2js.dataset[table].addRow(db2js.dataset[table].newRow());
  	        	Molecule.of(tl).editRow(row);
 	        });	        
 	    }
@@ -868,10 +889,10 @@
                 <input type="text" molecule="Input">
             </div>
             <div molecule="FormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',false)" >
-                <select molecule="Select" collector="c|n|s"></select>
+                <select molecule="Select"></select>
             </div>
             <div molecule="FormItem" col="kind" text="Kind" dict="book_kind">
-                <select molecule="Select"></select>
+                <select molecule="Select" collector="c|n|s"></select>
             </div>
             <div molecule="FormItem" col="publish_date" text="Publish Date">
                 <input type="date" molecule="Input" format="yyyy-MM-dd" renderer="date|std" collector="c|d|s">

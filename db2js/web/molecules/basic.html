@@ -334,7 +334,7 @@
 	                
 	                this.setValue = function(value){
 	                	var ck = me.container.find('thead>tr>th[molecule-obj=CheckHeader]');
-	                	ck.molecule().checked(value);
+	                	ck.molecule().checked(value && value.slice());
 	                	ck.trigger('valuechange', [ck.molecule().checked()])
                 	}
                 	this.getValue = function(){
@@ -615,7 +615,9 @@
             [{$:'.modal-body',
         		'min-height': '320px',
         		'max-height': '640px',
-        		'overflow-y': 'scroll'}].defCss();
+        		'overflow-y': 'scroll'},
+        	 {$:'modal', 'overflow': 'visible'},
+        	].defCss();
             
             function Dialog() {
                 var title = this.container.attr('title');
@@ -887,10 +889,10 @@
                 <input type="text" molecule="Input">
             </div>
             <div molecule="FormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',false)" >
-                <select molecule="Select" collector="c|n|s"></select>
+                <select molecule="Select"></select>
             </div>
             <div molecule="FormItem" col="kind" text="Kind" dict="book_kind">
-                <select molecule="Select"></select>
+                <select molecule="Select" collector="c|n|s"></select>
             </div>
             <div molecule="FormItem" col="publish_date" text="Publish Date">
                 <input type="date" molecule="Input" format="yyyy-MM-dd" renderer="date|std" collector="c|d|s">

@@ -197,7 +197,7 @@
 	                this.setValue = this.setMultiValue = function(value){
 	                	var table = db2js.locateData(this.container)[0];
 	                	table.tree = null;
-	                	this.container.data('value', value);
+	                	this.container.data('value', value && value.slice());
 	                	db2js.render(this.container);
 	                }
 	                this.getValue = this.getMultiValue = function(){
