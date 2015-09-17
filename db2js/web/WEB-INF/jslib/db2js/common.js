@@ -400,11 +400,15 @@ DBJS.prototype.insertRow = function(table, row, columns, pkColumn){
 		if(this.sqlExecutor.isOracle()) {
 			valuesPart.append(' FROM DUAL');
 		} else if(this.sqlExecutor.isPostgreSQL()){
-			// nothing to do 
+			valuesPart.append(' RETURNING *');
 		}
 	}	
-	var sql = insertPart.toString() + valuesPart.toString(); 
-	return this.execute(sql, args);
+	var sql = insertPart.toString() + valuesPart.toString();
+	if(this.sqlExecutor.isPostgreSQL()){
+		return this.queryRow(sql, args);
+	} else {
+		return this.execute(sql, args);
+	}
 };
 
 /**
@@ -455,7 +459,12 @@ DBJS.prototype.updateRow = function(table, row, columns, pkColumn){
 	
 	sql.append(' WHERE ' + table + '.' + pkColumn + '= ?');
 	args.push(row[pkColumn]);
-	return this.execute(sql.toString(), args);
+	
+	if(this.sqlExecutor.isPostgreSQL()){
+		return this.queryRow(sql.toString() + ' RETURNING *', args);
+	} else {
+		return this.execute(sql.toString(), args);
+	}
 };
 
 /**
