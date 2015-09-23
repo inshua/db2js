@@ -399,10 +399,11 @@ DBJS.prototype.insertRow = function(table, row, columns, pkColumn){
 	} else {
 		if(this.sqlExecutor.isOracle()) {
 			valuesPart.append(' FROM DUAL');
-		} else if(this.sqlExecutor.isPostgreSQL()){
-			valuesPart.append(' RETURNING *');
 		}
 	}	
+	if(this.sqlExecutor.isPostgreSQL()){
+		valuesPart.append(' RETURNING *');
+	}
 	var sql = insertPart.toString() + valuesPart.toString();
 	if(this.sqlExecutor.isPostgreSQL()){
 		return this.queryRow(sql, args);
