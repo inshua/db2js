@@ -246,6 +246,7 @@ db2js.Renderers.repeater = function(element, rows){
 	copies.each(function(idx, c){c.remove()});
 
 	var repeater = e.find('[repeater]');
+	if(repeater.length == 0) return console.error('repeater child not found');	
 	repeater.hide();
 	
 	if(rows == null || rows.length == 0){
