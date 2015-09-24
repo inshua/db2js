@@ -1108,10 +1108,10 @@ public class SqlExecutor {
 			return null;
 		}
 		if (value instanceof Double) {
-			return new java.sql.Timestamp(((Double) value).longValue());
+			return dateToTimeStamp(new java.util.Date(((Double) value).longValue()));
 		} else if (value instanceof String) {
 			try {
-				return new java.sql.Timestamp(sdfDate.parse((String) value).getTime());
+				return dateToTimeStamp(sdfDate.parse((String) value));
 			} catch (ParseException e) {
 				throw new SqlExecutorException("unmatched datetime format " + value, e);
 			}
@@ -1123,6 +1123,15 @@ public class SqlExecutor {
 			throw new SqlExecutorException("unknown date format " + value + " " + value.getClass());
 		}
 	}
+	
+	private Timestamp dateToTimeStamp(java.util.Date date){
+		if(this.isPostgreSQL()){
+			return new java.sql.Timestamp(date.getTime() + date.getTimezoneOffset() * 60000);
+		} else {
+			return new java.sql.Timestamp(date.getTime());
+		}
+	}
+	
 
 	private SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
 
@@ -1155,7 +1164,7 @@ public class SqlExecutor {
 	private java.sql.Timestamp nativeDateToTimeStamp(NativeDate value) {
 		try {
 			long time = this.jsDateUtil.getTime(value);
-			return new java.sql.Timestamp(time);
+			return dateToTimeStamp(new java.util.Date(time));
 		} catch (Exception e) {
 			return null;
 		}
@@ -1164,7 +1173,7 @@ public class SqlExecutor {
 	private java.sql.Timestamp nativeDateToTimeStamp(ScriptObjectMirror value) {
 		try {
 			long time = this.jsDateUtil.getTime(value);
-			return new java.sql.Timestamp(time);
+			return dateToTimeStamp(new java.util.Date(time));
 		} catch (Exception e) {
 			return null;
 		}
