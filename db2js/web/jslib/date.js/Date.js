@@ -70,7 +70,7 @@ d.i18n['en-US'] = {
   pm: 'PM',
   gmt: 'GMT',
   z: ':',   // Hour - minute separator
-  Z: '',    // Hour - minute separator
+  Z: ':',   // Hour - minute separator
   fdow: 0,  // First day of week
   mdifw: 1  // Minimum days in first week
 };
@@ -315,7 +315,7 @@ dp.format = function (p, l) {
     return n;
   };
   var tz = function (n, s) {
-    return ((n<0)?'+':'-')+pad(Math.abs(n/60),2)+s+pad(Math.abs(n%60),2);
+    return ((n<0)?'+':'-')+pad(Math.abs(n/60),2)+ s +pad(Math.abs(n%60),2);
   };
   return p.replace(/([aDdEFGHhKkMmSsWwyZz])\1*|'[^']*'|"[^"]*"/g, function (m) {
     l = m.length;
