@@ -958,7 +958,13 @@ public class SqlExecutor {
 		} else if (obj instanceof Long) {
 			return ((Long) obj).doubleValue();
 		} else if (obj instanceof Timestamp) {
-			return jsDateUtil.toNativeDate(((java.sql.Timestamp) obj).getTime());
+			Timestamp tstmp = ((java.sql.Timestamp) obj);
+			//return jsDateUtil.toNativeDate(tstmp.getTime());
+			if(this.isPostgreSQL()){
+				return jsDateUtil.toNativeDate(tstmp.getTime() - tstmp.getTimezoneOffset() * 60000);
+			} else {
+				return jsDateUtil.toNativeDate(tstmp.getTime());
+			}
 		} else if (obj instanceof java.sql.Date) {
 			return jsDateUtil.toNativeDate(((java.sql.Date) obj).getTime());
 		} else if (obj instanceof Time) {
