@@ -127,7 +127,7 @@ db2js.DataTable = function (name, url, option){
 	this.total = 0;
 	
 	EventDispatcher.call(this);
-	this.regEvent(['load', 'submit', 'rowchange', 'newrow', 'statechange', 'schemachange']);
+	this.regEvent(['willload', 'load', 'willsubmit', 'submit', 'rowchange', 'newrow', 'statechange', 'schemachange']);
 	var listeners = option && option.listeners;
 	if(listeners){
 		for(var k in listeners){ if(listeners.hasOwnProperty(k)){
@@ -284,6 +284,8 @@ db2js.DataTable.prototype.load = function(method, params, option){
 	
 	this.clearError();
 	this.setState('loading');
+	this.rows = [];
+	this.fireEvent('willload');
 	var me = this;
 	this.search.params = q;
 	this.search.option = option;
@@ -306,6 +308,7 @@ db2js.DataTable.prototype.load = function(method, params, option){
 			isJson = true;
 		} catch(e){}
 		
+		me.rows = [];
 		if(isJson){
 			if(!result.error){
 				if(result.total != null){
@@ -316,7 +319,6 @@ db2js.DataTable.prototype.load = function(method, params, option){
 				
 				me.initSchema(result.columns);
 				
-				me.rows = [];
 				var rows = result.rows;
 				for(var i=0; i<rows.length; i++){
 					var row = new db2js.DataRow(me, rows[i]);
@@ -493,6 +495,7 @@ db2js.DataTable.prototype.submit = function(option){
 	}
 	
 	this.clearError();
+	this.fireEvent('willsubmit');
 	this.setState('submiting');
 	var params = {_m : 'update', table : changes};
 	$.ajax({
@@ -694,7 +697,7 @@ db2js.DataTable.prototype.monitor = function(returnHtml){
 	for(var rid =0; rid< t.rows.length; rid++){
 		var r = t.rows[rid];
 		a.push("<tr>");
-		a.push(t.columns.map(function(col){return "<td>" + r[col.name] + "</td>";}).join(''))
+		a.push(t.columns.map(function(col){return "<td>" + JSON.stringify(r[col.name]) + "</td>";}).join(''))
 		a.push("<td>" + r._state + "</td>");
 		a.push("<td>" + (r._error? r._error.name : '') + "</td>");
 		a.push("</tr>");
