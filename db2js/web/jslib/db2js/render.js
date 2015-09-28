@@ -89,8 +89,9 @@ db2js.render = function(htmlElement, baseData, direct){
 					renderer = parr[parr.length -1];
 				} 
 				var fun = extractRenderer(renderer.trim());
-				fun.apply(null, data);				
+				var r = fun.apply(null, data);				
 				$(e).trigger('db2js.rendered', data);
+				if(r == 'break') continue;
 			}
 		}
 		

@@ -79,10 +79,10 @@ db2js.Renderers.std = db2js.KNOWN_RENDERERS['std'] = function(element, value, ta
  */
 db2js.Renderers.expr = db2js.KNOWN_RENDERERS['expr'] = function(e, data){
 	if(e.innerHTML.indexOf('{{') != -1){		// 带有表达式 {{}},以参数 row 为出发路径
-		e.setAttribute('render-expr', e.innerHTML)
+		e.dataset['render_expr'] = e.innerHTML;
 	}
-	if(e.hasAttribute('render-expr')){
-		var s = e.getAttribute('render-expr');
+	if(e.dataset['render_expr']){
+		var s = e.dataset['render_expr'];
 		var res = '';
 		var start = 0;
 		for(var offset = s.indexOf('{{', start); offset != -1; offset = s.indexOf('{{', start)){
@@ -245,7 +245,7 @@ db2js.Renderers.repeater = function(element, rows){
 	var copies = e.find('[repeater-copy]');
 	copies.each(function(idx, c){c.remove()});
 
-	var repeater = e.find('[repeater]');
+	var repeater = e.find('[repeater]').first();
 	if(repeater.length == 0) return console.error('repeater child not found');	
 	repeater.hide();
 	
@@ -264,6 +264,7 @@ db2js.Renderers.repeater = function(element, rows){
 			prev = r;
 		}
 	}
+	return 'break';
 }
 
 /**
