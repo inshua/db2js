@@ -188,3 +188,46 @@ db2js.Collectors.repeater = function(element, rows){
 		if(row) db2js.collect(c, row, true);
 	});
 }
+
+
+/**
+ * Object Column 值设置器
+ * 当 DataRow['field'] 为对象时，如果 element 绑定的是对象的属性，应当使用该收集器。
+ * 例如
+ * <input data="#table,rows,0,contact,email">
+ * 该表的 contact 字段为一JSON字段，表现在前端为一个对象，其中 email 是一个属性，此时应使用如下收集方式 
+ * <input data="#table,rows,0,contact,email" collector="c|oc">
+ * 
+ * 如使用
+ * <input data="#table,rows,0,contact,email" collector="c|s">
+ * 则编辑时虽然值变化了，但行状态不会变化，将导致数据不提交。
+ * 
+ * @param element
+ * @param newValue
+ */
+db2js.Collectors.oc = db2js.KNOWN_COLLECTORS['oc'] = function(element, newValue){
+	var row = null;
+	for(var i=1; i<arguments.length; i++){
+		if(arguments[i] instanceof db2js.DataRow){
+			row = arguments[i];
+			var colname = arguments[i+1];
+			
+		}
+	}
+	if(!row) return;
+	
+	if(row._state = 'none'){
+		if(row._origin == null){
+			row._origin = JSON.parse(JSON.stringify(row._toJson()));
+		}
+	}
+	
+	db2js.Collectors.s.apply(this, arguments);
+	
+	if(row._state = 'none'){
+		if(JSON.stringify(row._toJson()) != JSON.stringify(row._origin)){
+			row._state = 'edit';
+		}
+	}	
+}
+
