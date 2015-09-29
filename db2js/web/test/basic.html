@@ -849,6 +849,49 @@
         </script>
     </div>
     
+    <!-- 
+    	日期时间控件。从 input type=date 和 input type=time 复合得到的一个 molecule。 
+    -->
+    <div molecule-def="DateTime" class="datetime" collector="m|s" renderer="molecule">
+		<input class="form-control" type="date" format="yyyy-MM-dd"><input class="form-control" type="time" format="HH:mm">
+		<script>
+	        // MOLECULE_DEF
+			[
+			 	{$ : '.datetime', display: 'inline-block'},					
+			
+				{$ : '.datetime > input[type=date]',			
+					'border-right' : 'none',
+					'border-top-right-radius' : '0px', 
+					'border-bottom-right-radius' : '0px',
+					'padding-right' : '0px'
+				},
+				
+				{$ : '.datetime > input[type=time]',			
+					'border-left' : 'none',
+					'border-top-left-radius' : '0px', 
+					'border-bottom-left-radius' : '0px',
+					'padding-left' : '0px'
+				}
+			].defCss();
+	        function DateTime() {
+	        	this.getValue = function(){
+	        		var s = this.container.find('[type=date]').val() + ' ' + this.container.find('[type=time]').val();
+	        		return Date.parse(s, 'yyyy-MM-dd HH:mm'); 
+	        	}
+	        	this.setValue = function(value){
+	        		if(value){
+	        			this.container.find('[type=date]').val(value.format('yyyy-MM-dd'));
+	        			this.container.find('[type=time]').val(value.format('HH:mm'));
+	        		} else {
+	        			this.container.find('[type=date]').val('');
+	        			this.container.find('[type=time]').val('');
+	        		}
+	        	}
+	        }	        
+	     	// MOLECULE_DEF_END
+	     	Molecule.create(DateTime);
+		</script> 
+	</div>
 
     <div molecule="TableList" table="book" edit-dialog="dialog1" allow-remove="true">
         <h1>Book</h1>
