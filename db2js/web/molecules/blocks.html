@@ -46,7 +46,7 @@
 			<div id="text"></div>
 		</div>
 		
-		<script type="text/javascript" id="molecule">
+		<script type="text/javascript">
 			if(typeof BlocksGame !=null){
 				function BlocksGame(){
 					var divBox = this.container.find('#box')[0];
@@ -158,7 +158,7 @@
 					}
 				}
 			}
-			Molecule.create(BlocksGame, document.currentScript).start();
+			Molecule.create(BlocksGame).start();
 		</script>
 	</div>
 </body>

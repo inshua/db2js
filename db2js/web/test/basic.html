@@ -167,7 +167,7 @@
             -->
             <th molecule-def="ActionHeader" href="###">
 		    </th>
-		    <script molecule-for="ActionHeader" id="molecule">
+		    <script molecule-for="ActionHeader">
 	            // MOLECULE_DEF
 	            function ActionHeader() {
 	                var table = this.container.closest('[table]').attr('table');
@@ -255,7 +255,7 @@
                 case 'none' : ;
                 	break;
                 case 'single' : 
-                	this.container[0].className = 'table table-hover table-condensed table-selectable';
+                	this.container[0].className = 'table table-hover table-condensed table-selectable list';
                 	this.container.on('db2js.rendered', function f(event) {
                         if (event.target == me.container[0]) {
                             var storeValue = me.container.data('value'); 
@@ -292,7 +292,7 @@
                 	}
                 	break;
                 case 'multi' :
-	                this.container[0].className = 'table table-hover table-condensed table-selectable';
+	                this.container[0].className = 'table table-hover table-condensed table-selectable list';
 	                var checkAll = $(document.createElement('th')).attr('molecule', 'CheckHeader');
 	                checkAll.attr('col', valueColumn);
 	                var tr = this.container.find('thead>tr');
@@ -482,7 +482,7 @@
 
     <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
     <input molecule-def="Input" type="text" class="form-control" renderer="std" collector="c|s">
-    <script molecule-for="Input" id="molecule">
+    <script molecule-for="Input">
         // MOLECULE_DEF
         function Input() {
             var table = this.container.closest('[table]').attr('table');
@@ -498,7 +498,7 @@
     	TextArea, <textarea cols="" rows=""> 必须放在 FormItem 内
     -->
     <textarea molecule-def="TextArea" class="form-control" renderer="std" collector="c|s"></textarea>
-    <script molecule-for="TextArea" id="molecule">
+    <script molecule-for="TextArea">
         // MOLECULE_DEF
         [{$ : '.form-textarea-item > label', 'vertical-align' : 'top'}].defCss();
         function TextArea() {
@@ -521,7 +521,7 @@
             </div>
 	-->
     <input molecule-def="SearchInput" type="text" class="form-control" renderer="std" collector="c|s">
-    <script molecule-for="SearchInput" id="molecule">
+    <script molecule-for="SearchInput">
         // MOLECULE_DEF
         function SearchInput() {
             var table = this.container.closest('[table]').attr('table');
@@ -540,7 +540,7 @@
             </div>
 	-->
     <select molecule-def="SearchSelect" class="form-control" renderer="std" collector="c|s"></select>
-    <script molecule-for="SearchSelect" id="molecule">
+    <script molecule-for="SearchSelect">
         // MOLECULE_DEF
         function SearchSelect() {
             var table = this.container.closest('[table]').attr('table');
@@ -580,7 +580,7 @@
 	
 	<!-- 编辑对话框用的 select, <select> 必须放在 FormItem 内-->
     <select molecule-def="Select" class="form-control" renderer="std" collector="c|s"></select>
-    <script molecule-for="Select" id="molecule">
+    <script molecule-for="Select">
         // MOLECULE_DEF
         function Select() {
             var table = this.container.closest('[table]').attr('table');

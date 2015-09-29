@@ -22,3 +22,8 @@ dbjs.modify = function(row, columns){
 	return this.updateRow('author', row, columns);
 }
 
+
+dbjs.testDate = function(){
+	var d = new Date()
+	return this.query('select to_json(?::timestamp) a, to_json(current_timestamp::timestamp) b, ?::timestamp c', [d, d]);
+}

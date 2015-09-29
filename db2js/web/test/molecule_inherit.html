@@ -13,7 +13,7 @@
 				background-color: red; width:100px; height: 100px; margin: 4px;
 			}
 		</style>
-		<script id="molecule">
+		<script>
 		// MOLECULE_DEF
 			function RedBlock(){
 				this.setBackColor = function(color){
@@ -22,7 +22,7 @@
 				}
 			}
 		// MOLECULE_DEF_END
-			Molecule.create(RedBlock, document.currentScript);
+			Molecule.create(RedBlock);
 		</script>
 	</div>
 	

@@ -25,7 +25,7 @@
         <tr>
             <th molecule-def="SortHeader" renderer="std">
                 <a></a>
-                <script id="molecule">
+                <script>
                     // MOLECULE_DEF
                     var SortHeader = function () {
                         var table = this.container.closest('[table]').attr('table');
@@ -62,7 +62,7 @@
                         }
                     }
                     // MOLECULE_DEF_END
-                    Molecule.create(SortHeader, document.currentScript);
+                    Molecule.create(SortHeader);
                 </script>
             </th>
         </tr>
@@ -80,7 +80,7 @@
                 </td>
             </tr>
         </tfoot>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function List() {
                 var table = this.container.closest('[table]').attr('table');
@@ -91,7 +91,7 @@
                 }
             }
             // MOLECULE_DEF_END
-            Molecule.create(List, document.currentScript);
+            Molecule.create(List);
         </script>
     </table>
 
@@ -99,7 +99,7 @@
     <div molecule-def="FormItem" class="form-group" renderer="flderr">
         <label></label>
         <!-- {INNER_HTML} -->
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function FormItem() {
                 var table = this.container.closest('[table]').attr('table');
@@ -110,7 +110,7 @@
                 this.container.find('label').html(text);
             }
             // MOLECULE_DEF_END
-            Molecule.create(FormItem, document.currentScript);
+            Molecule.create(FormItem);
         </script>
     </div>
     
@@ -118,7 +118,7 @@
     <div molecule-def="SearchFormItem" class="form-group">
         <label></label>
         <!-- {INNER_HTML} -->
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function SearchFormItem() {
                 var table = this.container.closest('[table]').attr('table');
@@ -128,13 +128,13 @@
                 this.container.find('label').html(text);
             }
             // MOLECULE_DEF_END
-            Molecule.create(SearchFormItem, document.currentScript);
+            Molecule.create(SearchFormItem);
         </script>
     </div>
 
     <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
     <input molecule-def="Input" type="text" class="form-control" renderer="std" collector="c|s">
-    <script molecule-for="Input" id="molecule">
+    <script molecule-for="Input">
         // MOLECULE_DEF
         function Input() {
             var table = this.container.closest('[table]').attr('table');
@@ -143,12 +143,12 @@
             this.container.attr('data', '#' + table + ',curr,' + col);
         }
         // MOLECULE_DEF_END
-        Molecule.create(Input, document.currentScript);
+        Molecule.create(Input);
     </script>
     
     <!-- 输入控件, <input type=xxx> 必须放在 FormItem 内-->
     <input molecule-def="SearchInput" type="text" class="form-control" renderer="std" collector="c|s">
-    <script molecule-for="SearchInput" id="molecule">
+    <script molecule-for="SearchInput">
         // MOLECULE_DEF
         function SearchInput() {
             var table = this.container.closest('[table]').attr('table');
@@ -157,7 +157,7 @@
             this.container.attr('data', '#' + table + ',search,params,' + col);
         }
         // MOLECULE_DEF_END
-        Molecule.create(SearchInput, document.currentScript);
+        Molecule.create(SearchInput);
     </script>
     
 
@@ -179,7 +179,7 @@
                 </div>
             </div>
         </div>
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             function Dialog() {
                 var title = this.container.attr('title');
@@ -198,7 +198,7 @@
                 });
             }
             // MOLECULE_DEF_END
-            Molecule.create(Dialog, document.currentScript);
+            Molecule.create(Dialog);
         </script>
     </div>
     
@@ -215,7 +215,7 @@
 	        });	        
 	    }
 	    // MOLECULE_DEF_END
-	    Molecule.create(SearchButton, document.currentScript);
+	    Molecule.create(SearchButton);
     </script>
     
     <!-- 增加按钮, 放在 form 里 -->
@@ -232,12 +232,12 @@
 	        });	        
 	    }
 	    // MOLECULE_DEF_END
-	    Molecule.create(AddButton, document.currentScript);
+	    Molecule.create(AddButton);
     </script>
     
     <!-- TableList, <table table="" edit-dialog="dialog id"> -->
      <div molecule-def="TableList" class="container">
-        <script id="molecule">
+        <script>
             // MOLECULE_DEF
             db2js.Renderers.editLink = function (element, v, table) {
          	        var e = $(element);
@@ -288,20 +288,20 @@
             	}
             }
             // MOLECULE_DEF_END
-            Molecule.create(TableList, document.currentScript);
+            Molecule.create(TableList);
         </script>
     </div>
     
     <!-- TableError -->
 	<div molecule-def="TableError" renderer="stderr">
-		<script id="molecule">
+		<script>
             // MOLECULE_DEF
             function TableError() {
             	var tname = this.container.closest('[table]').attr('table');
             	this.container.attr('data', '#' + tname + ',error');
             }
             // MOLECULE_DEF_END
-            Molecule.create(TableError, document.currentScript);
+            Molecule.create(TableError);
         </script>
 	</div>
     
