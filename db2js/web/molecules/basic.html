@@ -255,7 +255,7 @@
                 case 'none' : ;
                 	break;
                 case 'single' : 
-                	this.container[0].className = 'table table-hover table-condensed table-selectable';
+                	this.container[0].className = 'table table-hover table-condensed table-selectable list';
                 	this.container.on('db2js.rendered', function f(event) {
                         if (event.target == me.container[0]) {
                             var storeValue = me.container.data('value'); 
@@ -292,7 +292,7 @@
                 	}
                 	break;
                 case 'multi' :
-	                this.container[0].className = 'table table-hover table-condensed table-selectable';
+	                this.container[0].className = 'table table-hover table-condensed table-selectable list';
 	                var checkAll = $(document.createElement('th')).attr('molecule', 'CheckHeader');
 	                checkAll.attr('col', valueColumn);
 	                var tr = this.container.find('thead>tr');
