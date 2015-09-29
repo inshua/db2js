@@ -67,8 +67,8 @@
     <!-- 下拉列表
     	<div data-value="5" table="author" value-col="id" display-col=""></div> 
     -->
-    <div molecule-def="DropDownList" molecule="DropDown" select="single" escape-tag="th" collector="m|s" renderer="molecule">
-        <div molecule="TableList" class="contaienr">
+    <div molecule-def="DropDownList" molecule="DropDown" select="single" escape-tag="th" collector="m|s" renderer="molecule" class="+ dropdownlist">
+        <div molecule="TableList" class="contaienr dropdownlist"">
             <div molecule="TableError"></div>
            
             <table molecule="List">
@@ -79,6 +79,8 @@
         </div>
         <script>
             // MOLECULE_DEF
+            [{$ : '.dropdownlist > table > tbody.data', 'height' : '200px', overflow: 'scroll'}].defCss();
+            
             function DropDownList() {
             	this.isDropDownList = true;
             	var me = this;
