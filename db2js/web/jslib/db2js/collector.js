@@ -216,7 +216,7 @@ db2js.Collectors.oc = db2js.KNOWN_COLLECTORS['oc'] = function(element, newValue)
 	}
 	if(!row) return;
 	
-	if(row._state = 'none'){
+	if(row._state == 'none'){
 		if(row._origin == null){
 			row._origin = JSON.parse(JSON.stringify(row._toJson()));
 		}
@@ -224,7 +224,7 @@ db2js.Collectors.oc = db2js.KNOWN_COLLECTORS['oc'] = function(element, newValue)
 	
 	db2js.Collectors.s.apply(this, arguments);
 	
-	if(row._state = 'none'){
+	if(row._state == 'none'){
 		if(JSON.stringify(row._toJson()) != JSON.stringify(row._origin)){
 			row._state = 'edit';
 		}
