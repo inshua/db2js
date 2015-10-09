@@ -366,4 +366,14 @@ public class JsEngineUtil {
 		}
 		return e;
 	}
+	
+//	public static Object invokeMethodCrossEngine(ScriptEngine masterEngine, ScriptEngine serverEngine, Object object, String method, Object[] arguments) throws NoSuchMethodException, ScriptException{
+//		for(int i=0; i<arguments.length; i++){
+//			if(arguments[i] instanceof ScriptObjectMirror){
+//				ScriptObjectMirror om = arguments[i];
+//				json
+//			}
+//		}
+//		return ((Invocable)serverEngine).invokeMethod(object, method, arguments);
+//	}
 }
