@@ -606,7 +606,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-primary" id="bnSave">Save changes</button>
                 </div>
             </div>
         </div>
@@ -627,7 +627,7 @@
                 this.regEvent(['close', 'submit']);
 
                 var me = this;
-                this.container.find('.btn-primary').on('click', function () {
+                this.container.on('click', '#bnSave', function () {
                     me.fireEvent('submit');
                 });
 
@@ -725,6 +725,7 @@
            	    this.editRow = function(row){
        		        row._table.curr = row;
        		        db2js.render($('#' + dialogId), row._table);
+       		        this.container.trigger('tablelist.edit', [row]);
        		        $('#' + dialogId).modal('show');
             	}
             }

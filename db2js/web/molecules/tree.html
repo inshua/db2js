@@ -240,7 +240,7 @@
         			rebuildTree = true;
         		} else if((table.rows.length == 0) != (table.tree.length == 0)){
         			rebuildTree = true;
-        		} else if(table.rows.indexOf(table.tree[0].row) == -1){
+        		} else if(table.rows.indexOf(table.tree[0] && table.tree[0].row) == -1){
         			rebuildTree = true;
         		}
         		var tree = rebuildTree ? buildTree(table, idColumn, parentColumn) : table.tree ;
