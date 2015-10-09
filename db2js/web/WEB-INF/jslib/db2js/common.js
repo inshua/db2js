@@ -953,6 +953,11 @@ DBJS.prototype.callDbjs = function(src, method, params){
 //			engineContext.getScriptEngine().eval('another.transactConnection = transactConnection', bindings);
 		}
 		var arr = Java.to(params instanceof Array ? params : [params], ObjectArray);
+		for(var i=0;i<arr.length; i++){
+			if(arr[i] && typeof arr[i] == 'object'){
+				arr[i] = engineContext.getJson().parse(JSON.stringify(arr[i]));
+			}
+		}
 		var res = engineContext.getEngineAsInvocable().invokeMethod(another, method, arr);
 		if(res != null && res instanceof ScriptObjectMirror) res = org.siphon.common.js.JsTypeUtil.getSealed(res);
 		dbjsRunner.completeTask(engineContext.getScriptEngine(), null);
