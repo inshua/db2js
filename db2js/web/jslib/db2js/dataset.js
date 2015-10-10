@@ -236,10 +236,25 @@ db2js.DataTable.prototype.initSchema = function(columns, raiseEvent){
 	this.columnNames = [];
 	for(var i=0; i<columns.length; i++){
 		var col = columns[i];
-		this.columns.push(new db2js.DataColumn(col.name, col.type));
-		this.columnNames.push(col.name);
+		if(col instanceof String){
+			this.columns.push(new db2js.DataColumn(col));
+			this.columnNames.push(col);
+		} else {
+			this.columns.push(new db2js.DataColumn(col.name, col.type));
+			this.columnNames.push(col.name);
+		}
 	}
 	if(raiseEvent) this.fireEvent('schemachange');
+}
+
+/**
+ * 增加一列
+ * @param colName 列名
+ * @param colType 列的数据类型，可选
+ */
+db2js.DataTable.prototype.addColumn = function(colName, colType){
+	this.columns.push(new db2js.DataColumn(colName, colType));
+	this.columnNames.push(colName);
 }
 
 /**
