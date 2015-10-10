@@ -89,7 +89,14 @@ db2js.collect = function(htmlElement, baseData, direct){
 		return db2js.extractCachedFunction(pipelineDesc, db2js.Collectors.Pipelines, 'db2js.Collectors.Pipelines.', db2js.KNOWN_COLLECT_PIPELINES);
 	}
 	
-}
+};
+
++(function ( $ ) {
+    $.fn.collect = function(baseData, direct) {
+    	return db2js.collect(this, baseData, direct);
+    };
+}( jQuery ));
+
 
 /**
  * 通常收集器写为 c|s 前者由控件获取内容，后者设置到对象，中间可插入其它管道，如 c|n|s

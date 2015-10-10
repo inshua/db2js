@@ -138,7 +138,20 @@ db2js.locateData = function(element, baseData, direct){
 	this.extractData(baseData, dataPath, data, direct);
 	data.splice(0, 0, data[data.length - 1]);		// value 设为第一个值
 	return data;
-}
+};
+
++(function ( $ ) {
+    $.fn.locateData = function() {
+    	return db2js.locateData(this);
+    };
+}( jQuery ));
+
++(function ( $ ) {
+    $.fn.render = function(baseData, direct) {
+    	return db2js.render(this, baseData, direct);
+    };
+}( jQuery ));
+
 
 db2js.extractData = function(baseData, dataPath, output, direct){
 	var arr = dataPath.split(',');
