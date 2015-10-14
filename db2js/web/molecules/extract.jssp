@@ -30,7 +30,7 @@
 	
 	function processFile(file){
 		var sout = '';
-		if(file.name.endsWith(".html") || file.name.endsWith(".htm")){
+		if(file.name.endsWith(".html") || file.name.endsWith(".htm") || file.name.endsWith(".jssp")){
 			sout +=  ("<h2>parse " + file.name + "</h2>");
 			var document = org.jsoup.Jsoup.parse(file, "utf-8");
 			var defs = document.select("[molecule-def]");
