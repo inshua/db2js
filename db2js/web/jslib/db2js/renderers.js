@@ -93,7 +93,7 @@ db2js.Renderers.expr = db2js.KNOWN_RENDERERS['expr'] = function(e, data){
 				var expr = s.substring(offset + 2, end);
 				with(data){
 					try{
-						res += eval(expr);
+						res += (function(s){return eval(s)}).call(data, expr);
 					}catch(e){
 						res += e.message;
 						console.log('eval error, expr : ' + expr);
@@ -112,6 +112,7 @@ db2js.Renderers.expr = db2js.KNOWN_RENDERERS['expr'] = function(e, data){
 	} else {
 		//nothing todo
 	}
+	
 }
 
 
@@ -245,22 +246,38 @@ db2js.Renderers.repeater = function(element, rows){
 	var copies = e.find('[repeater-copy]');
 	copies.each(function(idx, c){c.remove()});
 
-	var repeater = e.find('[repeater]').first();
-	if(repeater.length == 0) return console.error('repeater child not found');	
-	repeater.hide();
+	var repeater = e.find('[repeater]');
+	if(repeater.length == 0) return console.error('repeater child not found');
+	
+	repeater.each(function(idx, e){ $(e).hide(); });
 	
 	if(rows == null || rows.length == 0){
 		e.find('[repeater-empty]').show();
 	} else {
 		e.find('[repeater-empty]').hide();
-		var prev = repeater;
+		var prev = repeater.last();
 		for(var i=0; i<rows.length; i++){
-			var r = repeater.clone();
+			var row = rows[i];
+			var tpl = repeater.filter(function(idx, item){
+				if(item.hasAttribute('when')){
+					with(row){
+						return eval(item.getAttribute('when'));
+					}
+				} else {
+					return true;
+				}
+			}).first();
+			if(tpl.length == 0) continue;
+			
+			var r = tpl.clone();
+			r.find('[molecule-r]').each(function(idx, e){
+				$(e).attr('molecule', $(e).attr('molecule-r')); 
+			});
 			r.attr('repeater-copy', true);
-			r.data('repeater-obj', rows[i]);
-			db2js.render(r[0], rows[i], true);
-			r.show();
+			r.data('repeater-obj', row);
 			r.insertAfter(prev);
+			db2js.render(r[0], row, true);
+			r.show();
 			prev = r;
 		}
 	}
