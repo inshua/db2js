@@ -117,6 +117,11 @@
                                 }
                             }
                         }
+                        
+                        var table = db2js.dataset[this.container.closest('[table]').attr('table')];
+                        table.on(['load', 'submit'], function(){
+                        	me.checked([]);
+                        });
                     }
 
                     db2js.Renderers.check = function (element, v, table) {
@@ -187,7 +192,7 @@
 	                    e.attr('href', '###');
 	                    if(click) e.attr('onclick', click);
 	                    var action = e.parent().attr('action');
-	                    e.on('click', function(){
+	                    e.bind('click', function(){
 	                    	var td = $(this).parent();
 	                    	td.trigger('actionheader.click', [action].concat(db2js.locateData(td)));
 	                    });	                    
@@ -673,7 +678,7 @@
 	    Molecule.create(AddButton);
     </script>
     
-     <!-- TableList, <table table="" edit-dialog="dialog id" allow-remove="true|false"> -->
+     <!-- TableList, <table table="" edit-dialog="dialog id" [new-dialog="dialog id"] allow-remove="true|false"> -->
      <div molecule-def="TableList" class="container">
         <script>
             // MOLECULE_DEF
@@ -692,37 +697,55 @@
          	    };
          	    
             function TableList() {
-               	var dialogId = this.container.attr('edit-dialog');
                	var tname = this.container.closest('[table]').attr('table');
-            	$(document).ready(function () {
-            		if(dialogId == null) return;		// 没有提供编辑数据的对话框
-            		var dialogEle = $('#' + dialogId);
-           	        var dialog = Molecule.of(dialogEle);
-           	        if(dialog == null) return;
-           	        dialog.on('close', function () {
-           	     		var table = db2js.dataset[tname];
-           	            table.reject();
-           	            table.clearError();
-           	            db2js.render();
-           	        });
-           	        dialog.on('submit', function () {
-           	            db2js.collect();
-
-           	         	var table = db2js.dataset[tname];
-           	            table.submit({
-           	                callback: function (error) {           	                    
-           	                    if (!error) {
-           	                    	dialogEle.modal('hide');
-           	                        this.reload();
-           	                    } else {
-           	                    	db2js.render();
-           	                    }
-           	                }
-           	            });
-           	        });
-           	    })
+               	
+               	var editDialogId = this.container.attr('edit-dialog');
+               	var newDialogId = this.container.attr('new-dialog') || editDialogId;
+               	
+           		if(editDialogId == null || newDialogId == null) return;		// 没有提供编辑数据的对话框
+           		
+           		$(document).ready(function(){
+	           		if(editDialogId) {
+	           			initDialog($('#' + editDialogId));
+	           		}
+	           		if(newDialogId && newDialogId != editDialogId){
+	           			initDialog($('#' + newDialogId));
+	           		}
+           		});
+           		
+           		function initDialog(dialogEle){
+	      	        var dialog = Molecule.of(dialogEle);
+	      	        if(dialog == null) debugger;
+	      	        dialog.on('close', function () {
+	      	     		var table = db2js.dataset[tname];
+	      	            table.reject();
+	      	            table.clearError();
+	      	            db2js.render();
+	      	        });
+	      	        dialog.on('submit', function () {
+	      	            $(dialogEle).collect();
+	      	         	var table = db2js.dataset[tname];
+	      	            if(dialogEle[0].hasAttribute('trace-submit')){
+	      	            	table.monitor();
+	      	            	debugger;
+	      	            	return;
+	      	            }
+	      	            table.submit({
+	      	                callback: function (error) {           	                    
+	      	                    if (!error) {
+	      	                    	dialogEle.modal('hide');
+	      	                        this.reload();
+	      	                    } else {
+	      	                    	db2js.render();
+	      	                    }
+	      	                }
+	      	            });
+	      	        });
+           		}
            	    
            	    this.editRow = function(row){
+           	    	var dialogId = (row._state == 'new') ? newDialogId : editDialogId;
+           	    		
        		        row._table.curr = row;
        		        db2js.render($('#' + dialogId), row._table);
        		        this.container.trigger('tablelist.edit', [row]);
