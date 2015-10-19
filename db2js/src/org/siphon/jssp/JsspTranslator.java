@@ -111,6 +111,8 @@ public class JsspTranslator {
 				if (code.startsWith("%]", i)) {
 					i += 2;
 					break till;
+				} else {
+					output.append(c);
 				}
 				break;
 			case '"':
