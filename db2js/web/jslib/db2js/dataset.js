@@ -86,9 +86,16 @@ db2js.DataTable = function (name, url, option){
 	this.db2js = name;				// selector, for render and collect
 	this.isDb2jsTerm = true;		// avoid extractData travel children
 	
-	var link = document.createElement('a');
-	link.href = url;
-	this.url = this.src = link.pathname;
+	/**
+	 * 设置 dbjs 的 URL
+	 */
+	this.setUrl = function(url){
+		var link = document.createElement('a');
+		link.href = url;
+		this.url = this.src = link.pathname; 
+		return this;
+	}
+	this.setUrl(url);
 	
 	if(!option.standalone){
 		db2js.dataset[name] = this;
@@ -303,6 +310,7 @@ db2js.DataTable.prototype.load = function(method, params, option){
 	this.fireEvent('willload');
 	var me = this;
 	this.search.params = q;
+	this.search.params._m = method;
 	this.search.option = option;
 	
 	$.ajax({
