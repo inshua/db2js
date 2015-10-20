@@ -247,18 +247,21 @@ db2js.Renderers.repeater = function(element, rows){
 	copies.each(function(idx, c){c.remove()});
 
 	var repeater = e.find('[repeater]');
+	repeater = repeater.toArray().filter(function(r){
+		return $(r).closest('[renderer=repeater]').is(e);
+	})
 	if(repeater.length == 0) return console.error('repeater child not found');
 	
-	repeater.each(function(idx, e){ $(e).hide(); });
+	repeater.forEach(function(e, idx){ $(e).hide(); });
 	
 	if(rows == null || rows.length == 0){
 		e.find('[repeater-empty]').show();
 	} else {
 		e.find('[repeater-empty]').hide();
-		var prev = repeater.last();
+		var prev = repeater[repeater.length-1];
 		for(var i=0; i<rows.length; i++){
 			var row = rows[i];
-			var tpl = repeater.filter(function(idx, item){
+			var tpl = repeater.filter(function(item, idx){
 				if(item.hasAttribute('when')){
 					with(row){
 						return eval(item.getAttribute('when'));
@@ -266,10 +269,10 @@ db2js.Renderers.repeater = function(element, rows){
 				} else {
 					return true;
 				}
-			}).first();
-			if(tpl.length == 0) continue;
+			})[0];
+			if(!tpl) continue;
 			
-			var r = tpl.clone();
+			var r = $(tpl).clone();
 			r.find('[molecule-r]').each(function(idx, e){
 				$(e).attr('molecule', $(e).attr('molecule-r')); 
 			});
