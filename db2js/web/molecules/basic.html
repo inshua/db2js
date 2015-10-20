@@ -916,6 +916,70 @@
 	     	Molecule.create(DateTime);
 		</script> 
 	</div>
+	
+	<!-- 
+		单选按钮组 <div dict="xxx" data-value="V"> 
+	-->
+	<div style="display:inline-block" molecule-def="RadioButtonGroup" renderer="molecule" collector="m|s">
+	  <div class="btn-group" role="group" data="#dicts" renderer="dictToList|buttons('name', 'id')">
+	  </div>
+	  <script>
+	  		// MOLECULE_DEF
+	  		function RadioButtonGroup(){
+	  			this.container.find('.btn-group').attr('dict', this.container.attr('dict'));
+	  			var value = this.container.data('value');
+	  			
+	  			this.setValue = function(val){
+	  				value = val;
+	  				this.container.find('button').each(function(idx, btn){
+	  					if($(btn).data('value') == value){
+	  						$(btn).addClass('btn-primary');
+	  					} else {
+	  						$(btn).removeClass('btn-primary');
+	  					}
+	  				});
+	  			}
+	  			if(value != null && value.length){
+	  				this.setValue(value);
+	  			}
+	  			this.getValue = function(){
+	  				return value;
+	  			}
+	  			
+	  			var me = this;
+	  			this.container.on('click', 'button', function(event){
+	  				var v = $(event.currentTarget).data('value');
+	  				me.setValue(v);
+	  			});
+	  		}
+	  		db2js.Renderers.buttons = function(dispCol, valueCol, allowEmpty){
+	  			
+	  			return function(element, rows, table){
+	  				var group = $(element);
+	  				
+	  				element.innerHTML = '';
+	  				
+	  				if(!rows) return;
+	  				for(var i=0; i<rows.length; i++){
+	  					$(document.createElement('button'))
+	  						.addClass('btn btn-default')
+	  						.data('value', rows[i][valueCol])
+	  						.html(rows[i][dispCol])
+	  						.appendTo(group);	  					
+	  				}
+	  				
+	  				var m = group.parent().molecule();
+	  				if(m){
+	  					m.setValue(m.getValue());
+	  				}
+	  			}
+	  		}
+
+	  		
+	  		// MOLECULE_DEF_END
+	  		Molecule.create(RadioButtonGroup)
+	  </script>
+	</div>
 
     <div molecule="TableList" table="book" edit-dialog="dialog1" allow-remove="true">
         <h1>Book</h1>
