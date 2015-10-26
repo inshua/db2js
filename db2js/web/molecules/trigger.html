@@ -38,7 +38,7 @@
 
     <!-- 下拉控件 -->
     <div molecule-def="DropDown" class="input-group">
-        <input type="text" class="form-control">
+        <input type="text" id="txDropDownText" class="form-control">
         <div class="input-group-btn">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="caret"></span>
@@ -52,6 +52,11 @@
             // MOLECULE_DEF
             function DropDown() {
             	this.isDropDown = true;
+            	
+            	this.shown = function(){
+            		return this.container.find('.input-group-btn').is('.open');
+            	}
+            	
                 this.toggle = function () {
                     this.container.find('.dropdown-menu').parent().find('.dropdown-toggle').click();
                 }
@@ -65,7 +70,7 @@
     </div>
 
     <!-- 下拉列表
-    	<div data-value="5" table="author" value-col="id" display-col=""></div> 
+    	<div data-value="5" table="author" value-col="id" display-col="name" autocomplete-col="code"></div> 
     -->
     <div molecule-def="DropDownList" molecule="DropDown" select="single" escape-tag="th" collector="m|s" renderer="molecule" class="+ dropdownlist">
         <div molecule="TableList" class="contaienr dropdownlist"">
@@ -91,11 +96,29 @@
             		}
                 });
             	
+            	var autoCompleteCol = this.container.attr('autocomplete-col'); 
+            	if(autoCompleteCol){        	
+	            	this.container.on('keyup', '#txDropDownText', function(event, value){
+	            		me.container.find('[molecule-obj=List]').attr('renderer', 'autoCompleteTableRenderer');
+	            		var text = $(event.currentTarget).val();
+	            		var t = me.container.find('[molecule-obj=List]');
+	            		t.attr('autocomplete-pattern', text);
+	            		t.render();
+	            		if(!me.shown()){
+	            			me.toggle();
+	            			$(event.currentTarget).focus();
+	            		}
+	                });
+            	} else {
+            		this.container.find('#txDropDownText').attr('readonly', true);
+            	}
+            	
             	this.container.on('db2js.rendered',function(event, value){
             		var t = $(event.target);
             		if(t.is('[molecule-obj=List]')){
             			updateText(t, me.getValue());
             		}
+            		me.container.off('db2js.rendered', arguments.callee);
                 });
             	
             	function updateText(t, value){
@@ -119,6 +142,69 @@
             	this.setValue = function(value){this.container.find('[molecule-obj=List]').molecule().setValue(value);}
             	this.getValue = function(value){return this.container.find('[molecule-obj=List]').molecule().getValue();}
             }
+            
+            db2js.Renderers.autoCompleteTableRenderer = function(hTable, value, table){
+            	var columnRenders = [];
+            	var headRow = hTable.tHead.rows[0];
+            	for(var i=0; i<headRow.cells.length; i++){
+            		var cell = headRow.cells[i];
+            		var attrs = {};
+            		for(var j=0; j<cell.attributes.length; j++){
+            			var attr = cell.attributes[j].name;
+            			var v = $(cell).attr(attr);
+            			switch(attr){
+            			case 'data-t' : attrs['data'] = v; break;
+            			default : attrs[attr] = v;
+            			} 
+            		}
+            		columnRenders.push(attrs);
+            	}
+
+            	var tBodyEmpty = hTable.querySelector('tbody.empty');
+            	var tBody = hTable.querySelector('tbody.data');
+            	if(tBody == null){
+            		var tBody = hTable.createTBody();
+            		tBody.className = 'data';
+            	} else {
+            		while(tBody.rows.length){
+            			tBody.rows[0].remove();
+            		}
+            	}
+            	if(table.rows.length == 0){
+            		if(tBodyEmpty) tBodyEmpty.style.display = '';
+            	} else {
+            		if(tBodyEmpty) tBodyEmpty.style.display = 'none';
+            		
+            		var autoCompleteCol = $(hTable).closest('[autocomplete-col]').attr('autocomplete-col');
+            		var pattern = $(hTable).closest('[autocomplete-pattern]').attr('autocomplete-pattern').toUpperCase();  
+            		
+            		for(var i=0; i<table.rows.length; i++){
+            			var row = table.rows[i];
+            			if(autoCompleteCol){
+            				var s = row[autoCompleteCol] + '';
+            				if(s.toUpperCase().indexOf(pattern) == -1){
+            					continue;
+            				}
+            			}
+            			var tr = tBody.insertRow();
+            			if(headRow.hasAttribute('data')){
+            				tr.setAttribute('data', hTable.getAttribute('data') + ',' + headRow.getAttribute('data').replace(/,\s*N/, ',' + i));
+            			}
+            			columnRenders.forEach(function(column){
+            				var cell = document.createElement('td');
+            				for(var attr in column){if(column.hasOwnProperty(attr)){
+            					if(attr == 'data'){
+            						$(cell).attr('data', hTable.getAttribute('data') + ',' + column.data.replace(/,\s*N\s*,/, ',' + i + ','));
+            					} else {
+            						$(cell).attr(attr, column[attr]);
+            					}
+            				}}
+            				tr.appendChild(cell);
+            			});
+            		}
+            	}
+            }
+            
             // MOLECULE_DEF_END            
 			Molecule.extend(DropDownList);
         </script>
@@ -192,7 +278,7 @@
 
     <div class="container">
           <label>Test</label>
-		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false" molecule-trace>
+		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false">
 		  		<tr>
 			  		<m:th molecule="Header" col="id" text="ID"></m:th>
 			        <m:th molecule="Header" col="name" text="Name"></m:th>
@@ -200,6 +286,14 @@
 		        </tr>
 		  </div>
 		  
+		  <label>Test</label>
+		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" autocomplete-col="email" select="single" show-header="true">
+		  		<tr>
+			  		<m:th molecule="Header" col="id" text="ID"></m:th>
+			        <m:th molecule="Header" col="name" text="Name"></m:th>
+			        <m:th molecule="Header" col="email" text="Email"></m:th>
+		        </tr>
+		  </div>
 		  
 		  <label>Test</label>
 		  <div molecule="DropDownTree" table="author" value-col="id" display-col="name" parent-col="parent_id" select="single" show-header="true">
@@ -236,27 +330,15 @@
     $(function () {
         table.fill([
 	        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
-	        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },
-	        { id: 8, name: '空管部', email: 'dh@xxx.com', parent_id: 2 },
-	        { id: 3, name: '信息部', email: 'dh@xxx.com', parent_id: 2 },
-	        { id: 4, name: '东方航空华北公司', email: 'dh@xxx.com', parent_id: 1 },
-	        { id: 5, name: '厦门航空', email: 'dh@xxx.com', },
-	        { id: 6, name: '厦门航空华南公司', email: 'dh@xxx.com', parent_id: 5 },
-	        { id: 7, name: '吉祥航空', email: 'dh@xxx.com' },
+	        { id: 2, name: '东方航空华东公司', email: 'hd@xxx.com', parent_id: 1 },
+	        { id: 8, name: '空管部', email: 'kg@xxx.com', parent_id: 2 },
+	        { id: 3, name: '信息部', email: 'xx@xxx.com', parent_id: 2 },
+	        { id: 4, name: '东方航空华北公司', email: 'dhhb@xxx.com', parent_id: 1 },
+	        { id: 5, name: '厦门航空', email: 'xm@xxx.com', },
+	        { id: 6, name: '厦门航空华南公司', email: 'xmhn@xxx.com', parent_id: 5 },
+	        { id: 7, name: '吉祥航空', email: 'jx@xxx.com' },
         ], true);
     });
-
-    function test(){
-    	table.fill([
-    		        { id: 1, name: '东方航空', email: 'dh@xxx.com', parent_id: null },
-    		        { id: 2, name: '东方航空华东公司', email: 'dh@xxx.com', parent_id: 1 },
-    		        { id: 8, name: '空管部', email: 'dh@xxx.com', parent_id: 2 },
-    		        { id: 3, name: '信息部', email: 'dh@xxx.com', parent_id: 2 },
-    		        { id: 4, name: '东方航空华北公司', email: 'dh@xxx.com', parent_id: 1 },
-    		        { id: 5, name: '厦门航空', email: 'dh@xxx.com', },
-    		        { id: 6, name: '厦门航空华南公司', email: 'dh@xxx.com', parent_id: 5 },
-    		        { id: 7, name: '吉祥航空', email: 'dh@xxx.com' },
-    	        ], true);
-    }
+    
 </script>
 </html>
