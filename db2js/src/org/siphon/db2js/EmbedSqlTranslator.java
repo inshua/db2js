@@ -19,12 +19,22 @@
  *******************************************************************************/
 package org.siphon.db2js;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.el.parser.ParseException;
@@ -73,7 +83,8 @@ public class EmbedSqlTranslator {
 			generateCode(node);
 			
 			return StringUtils.join( this.code.lines, System.lineSeparator()) + System.lineSeparator() + this.code.currentLine;
-			
+		} catch(UnexceptedTokenException e){			
+			throw new Exception(e.getMessage() + " near " + getLineNear(code, e.getStart()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new Exception(e.getMessage());
@@ -81,6 +92,32 @@ public class EmbedSqlTranslator {
 	}
 	
 	
+	private String getLineNear(String code, int pos) {
+		
+		DataInputStream inputStream = new DataInputStream(IOUtils.toInputStream(code));
+		
+		String line = null;
+		int lineHead = 0;
+		int lineIndex = 0;
+		try {
+			while(inputStream.available() >= code.length() - pos){
+				System.out.println(inputStream.available());
+				System.out.println("total " + (code.length() - pos));
+				lineHead = code.length() - inputStream.available();
+				line = inputStream.readLine();
+				System.out.println("got " + line);
+				lineIndex ++;
+			}
+		} catch (IOException e) {
+			// e.printStackTrace();
+		}
+		
+		String s = "LN " + lineIndex + ":" + (pos - lineHead + 1) + " " + line;
+		
+		return s;
+	}
+
+
 	private void generateCode(Node node) throws ParseException {
 		switch(state){
 		case STATE_CODE :
@@ -559,13 +596,21 @@ public class EmbedSqlTranslator {
 	
 	private static class UnexceptedTokenException extends Exception{
 
+		private int start;
+
 		public UnexceptedTokenException(int start, String unexpected) {
 			super("unexpected token " + unexpected + " at " + start);
+			this.start = start;
 		}
 
 		public UnexceptedTokenException(String unexpected) {
 			super("unexpected token " + unexpected);
 		}
+
+		public int getStart() {
+			return start;
+		}
+
 
 		private static final long serialVersionUID = 6127948538074329561L;
 	}
