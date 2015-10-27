@@ -101,11 +101,8 @@ public class EmbedSqlTranslator {
 		int lineIndex = 0;
 		try {
 			while(inputStream.available() >= code.length() - pos){
-				System.out.println(inputStream.available());
-				System.out.println("total " + (code.length() - pos));
 				lineHead = code.length() - inputStream.available();
 				line = inputStream.readLine();
-				System.out.println("got " + line);
 				lineIndex ++;
 			}
 		} catch (IOException e) {
