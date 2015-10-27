@@ -84,10 +84,10 @@ public class EmbedSqlTranslator {
 			
 			return StringUtils.join( this.code.lines, System.lineSeparator()) + System.lineSeparator() + this.code.currentLine;
 		} catch(UnexceptedTokenException e){			
-			throw new Exception(e.getMessage() + " near " + getLineNear(code, e.getStart()));
+			throw new Exception(e.getMessage() + " near " + getLineNear(code, e.getStart()), e);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new Exception(e.getMessage());
+			//e.printStackTrace();
+			throw e;
 		}
 	}
 	
