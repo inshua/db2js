@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.siphon.common.js.JsTypeUtil;
 import org.siphon.db2js.jshttp.JsEngineHandlerContext;
+import org.siphon.jssp.JsspWriter;
 import org.siphon.jssql.SqlExecutorException;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -37,11 +38,17 @@ import jdk.nashorn.internal.runtime.ScriptObject;
 public class Db2jsFormatter extends Formatter {
 
 	@Override
-	public String formatQueryResult(Object queryResult, String message, JsEngineHandlerContext engineContext) throws Exception {
+	public void formatQueryResult(Object queryResult, String message, JsEngineHandlerContext engineContext) throws Exception {
+		JsspWriter out = (JsspWriter) engineContext.getScriptEngine().get("out");
 		if (engineContext.getJsTypeUtil().isNull(queryResult))
-			return "{\"success\" : true}";
-		else
-			return engineContext.getJson().stringify(queryResult);
+			if(out.isDirty()){
+				return;
+			} else {
+				out.print("{\"success\" : true}");
+			}
+		else{
+			out.printJson(queryResult);
+		}
 	}
 
 	@Override

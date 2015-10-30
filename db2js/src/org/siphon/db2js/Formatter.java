@@ -25,7 +25,7 @@ import org.siphon.db2js.jshttp.JsEngineHandlerContext;
 
 public abstract class Formatter {
 
-	public abstract String formatQueryResult(Object queryResult, String message, JsEngineHandlerContext engineContext)
+	public abstract void formatQueryResult(Object queryResult, String message, JsEngineHandlerContext engineContext)
 			throws Exception;
 
 	public abstract String formatRow(Object row, String message, JsEngineHandlerContext engineContext) throws Exception;

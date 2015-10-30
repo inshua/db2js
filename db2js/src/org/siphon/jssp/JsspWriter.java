@@ -40,6 +40,8 @@ public class JsspWriter {
 	private ServletOutputStream outputStream;
 	private final JsEngineHandlerContext jsEngineHandlerContext;
 	
+	private boolean dirty = false;
+	
 	public JsspWriter(HttpServletResponse response, JsEngineHandlerContext jsEngineHandlerContext) {
 		this.response = response;
 		this.jsEngineHandlerContext = jsEngineHandlerContext;
@@ -49,6 +51,7 @@ public class JsspWriter {
 	public void print(String s) throws IOException {
 		if(this.writer== null ){
 			this.writer = response.getWriter();
+			this.dirty = true;
 		}
 		this.writer.print(s);
 	}
@@ -56,6 +59,7 @@ public class JsspWriter {
 	public void write(byte[] data) throws IOException {
 		if(this.outputStream == null){
 			this.outputStream = response.getOutputStream();
+			this.dirty = true;
 		}
 		this.outputStream.write(data);
 		
@@ -89,5 +93,10 @@ public class JsspWriter {
 	
 	public void printJson(Object o) throws IOException{
 		this.print(jsEngineHandlerContext.getJson().tryStringify(o));
+	}
+
+
+	public boolean isDirty() {
+		return dirty;
 	}
 }

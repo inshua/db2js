@@ -121,15 +121,16 @@ public class DbjsRunner {
 		} 
 
 		formatter.writeHttpHeader(response, engineContext);
-		PrintWriter out = null;
+		JsspWriter out = null;
 		try {
 
 			initEngineContext(engineContext, jsspRequest, response);
+			
+			out = (JsspWriter) engineContext.getScriptEngine().get("out");
 
 			Object res = run(engineContext, jsspRequest, response, method, params);
 
-			out = response.getWriter();
-			out.print(formatter.formatQueryResult(res, null, engineContext));
+			formatter.formatQueryResult(res, null, engineContext);
 
 		} catch (Exception e) {
 			try {
@@ -159,8 +160,6 @@ public class DbjsRunner {
 			}
 
 			try {
-				if (out == null)
-					out = response.getWriter();
 				out.print(formatter.formatException(ex, engineContext));
 				out.flush();
 			} catch (Exception e1) {
@@ -170,8 +169,7 @@ public class DbjsRunner {
 			if (engineContext != null)
 				engineContext.free();
 
-			if (out != null)
-				out.flush();
+			out.flush();
 		}
 	}
 
