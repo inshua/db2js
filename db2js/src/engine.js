@@ -168,8 +168,6 @@ function findResource(filename){
  */
 function parseDate(key, value) {
     switch(typeof value){
-    case 'function':
-    	return null;
     case 'string':
         var a = parseDate.reg.exec(value);
         if (a) {

@@ -46,20 +46,10 @@ public class JsTypeUtil {
 		try {
 		    Bindings b = engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE);
 			this.arrayConstructor = (ScriptObjectMirror) b.get("Array");
-//			ScriptObjectMirror m = (ScriptObjectMirror) this.arrayConstructor.call(null);
-//			Object diff = m.getMember("diff");
-//			if(JsTypeUtil.isNull(diff) == false){
-//				// ScriptObjectMirror marr2 = (ScriptObjectMirror) jsEngine.eval("JSON.parse('[1,2,3]')");
-//				// ScriptObjectMirror json = (ScriptObjectMirror) jsEngine.eval("JSON");
-//				// jsEngine.eval(jsEngine.get("parseDate").toString());
-//				// ScriptObjectMirror marr2 = (ScriptObjectMirror) json.callMember("parse", "[1,2,3]");
-//				ScriptObjectMirror marr2 = (ScriptObjectMirror) new JSON(jsEngine).parse("[1,2,3]");
-//				System.out.println(marr2.getMember("diff"));
-//			}
-			
 			this.objectConstructor = (ScriptObjectMirror) b.get("Object");
 		} catch (Exception e) {
-			// logger.error("", e);
+			e.printStackTrace();
+			//logger.error("", e);
 		}
 
 	}

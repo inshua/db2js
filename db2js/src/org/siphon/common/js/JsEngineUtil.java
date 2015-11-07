@@ -213,8 +213,6 @@ public class JsEngineUtil {
 			" */\n" +
 			"function parseDate(key, value) {\n" +
 			"    switch(typeof value){\n" +
-			"    case 'function':\n" +
-			"      return null;\n" +
 			"    case 'string':\n" +
 			"        var a = parseDate.reg.exec(value);\n" +
 			"        if (a) {\n" +
