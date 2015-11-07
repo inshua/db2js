@@ -30,6 +30,7 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.internal.objects.NativeArray;
+import jdk.nashorn.internal.objects.NativeString;
 import jdk.nashorn.internal.runtime.Undefined;
 
 
@@ -45,6 +46,17 @@ public class JsTypeUtil {
 		try {
 		    Bindings b = engine.getContext().getBindings(ScriptContext.ENGINE_SCOPE);
 			this.arrayConstructor = (ScriptObjectMirror) b.get("Array");
+//			ScriptObjectMirror m = (ScriptObjectMirror) this.arrayConstructor.call(null);
+//			Object diff = m.getMember("diff");
+//			if(JsTypeUtil.isNull(diff) == false){
+//				// ScriptObjectMirror marr2 = (ScriptObjectMirror) jsEngine.eval("JSON.parse('[1,2,3]')");
+//				// ScriptObjectMirror json = (ScriptObjectMirror) jsEngine.eval("JSON");
+//				// jsEngine.eval(jsEngine.get("parseDate").toString());
+//				// ScriptObjectMirror marr2 = (ScriptObjectMirror) json.callMember("parse", "[1,2,3]");
+//				ScriptObjectMirror marr2 = (ScriptObjectMirror) new JSON(jsEngine).parse("[1,2,3]");
+//				System.out.println(marr2.getMember("diff"));
+//			}
+			
 			this.objectConstructor = (ScriptObjectMirror) b.get("Object");
 		} catch (Exception e) {
 			// logger.error("", e);
@@ -79,7 +91,7 @@ public class JsTypeUtil {
 			return true;
 		if (object instanceof ScriptObjectMirror){
 			ScriptObjectMirror m = (ScriptObjectMirror) object;
-			if(m.isEmpty()) return true;					// 空字符串（空数组 isEmpty() 为 true)
+			if(m.isInstanceOf(NativeString.class) && m.isEmpty()) return true;					// 空字符串（空数组 isEmpty() 为 true)
 			if(ScriptObjectMirror.isUndefined(m)){			// 实际上总是返回 null，不会返回 undefined
 				return true;
 			}

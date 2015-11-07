@@ -40,7 +40,7 @@ public class JSON {
 		this.engine = (NashornScriptEngine) jsEngine;
 		try {
 			this.json = (ScriptObjectMirror) jsEngine.eval("JSON");
-			this.parseDate = jsEngine.eval("parseDate");
+			this.parseDate = jsEngine.get("parseDate");
 		} catch (ScriptException e) {
 		}
 	}
@@ -70,7 +70,7 @@ public class JSON {
 
 	public Object parse(String jsonStr) throws Exception {
 		try {
-			return this.json.callMember("parse", jsonStr, parseDate);
+			return this.json.callMember("parse", jsonStr);
 		} catch (Exception e) {
 			throw new Exception(json + " cannot parsed", e);
 		} finally {
