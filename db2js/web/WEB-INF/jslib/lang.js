@@ -60,6 +60,44 @@ Array.prototype.find = function(fn, scope){
 	return -1;
 };
 
+
+/**
+ * 找出两个数组（集合）的变化。
+ * 例如 
+ *     [1,2,3].diff([3,4]) 
+ * 得到 
+ * 	   {appended : [4], removed : [1,2]}
+ * @param newArray 新版本的数组
+ * @returns {Object} {appended : [], removed : []}
+ */
+Array.prototype.diff = function(newArray){
+	var n = [], r = [];
+	for(var i=0; i<this.length; i++){
+		if(newArray.indexOf(this[i]) == -1){
+			r.push(this[i]);
+		}
+	}
+	for(var i=0; i<newArray.length; i++){
+		if(this.indexOf(newArray[i]) == -1){
+			n.push(newArray[i]);
+		}
+	}
+	return {appended : n, removed : r};
+}
+
+/**
+ * 去除数组中所有相同的元素,得到新数组
+ */
+Array.prototype.distinct = function(){
+	var arr = [];
+	for(var i=0; i<this.length; i++){
+		if(arr.indexOf(this[i]) == -1){
+			arr.push(this[i]);
+		}
+	}
+	return arr;
+}
+
 ///**
 // * 将当前对象与另一对象合并，另一对象的属性复制到本对象。
 // * @param b 另一对象
