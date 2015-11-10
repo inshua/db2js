@@ -841,8 +841,8 @@ db2js.DataRow = function(table, rowData){
 	 */
 	this._setValues = function(rowData){
 		for(var k in rowData){
-			if(this._table.columns.any(function(col){return col.name == k})){
-				this._set(k, value);
+			if(this._table.columns.some(function(col){return col.name == k})){
+				this._set(k, rowData[k]);
 			}
 		}
 		return this;
