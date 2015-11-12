@@ -926,6 +926,7 @@ function init(sqlExecutor, client){
 	dbjs = handler = new DBJS(sqlExecutor);
 	engine.put('handler', handler);
 	engine.put('dbjs', dbjs);
+	sqlExecutor.defaultJsonDbType = 'JSONB';
 }
 
 

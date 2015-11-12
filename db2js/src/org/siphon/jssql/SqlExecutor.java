@@ -114,6 +114,8 @@ public class SqlExecutor {
 	private org.siphon.common.js.JSON JSON;
 
 	private JsTypeUtil jsTypeUtil;
+	
+	private String defaultJsonDbType;
 
 	public SqlExecutor(DataSource dataSource, ScriptEngine jsEngine) throws ScriptException {
 		this.dataSource = dataSource;
@@ -789,6 +791,13 @@ public class SqlExecutor {
 					obj.setValue(this.JSON.tryStringify(value));
 					ps.setObject(i + 1, obj);
 				} else {
+					if(this.defaultJsonDbType != null){
+						PGobject obj = new PGobject();
+						obj.setType(this.defaultJsonDbType);
+						obj.setValue(this.JSON.tryStringify(arg));
+						ps.setObject(i + 1, obj);
+						return;
+					}
 					throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") not support");
 				}
 			} else {
@@ -1200,6 +1209,18 @@ public class SqlExecutor {
 
 	public String getDriverClass() {
 		return driverClass;
+	}
+
+	public String getDefaultJsonDbType() {
+		return defaultJsonDbType;
+	}
+
+	public void setDefaultJsonDbType(String defaultJsonDbType) {
+		if(defaultJsonDbType != null){
+			this.defaultJsonDbType = defaultJsonDbType.toLowerCase();
+		} else {
+			this.defaultJsonDbType = defaultJsonDbType;
+		}
 	}
 
 }
