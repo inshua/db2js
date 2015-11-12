@@ -796,9 +796,9 @@ public class SqlExecutor {
 						obj.setType(this.defaultJsonDbType);
 						obj.setValue(this.JSON.tryStringify(arg));
 						ps.setObject(i + 1, obj);
-						return;
+					} else {
+						throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") not support");
 					}
-					throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") not support");
 				}
 			} else {
 				throw new SqlExecutorException("js argument " + arg + " (" + arg.getClass() + ") at " + i +  " not support");
