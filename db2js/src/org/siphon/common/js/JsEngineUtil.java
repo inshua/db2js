@@ -365,13 +365,29 @@ public class JsEngineUtil {
 		return e;
 	}
 	
-//	public static Object invokeMethodCrossEngine(ScriptEngine masterEngine, ScriptEngine serverEngine, Object object, String method, Object[] arguments) throws NoSuchMethodException, ScriptException{
-//		for(int i=0; i<arguments.length; i++){
-//			if(arguments[i] instanceof ScriptObjectMirror){
-//				ScriptObjectMirror om = arguments[i];
-//				json
-//			}
-//		}
-//		return ((Invocable)serverEngine).invokeMethod(object, method, arguments);
-//	}
+	public static Object invokeMethodCrossEngine(ScriptEngine masterEngine, ScriptEngine serverEngine, Object object, String method, Object[] arguments) throws NoSuchMethodException, ScriptException{
+		if(masterEngine == serverEngine){
+			return ((Invocable)serverEngine).invokeMethod(object, method, arguments);
+		} else {
+			Object[] arguments2 = new Object[arguments.length];
+			for(int i=0; i<arguments.length; i++){
+				if(arguments[i] instanceof ScriptObjectMirror){
+					arguments2[i] = ((ScriptObjectMirror)arguments[i]).to(Object.class);
+				} else {
+					arguments2[i] = arguments[i];
+				}
+			}
+			Object res = null;
+			if(object instanceof ScriptObjectMirror){
+				res = ((ScriptObjectMirror) object).callMember(method, arguments2);
+			} else {
+				res = ((Invocable)serverEngine).invokeMethod(object, method, arguments2);
+			}
+			if(res instanceof ScriptObjectMirror){
+				return ((ScriptObjectMirror) res).to(Object.class);
+			} else {
+				return res;
+			}
+		}
+	}
 }
