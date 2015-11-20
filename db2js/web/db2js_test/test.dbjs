@@ -12,6 +12,7 @@ dbjs.fetch = function(params){
 }
 
 dbjs.modify = function(row, columns){
+	logger.info(JSON.stringify(row));
 	$V(row, {
 		email : V.email
 	});
@@ -19,3 +20,6 @@ dbjs.modify = function(row, columns){
 	return this.updateRow('author', row, columns);
 }
 
+dbjs.test = function(){
+	return this.query('select ?::jsonb att, ?::jsonb att2', [{name : 'Jack'}, {name : "tom"}]);
+}
