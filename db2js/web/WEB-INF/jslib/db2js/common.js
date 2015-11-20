@@ -931,7 +931,9 @@ function init(sqlExecutor, client){
 
 
 var ObjectArray = Java.type('java.lang.Object[]'), 
-	ScriptObjectMirror = Java.type('jdk.nashorn.api.scripting.ScriptObjectMirror');
+	ScriptObjectMirror = Java.type('jdk.nashorn.api.scripting.ScriptObjectMirror'),
+	JsTypeUtil = Java.type('org.siphon.common.js.JsTypeUtil'),
+	EngineUtil = Java.type('org.siphon.common.js.JsEngineUtil');
 
 /**
  * 调用另一个 dbjs 文件的函数
@@ -947,19 +949,11 @@ DBJS.prototype.callDbjs = function(src, method, params){
 		if(this.transactConnection){
 			another = engineContext.getEngineAsInvocable().invokeMethod(another, 'clone');	// ScriptObjectMirror
 			another.transactConnection = this.transactConnection;
-			
-//			var bindings = engineContext.getScriptEngine().createBindings();
-//			bindings.transactConnection = this.transactConnection;
-//			bindings.another = another;
-//			engineContext.getScriptEngine().eval('another.transactConnection = transactConnection', bindings);
 		}
-		var arr = Java.to(params instanceof Array ? params : [params], ObjectArray);
-		for(var i=0;i<arr.length; i++){
-			if(arr[i] && typeof arr[i] == 'object'){
-				arr[i] = engineContext.getJson().parse(JSON.stringify(arr[i]));
-			}
-		}
-		var res = engineContext.getEngineAsInvocable().invokeMethod(another, method, arr);
+		var engine2 = engineContext.getScriptEngine();
+		var bindings = engine2.getBindings(100);
+		bindings['__s'] = JSON.stringify(params instanceof Array ? params : [params]);		// 欲在两个引擎间传递对象，只能使用这种方法
+		var res = engine2.eval("dbjs." + method + '.apply(dbjs, JSON.parse(__s, parseDate))', bindings);
 		if(res != null && res instanceof ScriptObjectMirror) res = org.siphon.common.js.JsTypeUtil.getSealed(res);
 		dbjsRunner.completeTask(engineContext.getScriptEngine(), null);
 		return res;
