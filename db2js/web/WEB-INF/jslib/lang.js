@@ -20,14 +20,14 @@
 // ================= 扩充函数 ========================
 /**
  * <pre>
- * 根据判据函数查找满足条件的元素。如果没有找到返回 -1。
+ * 根据判据函数查找满足条件的序号。如果没有找到返回 -1。
  * 用法:
  * <pre class="code">
  * [1, 2, 3, 4].find(function(item, index){
  * 		return item % 2 == 0;
  * });
  * </pre>
- * 得到 2。
+ * 得到 1。
  * </pre>
  * @param fn function(item, index) { return boolean};
  * @returns {Object}
@@ -41,23 +41,22 @@ Array.prototype.findIndex = function(fn, scope){
 
 /**
  * <pre>
- * 根据判据函数查找满足条件的序号。如果没有找到返回 undefined。
+ * 根据判据函数查找满足条件的元素。如果没有找到返回 undefined。
  * 用法:
  * <pre class="code">
  * [1, 2, 3, 4].find(function(item, index){
  * 		return item % 2 == 0;
  * });
  * </pre>
- * 得到 1。
+ * 得到 2。
  * </pre>
  * @param fn function(item, index) { return boolean};
  * @returns {Number}
  */
 Array.prototype.find = function(fn, scope){
 	for(var i=0; i< this.length; i++){
-		if(fn.call(scope, this[i], i)) return ;
+		if(fn.call(scope, this[i], i)) return this[i];
 	}
-	return -1;
 };
 
 
