@@ -300,43 +300,6 @@ V.inside = function(dict, msg){
 
 /**
  * <pre>
- * 类似 Unique 检查器。检查与传入记录 NODE 相同的兄弟记录看是否唯一。
- * </pre>
- * @param table 表名
- * @param tableField 字段名。如与传入字段名相同可不填。
- * @param primaryDesc
- * @returns 
- */
-V.uniqueInNode = function(table, tableField, primaryDesc){	
-	return {
-		name : 'unique',	
-		check : function(v, fld, rcd){
-			if(v==null||v=='') return;
-			var pk = 'id';
-			if(primaryDesc == null){
-				primaryDesc = {id : rcd.id};
-			} else {
-				for(var k in primaryDesc){
-					if(primaryDesc.hasOwnProperty(k)){
-						pk = k;
-						break;
-					}
-				}
-			}
-			var sql = 'select 1 from ' + table + ' where ' + (tableField || fld) + ' = ? and rownum=1 and node=?';			
-			var r = (primaryDesc[pk] == null) ? 
-					dbjs.query(sql, [v, rcd.node]) : 
-					dbjs.query(sql + ' and ' + pk + ' <> ?', [v, primaryDesc[pk], rcd.node]);
-					
-			if(r.rows.length){
-				return '发现重复记录';
-			}
-		}
-	};
-};
-
-/**
- * <pre>
  * 服务器端类型转换器，如转换失败则抛错，这组工具会修改 record 的值，同时具备转换和校验的功能。
  * 
  * 使用方法:
