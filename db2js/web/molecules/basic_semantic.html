@@ -248,6 +248,8 @@
     		 {$ : '.list > tbody + tbody', 'border-top': '0px'}
     		].defCss();
             function List() {
+            	var activeTrClass = 'active';
+            	
                 var table = this.container.closest('[table]').attr('table');
                 var valueColumn = this.container.closest('[value-col]').attr('value-col') || 'id'
                 this.container.attr('data', '#' + table);
@@ -268,7 +270,7 @@
                 case 'none' : ;
                 	break;
                 case 'single' : 
-                	this.container[0].className = 'table table-hover table-condensed table-selectable list';
+                	this.container[0].className = 'ui sortable selectable table';
                 	this.container.on('db2js.rendered', function f(event) {
                         if (event.target == me.container[0]) {
                             var storeValue = me.container.data('value'); 
@@ -276,16 +278,16 @@
                                 var row = db2js.locateData(tr)[0];
                                 var value = row[valueColumn];
                                 if(storeValue && storeValue == value){
-                                	$(tr).addClass('info');
+                                	$(tr).addClass(activeTrClass);
                                 	me.container.data('prev_selected_tr', tr);
                                 }
                                 $(tr).bind('click', function () { 
                                     if(me.container.data('value') != value){
                                     	var prevtr = me.container.data('prev_selected_tr');
-                                    	prevtr && $(prevtr).removeClass('info');
+                                    	prevtr && $(prevtr).removeClass(activeTrClass);
                                     	
 	                                    me.container.data('value', value);
-	                                    $(tr).addClass('info');
+	                                    $(tr).addClass(activeTrClass);
 	                                    me.container.data('prev_selected_tr', tr);
 	                                    me.container.trigger('valuechange', [value, row]);
                                     }
@@ -305,7 +307,7 @@
                 	}
                 	break;
                 case 'multi' :
-	                this.container[0].className = 'table table-hover table-condensed table-selectable list';
+	                this.container[0].className = 'ui sortable selectable table';
 	                var checkAll = $(document.createElement('th')).attr('molecule', 'CheckHeader');
 	                checkAll.attr('col', valueColumn);
 	                var tr = this.container.find('thead>tr');
@@ -319,9 +321,9 @@
 		                		var row = d && d[0];
 	                            var value = row[valueColumn];
 	                            if(checked.indexOf(value) != -1){
-	                            	$(tr).addClass('info')
+	                            	$(tr).addClass(activeTrClass)
 	                            } else {
-	                            	$(tr).removeClass('info')
+	                            	$(tr).removeClass(activeTrClass)
 	                            }
 		                	});
 		                	console.log(me.container[0] + ' trigger valuechange');
@@ -415,7 +417,8 @@
             // MOLECULE_DEF
             [{$ : '.table-form', display: 'table !important'},
         	 {$ : '.table-form > .field', display: 'table-row !important'},
-        	 {$ : '.table-form > .field > label, .form-group > .form-control' , display: 'table-cell !important', margin : '.5em 0em !important'},        	
+        	 {$ : '.table-form > .field > label' , display: 'table-cell !important'},
+        	 {$ : '.table-form > .field > .form-control' , margin : '.3em 0em !important'},
         	 {$ : '.table-form > .field > label', 'padding-right': '8px', 'text-align': 'right', 'font-weight': 'normal', 'vertical-align' : 'middle !important'},
         	 // {$ : 'form.table-form', 'min-height': '480px',	'max-height': '800px'; overflow: 'scroll'}
         	].defCss();
@@ -485,7 +488,7 @@
     
     
     <!-- 搜索表单项，<form col="" text=""></form>， 必须放在 form 里，且 form 已指定 table=xxx -->
-    <div molecule-def="SearchFormItem" class="field">
+    <div molecule-def="SearchFormItem" class="inline field">
         <label></label>
         <!-- {INNER_HTML} -->
         <script>
@@ -562,7 +565,7 @@
             	<select molecule="SearchSelect">
             </div>
 	-->
-	<select molecule-def="SearchSelect" class="form-control compact ui dropdown" renderer="std" collector="c|s"></select>
+	<select molecule-def="SearchSelect" class="form-control ui dropdown" renderer="std" collector="c|s"></select>
     <script molecule-for="SearchSelect">
         // MOLECULE_DEF
         function SearchSelect() {
@@ -583,8 +586,8 @@
     	用法：
     	<div molecule="SearchFormSelectItem" col="gendor" text="Gendor" [dict="gendor"] [allow-empty="true|false"]></div>
     -->
-    <div molecule-def="SearchFormSelectItem" molecule="SearchFormItem" col="gendor" text="Gendor" dict="gendor" data="#dicts" allow-empty="true">
-		<select class="form-control" renderer="std" collector="c|s"></select>
+    <div molecule-def="SearchFormSelectItem" molecule="SearchFormItem" allow-empty="true">
+		<select class="form-control" class="form-control ui dropdown" renderer="std" collector="c|s"></select>
 		<script>
 			// MOLECULE_DEF
 	        function SearchFormSelectItem() {
@@ -596,6 +599,10 @@
 	            this.container.find('select').attr('data', '#' + table + ',search,params,' + col);
 				this.container.attr('renderer', 'dictToList|options(\'name\',\'id\', ' + allowEmpty + ')');
 	            db2js.render(this.container);
+	            
+	            this.container.find('select').on('db2js.rendered', function(event){
+	            	$(this).dropdown();
+	            });
 	        }
 	        // MOLECULE_DEF_END
 	        Molecule.create(SearchFormSelectItem);
@@ -603,7 +610,7 @@
 	</div>
 	
 	<!-- 编辑对话框用的 select, <select> 必须放在 FormItem 内-->
-    <select molecule-def="Select" class="form-control" renderer="std" collector="c|s"></select>
+    <select molecule-def="Select" class="form-control compact ui dropdown" renderer="std" collector="c|s"></select>
     <script molecule-for="Select">
         // MOLECULE_DEF
         function Select() {
@@ -611,11 +618,24 @@
             var col = this.container.closest('.field').attr('col');
 
             this.container.attr('data', '#' + table + ',curr,' + col);
+            
+            this.container.on('db2js.rendered', function(event){
+            	$(this).dropdown().addClass('compact');
+            });
         }
         // MOLECULE_DEF_END
         Molecule.create(Select);
     </script>    
 
+	<!--
+		搜索用的表单，靠右对齐 
+	 -->
+	<form molecule-def="SearchForm" class="ui form">
+    	<div class="fields">
+     		<div style="flex : 1;"></div><!-- 占位，把后面的元素挤到右边 -->
+          	<!-- {INNER_HTML} -->
+        </div>
+    </form>
 
     <!-- 对话框  <div title="title"> -->
     <div molecule-def="Dialog" class="ui modal" id="myModal">
@@ -998,21 +1018,20 @@
     <div molecule="TableList" table="book" edit-dialog="dialog1" allow-remove="true">
         <h1>Book</h1>
         <div>
-            <form class="ui form right floated statistic">
-            	<div class="inline fields">
-	                <div molecule="SearchFormItem" col="name" text="Name">
-	                    <input type="text" molecule="SearchInput">
-	                </div>
-	                <div molecule="SearchFormSelectItem" col="kind" text="Kind" dict="book_kind">                    
-	                </div>
-	                <div molecule="SearchFormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',true)">
-	                    <select molecule="SearchSelect"></select>
-	                </div>
-	                <button molecule="SearchButton">Search</button>
-	                <button molecule="AddButton">Add</button>
+            <form molecule="SearchForm">
+                <div molecule="SearchFormItem" col="name" text="Name">
+                    <input type="text" molecule="SearchInput">
                 </div>
+                <div molecule="SearchFormSelectItem" col="kind" text="Kind" dict="book_kind">                    
+                </div>
+                <div molecule="SearchFormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',true)">
+                    <select molecule="SearchSelect"></select>
+                </div>
+                <button molecule="SearchButton">Search</button>
+                <button molecule="AddButton">Add</button>
             </form>
         </div>
+        
         <div molecule="TableError"></div>
 
         <table molecule="List">
@@ -1035,14 +1054,14 @@
             <div molecule="FormItem" col="title" text="Title">
                 <input type="text" molecule="Input">
             </div>
-            <div molecule="FormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',false)" >
-                <select molecule="Select"></select>
-            </div>
             <div molecule="FormItem" col="kind" text="Kind" dict="book_kind">
                 <select molecule="Select" collector="c|n|s"></select>
             </div>
             <div molecule="FormItem" col="publish_date" text="Publish Date">
                 <input type="date" molecule="Input" format="yyyy-MM-dd" renderer="date|std" collector="c|d|s">
+            </div>
+            <div molecule="FormItem" col="author" text="Author" data="#author,rows" renderer="options('name','id',false)" >
+                <select molecule="Select"></select>
             </div>
         </form>
     </div>
