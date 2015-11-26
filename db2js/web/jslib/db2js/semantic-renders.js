@@ -60,7 +60,7 @@ db2js.Renderers.pagination = db2js.KNOWN_RENDERERS['pagination'] = function(elem
 db2js.Renderers.stderr = db2js.KNOWN_RENDERERS['stderr'] = function(element,  value, table, _1, rows, index, row, columnName){
 	var e = $(element), v = value;
 	if(value == null){
-		e.addClass('hide');
+		e.hide();
 	} else {
 		e.attr('class', '');
 		switch(v.level){
@@ -71,6 +71,7 @@ db2js.Renderers.stderr = db2js.KNOWN_RENDERERS['stderr'] = function(element,  va
 			e.addClass('ui red message');
 		}
 		e.html(value.message);
+		e.show();
 	}
 }
 
@@ -88,21 +89,20 @@ db2js.Renderers.stderr = db2js.KNOWN_RENDERERS['stderr'] = function(element,  va
 db2js.Renderers.flderr = db2js.KNOWN_RENDERERS['flderr'] = function(element,  value, table, _1, rows, index, row, columnName){
 	var e = $(element), v = value;
 	var helpDiv = null;
-	if(e.is('.help-block.with-errors')){
+	if(e.is('.ui.orange.label')){
 		helpDiv = e;
 		e = helpDiv.parent();
 	} else {
-		helpDiv = e.find('.help-block.with-errors');
+		helpDiv = e.find('.ui.orange.label');
 		if(helpDiv.length == 0){
-			helpDiv = $(document.createElement('div')).appendTo(e);
-			helpDiv.addClass('help-block with-errors');
+			helpDiv = $(document.createElement('div')).appendTo(e).addClass('ui orange label');
 		}
 	}	
 	if(value == null){
-		e.removeClass('has-error');
-		helpDiv.html('');
+		e.closest('.field').removeClass('error');
+		helpDiv.html('').hide();
 	} else {
-		e.addClass('has-error');
-		helpDiv.html(value.message || value + '');
+		e.closest('.field').addClass('error');
+		helpDiv.html(value.message || value + '').show();// .css('display', 'inline-block');
 	}
 }

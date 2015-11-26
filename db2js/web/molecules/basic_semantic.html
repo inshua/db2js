@@ -412,7 +412,7 @@
     <div molecule-def="FormItem" class="inline field form-group">
         <label></label>
         <!-- {INNER_HTML} -->
-        <div class="help-block with-errors" renderer="flderr"></div>
+        <div class="ui orange label" renderer="flderr"></div>
         <script>
             // MOLECULE_DEF
             [{$ : '.table-form', display: 'table !important'},
@@ -428,7 +428,7 @@
                 var col = this.container.attr('col');
                 var text = this.container.attr('text');
 
-                this.container.find('.help-block').attr('data', '#' + table + ',curr,_error,' + col);
+                this.container.find('[renderer=flderr]').attr('data', '#' + table + ',curr,_error,' + col);
                 this.container.find('label').html(text);
                 
                 if(this.container.is('[dict]') && this.container.find('select').length){
@@ -442,8 +442,8 @@
     </div>
     
     <div molecule-def="FormImageItem" class="+ form-image-item" molecule="FormItem" renderer="molecule" collector="m|s">
-        <img id="imgPreview" class="form-control">
-        <input type="file" accept="images/*" capture="camera" class="form-control" class="hide">
+        <img id="imgPreview" class="ui medium bordered image form-control">
+        <input type="file" accept="images/*" capture="camera" style="display: none">
         <script>
 	        // MOLECULE_DEF
 	        [{$ : '.form-image-item > label', 'vertical-align' : 'top'}].defCss();
@@ -616,12 +616,18 @@
         function Select() {
             var table = this.container.closest('[table]').attr('table');
             var col = this.container.closest('.field').attr('col');
+            
+            var inited = false;
 
             this.container.attr('data', '#' + table + ',curr,' + col);
             
             this.container.on('db2js.rendered', function(event){
-            	$(this).dropdown().addClass('compact');
-            });
+            	if(!inited){
+            		$(this).dropdown().addClass('compact');
+            		inited = true;
+            	}
+            	$(this).dropdown('set selected', $(this).val());
+            });            
         }
         // MOLECULE_DEF_END
         Molecule.create(Select);
@@ -630,7 +636,7 @@
 	<!--
 		搜索用的表单，靠右对齐 
 	 -->
-	<form molecule-def="SearchForm" class="ui form">
+	<form molecule-def="SearchForm" class="ui form" onsubmit="return false;">
     	<div class="fields">
      		<div style="flex : 1;"></div><!-- 占位，把后面的元素挤到右边 -->
           	<!-- {INNER_HTML} -->
@@ -783,7 +789,7 @@
        		        row._table.curr = row;
        		        db2js.render($('#' + dialogId), row._table);
        		        this.container.trigger('tablelist.edit', [row]);
-       		        $('#' + dialogId).modal('show');
+       		        $('#' + dialogId).modal({onApprove : function(){return false;}}).modal('show');
             	}
             }
             // MOLECULE_DEF_END
@@ -841,7 +847,7 @@
 		复选框组
 	 -->
 	<div molecule-def="CheckGroup" renderer="molecule" collector="m|s">
-		<ul class="list-inline checkgroup" renderer="dictToList|checkgroup('name','id')" data="#dicts"></ul>
+		<div class="ui buttons checkgroup" renderer="dictToList|checkgroup('name','id')" data="#dicts"></div>
         <script>
             // MOLECULE_DEF
             function CheckGroup() {
@@ -860,8 +866,13 @@
                 var me = this;
                 this.setValue = function(v){
                 	me.value = v;
-                	me.container.find('input[type=checkbox]').each(function(idx, ck){
-                		ck.checked = (v && v.indexOf(ck.value) != -1)
+                	me.container.find('input[type=button]').each(function(idx, ck){
+                		$(ck).prop('checked', (v && v.indexOf(ck.value) != -1));
+                		if($(ck).prop('checked')){
+                			$(ck).addClass('active');
+                		} else {
+                			$(ck).removeClass('active');
+                		}
                 	});
                 }                
                 
@@ -869,16 +880,27 @@
                 
                 this.updateValue = function(){
                 	var arr = [];
-                	me.container.find('input[type=checkbox]').each(function(idx, ck){
-                		if(ck.checked){
+                	me.container.find('input[type=button]').each(function(idx, ck){
+                		if($(ck).prop('checked')){
                 			arr.push(ck.value);
                 		}
                 	});
                 	me.value = arr;
                 }
                 
+                this.container.on('click', 'input[type=button]', function(event){
+                	var ck = $(event.target);
+                	ck.prop('checked', !ck.prop('checked'));
+                	if(ck.prop('checked')){
+            			ck.addClass('active');
+            		} else {
+            			ck.removeClass('active');
+            		}
+                	ck.trigger('change');
+                });
+                
                 this.container.on('change', function(event){
-                	if(event.target && $(event.target).is('input[type=checkbox]')){
+                	if(event.target && $(event.target).is('input[type=button]')){
                 		me.updateValue();
                 		me.container.trigger('change', [me.value]);
                 	}
@@ -890,12 +912,12 @@
 	           		           	
 	           		if(rows == null) return;
 	           		for(var i=0; i<rows.length; i++){
-	           			var li = $(document.createElement('li'));
 	           			$(document.createElement('input'))
-	           				.attr('type', 'checkbox').val(rows[i][valueCol])
-	           				.appendTo(li);
-	           			$(document.createElement('span')).html(rows[i][dispCol]).appendTo(li);
-	           			li.appendTo(element);
+	           				.attr('type', 'button').val(rows[i][valueCol]).html(rows[i][dispCol])
+	           				.attr('class', 'ui button')
+	           				.appendTo(element);
+	           			//$(document.createElement('span')).html(rows[i][dispCol]).appendTo(li);
+	           			//li.appendTo(element);
 	           		}
 	           		var m = $(element).parent().molecule();
 	           		if(m) m.setValue(m.getValue());
