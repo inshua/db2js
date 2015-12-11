@@ -114,6 +114,23 @@ db2js.Collectors.Pipelines.c = db2js.KNOWN_COLLECT_PIPELINES['c'] = function(ele
 }
 
 /**
+ * 复选框单独使用时，勾中为 true, 未勾中为 false
+ * @param element
+ * @param value
+ * @param table
+ * @param _1
+ * @param rows
+ * @param index
+ * @param row
+ * @param columnName
+ * @returns
+ */
+db2js.Collectors.Pipelines.check = db2js.KNOWN_COLLECT_PIPELINES['check'] = function(element, value, table, _1, rows, index, row, columnName){
+	return element.checked;
+}
+
+
+/**
  * s : set 或 std 的首字母，设置新值到数据对象。用法 collector="c|s"
  * @param newValue got from pipeline function
  */
