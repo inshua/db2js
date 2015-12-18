@@ -434,6 +434,29 @@ db2js.DataTable.prototype.reload = function(){
 	this.load(this.search.params, this.search.option);
 }
 
+/**
+ * 覆盖本方法实现提交 multipart 表单
+ * 例如:
+ * table.ajaxSubmit = function(options){
+        var formData = new FormData();
+        formData.append('file', $('#file')[0].files[0]);
+        for(var k in options.data){ if(options.data.hasOwnProperty(k)){
+        	formData.append(k, options.data[k]);	
+        }}
+        options.data = formData;
+        
+        options.enctype = 'multipart/form-data';
+        options.contentType = false;
+        options.processData = false;
+        options.timeout  = 5 * 60000;
+        
+        $.ajax(options);
+    }
+ * @param options
+ */
+db2js.DataTable.prototype.ajaxSubmit = function(options){
+	$.ajax(options);
+}
 
 db2js.DataTable.prototype.submit = function(option){
 	// 收集变化
@@ -521,7 +544,7 @@ db2js.DataTable.prototype.submit = function(option){
 	this.fireEvent('willsubmit');
 	this.setState('submiting');
 	var params = {_m : 'update', table : changes};
-	$.ajax({
+	this.ajaxSubmit({
 		url : this.url,
 		data : {_m : 'update', params : JSON.stringify(params)},
 		type : 'post',
