@@ -142,8 +142,8 @@ public class WatchDir {
 				// print out event
 				if (logger.isDebugEnabled()) {
 					// logger.debug(String.format("%s: %s\n", event.kind().name(), child));
-					onFileChanged(ev, child);
 				}
+				onFileChanged(ev, child);
 
 				// if directory is created, and watching recursively, then
 				// register it and its sub-directories
