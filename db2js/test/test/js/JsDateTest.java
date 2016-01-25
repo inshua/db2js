@@ -22,5 +22,8 @@ public class JsDateTest {
 		ScriptObjectMirror s = (ScriptObjectMirror) engine.eval("new Array(2)");
 		System.out.println(s.isInstance(NativeArray.class));
 //		System.out.println(s.to(NativeDate.class));		// java.lang.ClassCastException: Cannot cast jdk.nashorn.internal.objects.NativeArray to jdk.nashorn.internal.objects.NativeDate
+		
+		ScriptObjectMirror o = (ScriptObjectMirror) engine.get("Object");
+		System.out.println(o);
 	}
 }

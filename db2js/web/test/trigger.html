@@ -99,6 +99,10 @@
             	var autoCompleteCol = this.container.attr('autocomplete-col'); 
             	if(autoCompleteCol){        	
 	            	this.container.on('keyup', '#txDropDownText', function(event, value){
+	            		me.inputting = true;
+	            		setTimeout(function(){
+	            			me.inputting = false;
+	            		}, 50)
 	            		me.container.find('[molecule-obj=List]').attr('renderer', 'autoCompleteTableRenderer');
 	            		var text = $(event.currentTarget).val();
 	            		var t = me.container.find('[molecule-obj=List]');
@@ -114,11 +118,13 @@
             	}
             	
             	this.container.on('db2js.rendered',function(event, value){
+            		if(me.inputting) return;
+            		
             		var t = $(event.target);
             		if(t.is('[molecule-obj=List]')){
             			updateText(t, me.getValue());
+            			me.setValue(me.getValue());
             		}
-            		me.container.off('db2js.rendered', arguments.callee);
                 });
             	
             	function updateText(t, value){
@@ -133,6 +139,7 @@
         				}).join(', '));		
         			} else {
         				var row = table.find(valueCol, value);
+        				if(!row) success = false;
         				me.setText(row ? row[dispCol] : value);
         				if(me.container.find('.input-group-btn').is('.open')){
             				me.toggle();
@@ -278,7 +285,7 @@
 
     <div class="container">
           <label>Test</label>
-		  <div molecule="DropDownList" table="author" value-col="id" display-col="name" select="single" show-header="false">
+		  <div id="ddl1" molecule="DropDownList" table="author" value-col="id" display-col="name" select="multi" show-header="true">
 		  		<tr>
 			  		<m:th molecule="Header" col="id" text="ID"></m:th>
 			        <m:th molecule="Header" col="name" text="Name"></m:th>
