@@ -252,15 +252,15 @@ db2js.Renderers.repeater = function(element, rows){
 	})
 	if(repeater.length == 0) return console.error('repeater child not found');
 	
-	repeater.forEach(function(e, idx){ $(e).hide(); });
+	repeater.forEach(function(e, idx){ $(e).hide().attr('no-collect', 'true'); });
 	
 	if(rows == null || rows.length == 0){
 		e.find('[repeater-empty]').show();
 	} else {
 		e.find('[repeater-empty]').hide();
 		var prev = repeater[repeater.length-1];
-		for(var i=0; i<rows.length; i++){
-			var row = rows[i];
+		for(var rowIndex=0; rowIndex<rows.length; rowIndex++){
+			var row = rows[rowIndex];
 			var tpl = repeater.filter(function(item, idx){
 				if(item.hasAttribute('when')){
 					with(row){
@@ -276,7 +276,8 @@ db2js.Renderers.repeater = function(element, rows){
 			r.find('[molecule-r]').each(function(idx, e){
 				$(e).attr('molecule', $(e).attr('molecule-r')); 
 			});
-			r.attr('repeater-copy', true);
+			r.attr('repeater-copy', true);			
+			
 			r.data('repeater-obj', row);
 			r.insertAfter(prev);
 			db2js.render(r[0], row, true);

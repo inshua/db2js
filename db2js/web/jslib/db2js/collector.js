@@ -47,6 +47,8 @@ db2js.collect = function(htmlElement, baseData, direct){
 		var e = stk.pop();
 		var dataPath = e.getAttribute('data');
 		var collector = e.getAttribute('collector');
+		if(e.hasAttribute('no-collect')) continue;
+		
 		if(dataPath && collector){
 			if(e.hasAttribute('trace-collect')) debugger;
 			var data = [e]; 
@@ -208,8 +210,12 @@ db2js.Collectors.repeater = function(element, rows){
 	var e = $(element);
 	var copies = e.find('[repeater-copy]');
 	copies.each(function(idx, c){
-		var row = $(c).data('repeater-obj');
-		if(row) db2js.collect(c, row, true);
+		if($(c).closest('[renderer=repeater]').is(e)){
+			c.removeAttribute('no-collect');
+			var row = $(c).data('repeater-obj');		
+			if(row) db2js.collect(c, row, true);
+			c.setAttribute('no-collect', true);
+		}
 	});
 }
 
@@ -254,4 +260,19 @@ db2js.Collectors.oc = db2js.KNOWN_COLLECTORS['oc'] = function(element, newValue)
 		}
 	}	
 }
+
+
+/**
+ * choose 收集器
+ * 
+ * 
+    <div class="ui buttons" renderer="$choose" collector="$choose|n|s">
+        <button class="ui basic button" value="0">0</button>
+        <button class="ui basic button" value="1">1</button>
+    </div>
+ */
+db2js.Collectors.Pipelines.$choose = function(element){
+	return $(element).find('.choosed').attr('value');
+}
+
 
