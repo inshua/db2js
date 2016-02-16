@@ -1,3 +1,7 @@
+# 我决定开设一个新的项目：[d2js](https://github.com/inshua/d2js/)，现在已经提交了大量变动，并提供了完善的文档和示例。
+
+2016-02-17
+
 # db2js
 db2js - JavaScript前后端数据访问框架   jssp - js 后端网页框架  molecule.js - js 组件化框架
 
